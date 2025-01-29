@@ -23,10 +23,28 @@
                 <h2 class="text-xl text-center mb-6 text-gray-700">טופס רישום למפגש היכרות עם צוות חמ"ד תורני נריה</h2>
             </div>
             
-            <!-- Success Message -->
-            <div id="successMessage" class="hidden mb-4 p-4 bg-green-100 text-green-700 rounded-md text-center">
-                <p class="font-bold mb-2">הטופס נשלח בהצלחה!</p>
-                <p>תודה רבה על התעניינותכם ברישום, צוות בית הספר יצור עימכם קשר לתיאום מועד למפגש</p>
+            <!-- Success Modal -->
+            <div id="successModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                    <div class="mt-3 text-center">
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4 mb-2">הטופס נשלח בהצלחה!</h3>
+                        <div class="mt-2 px-7 py-3">
+                            <p class="text-sm text-gray-500">
+                                תודה רבה על התעניינותכם ברישום, צוות בית הספר יצור עימכם קשר לתיאום מועד למפגש.
+                            </p>
+                        </div>
+                        <div class="items-center px-4 py-3">
+                            <button id="closeModal" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
+                                אישור
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Error Message -->
@@ -217,18 +235,26 @@
                 // Clear the form
                 form.reset();
                 
-                // Show success message
-                successMessage.classList.remove('hidden');
-                successMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Show success modal instead of message
+                const successModal = document.getElementById('successModal');
+                successModal.classList.remove('hidden');
                 
+                // Add click event to close modal button
+                document.getElementById('closeModal').addEventListener('click', function() {
+                    successModal.classList.add('hidden');
+                });
+                
+                // Close modal when clicking outside
+                successModal.addEventListener('click', function(e) {
+                    if (e.target === successModal) {
+                        successModal.classList.add('hidden');
+                    }
+                });
+
                 // Reset button after short delay
                 setTimeout(() => {
                     submitButton.disabled = false;
                     submitButton.innerHTML = 'שליחת הטופס';
-                    // Hide success message after 3 seconds
-                    setTimeout(() => {
-                        successMessage.classList.add('hidden');
-                    }, 30000);
                 }, 1000);
                 
             } catch (error) {
