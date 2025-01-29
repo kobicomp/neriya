@@ -23,6 +23,16 @@
                 <h2 class="text-xl text-center mb-6 text-gray-700">טופס רישום למפגש היכרות עם צוות חמ"ד תורני נריה</h2>
             </div>
             
+            <!-- Validation Message -->
+            <div id="validationMessage" class="hidden mb-4 p-4 bg-yellow-100 text-yellow-700 rounded-md">
+                אנא מלאו את כל השדות המסומנים ב-*
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="hidden mb-4 p-4 bg-red-100 text-red-700 rounded-md text-center">
+                אירעה שגיאה בשליחת הטופס. אנא נסו שנית.
+            </div>
+
             <!-- Success Modal -->
             <div id="successModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
                 <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
@@ -45,16 +55,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Error Message -->
-            <div id="errorMessage" class="hidden mb-4 p-4 bg-red-100 text-red-700 rounded-md text-center">
-                אירעה שגיאה בשליחת הטופס. אנא נסו שנית.
-            </div>
-
-            <!-- Validation Message -->
-            <div id="validationMessage" class="hidden mb-4 p-4 bg-yellow-100 text-yellow-700 rounded-md">
-                אנא מלאו את כל השדות המסומנים ב-*
             </div>
 
             <form id="registrationForm" class="space-y-6" novalidate>
@@ -179,12 +179,13 @@
             const form = e.target;
             const submitButton = document.getElementById('submitButton');
             const validationMessage = document.getElementById('validationMessage');
-            const successMessage = document.getElementById('successMessage');
+            const successModal = document.getElementById('successModal');
             const errorMessage = document.getElementById('errorMessage');
             
             // Reset all error messages
             form.querySelectorAll('span.text-red-500').forEach(span => span.classList.add('hidden'));
             validationMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
             
             // Check all required fields
             let isValid = true;
@@ -218,8 +219,6 @@
             // Disable submit button and hide messages
             submitButton.disabled = true;
             submitButton.innerHTML = 'שולח...';
-            successMessage.classList.add('hidden');
-            errorMessage.classList.add('hidden');
             
             try {
                 // Create form data
@@ -235,22 +234,9 @@
                 // Clear the form
                 form.reset();
                 
-                // Show success modal instead of message
-                const successModal = document.getElementById('successModal');
+                // Show success modal
                 successModal.classList.remove('hidden');
                 
-                // Add click event to close modal button
-                document.getElementById('closeModal').addEventListener('click', function() {
-                    successModal.classList.add('hidden');
-                });
-                
-                // Close modal when clicking outside
-                successModal.addEventListener('click', function(e) {
-                    if (e.target === successModal) {
-                        successModal.classList.add('hidden');
-                    }
-                });
-
                 // Reset button after short delay
                 setTimeout(() => {
                     submitButton.disabled = false;
@@ -265,6 +251,18 @@
                 // Reset button
                 submitButton.disabled = false;
                 submitButton.innerHTML = 'שליחת הטופס';
+            }
+        });
+
+        // Add click event to close modal button
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('successModal').classList.add('hidden');
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('successModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
             }
         });
 
