@@ -45,7 +45,7 @@
                         <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4 mb-2">הטופס נשלח בהצלחה!</h3>
                         <div class="mt-2 px-7 py-3">
                             <p class="text-sm text-gray-500">
-                                תודה רבה על התעניינותכם ברישום, צוות בית הספר ייצור עימכם קשר לתיאום מועד למפגש.
+                                תודה רבה על התעניינותכם ברישום, צוות בית הספר יצור עימכם קשר לתיאום מועד למפגש.
                             </p>
                         </div>
                         <div class="items-center px-4 py-3">
@@ -162,6 +162,24 @@
                     <span class="hidden text-red-500 text-sm mt-1">שדה חובה</span>
                 </div>
 
+                <div>
+                    <div class="mb-4">
+                        <p class="text-gray-600 text-sm">ניתן לתאם מפגש של עד 5 משפחות (שימו לב שגם הם מילאו את טופס הפרטים)</p>
+                    </div>
+                    
+                    <div id="friendsContainer" class="space-y-4">
+                        <!-- כאן יתווספו שדות החברים באופן דינמי -->
+                    </div>
+
+                    <button type="button" id="addFriendBtn" 
+                        class="mt-2 inline-flex items-center px-3 py-1 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50">
+                        <svg class="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        הוסף חבר/ה למפגש
+                    </button>
+                </div>
+
                 <div class="text-center">
                     <button type="submit" id="submitButton"
                         class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
@@ -173,6 +191,60 @@
     </div>
 
     <script>
+        let friendCount = 0;
+        const maxFriends = 4;
+        const friendEntries = [
+            "entry.915291293",
+            "entry.1664520176",
+            "entry.1441005460",
+            "entry.202115271"
+        ];
+
+        function addFriendField() {
+            if (friendCount >= maxFriends) {
+                alert('ניתן להוסיף עד 4 חברים בלבד');
+                return;
+            }
+
+            const container = document.getElementById('friendsContainer');
+            const newField = document.createElement('div');
+            newField.className = 'flex items-center gap-2';
+            
+            const currentEntry = friendEntries[friendCount];
+            friendCount++;
+
+            newField.innerHTML = `
+                <div class="flex-1">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        שם חבר/ה ${friendCount}
+                    </label>
+                    <input type="text" name="${currentEntry}"
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button type="button" 
+                    class="self-end mb-2 p-2 text-red-500 hover:text-red-700"
+                    onclick="removeFriendField(this)">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
+            `;
+
+            container.appendChild(newField);
+
+            if (friendCount >= maxFriends) {
+                document.getElementById('addFriendBtn').style.display = 'none';
+            }
+        }
+
+        function removeFriendField(button) {
+            button.parentElement.remove();
+            friendCount--;
+            document.getElementById('addFriendBtn').style.display = 'inline-flex';
+        }
+
+        document.getElementById('addFriendBtn').addEventListener('click', addFriendField);
+
         document.getElementById('registrationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -233,6 +305,9 @@
                 
                 // Clear the form
                 form.reset();
+                document.getElementById('friendsContainer').innerHTML = '';
+                friendCount = 0;
+                document.getElementById('addFriendBtn').style.display = 'inline-flex';
                 
                 // Show success modal
                 successModal.classList.remove('hidden');
