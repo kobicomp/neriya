@@ -21,7 +21,7 @@
                 <img src="logo.png" alt="לוגו חמ״ד תורני נריה" class="mx-auto mb-4 w-96">
                 <h1 class="text-3xl font-bold text-center mb-2 text-blue-600">רוצים להכיר?</h1>
                 <h2 class="text-xl text-center mb-2 text-gray-700">טופס רישום למפגש היכרות עם צוות חמ"ד תורני נריה</h2>
-                <p class="text-red-600 font-bold text-sm mb-6">חשוב לציין שהרישום למפגש לא פוטר מהחובה להירשם באתר העירייה</p>
+                <p class="text-red-600 font-bold text-sm mb-6">חשוב לציין שהרישום למפגש ההיכרות אינו מהווה רישום לבית הספר.</p>
             </div>
             
             <!-- Validation Message -->
@@ -49,7 +49,7 @@
                                 תודה רבה על התעניינותכם ברישום, צוות בית הספר יצור עימכם קשר לתיאום מועד למפגש.
                             </p>
                             <p class="text-sm font-bold text-red-600">
-                                חשוב לציין שהרישום למפגש לא פוטר מהחובה להירשם באתר העירייה.
+                                חשוב לציין שהרישום למפגש ההיכרות אינו מהווה רישום לבית הספר.
                             </p>
                         </div>
                         <div class="items-center px-4 py-3">
@@ -146,7 +146,6 @@
                         <span class="hidden text-red-500 text-sm mt-1">יש להזין מספר טלפון תקין</span>
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-gray-700 font-semibold mb-2">
                         רצינו לספר לכם על הילד/ה <span class="text-red-500">*</span>
@@ -192,6 +191,7 @@
             </form>
         </div>
     </div>
+
     <script>
         let friendCount = 0;
         const maxFriends = 4;
@@ -218,7 +218,7 @@
             newField.innerHTML = `
                 <div class="flex-1">
                     <label class="block text-gray-700 font-semibold mb-2">
-                        שם חבר/ה ${friendCount}
+                        שם מלא של החבר ${friendCount}, שם פרטי ושם משפחה
                     </label>
                     <input type="text" name="${currentEntry}"
                         class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -238,7 +238,6 @@
                 document.getElementById('addFriendBtn').style.display = 'none';
             }
         }
-
         function removeFriendField(button) {
             button.parentElement.remove();
             friendCount--;
