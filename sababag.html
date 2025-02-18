@@ -77,15 +77,20 @@
             transition: background-color 0.3s;
         }
         
-        button:hover {
+        button:hover:not(:disabled) {
             background-color: #371f61;
+        }
+        
+        button:disabled {
+            background-color: #9d9d9d;
+            cursor: not-allowed;
         }
         
         button.secondary {
             background-color: #6c757d;
         }
         
-        button.secondary:hover {
+        button.secondary:hover:not(:disabled) {
             background-color: #5a6268;
         }
         
@@ -121,15 +126,15 @@
             border-radius: 8px;
         }
         
-        .radio-group {
+        .checkbox-group {
             margin-bottom: 15px;
         }
         
-        .radio-option {
+        .checkbox-option {
             margin-bottom: 10px;
         }
         
-        input[type="radio"] {
+        input[type="checkbox"] {
             width: auto;
             margin-left: 10px;
         }
@@ -145,7 +150,7 @@
             background-color: #28a745;
         }
         
-        #submitButton:hover {
+        #submitButton:hover:not(:disabled) {
             background-color: #218838;
         }
         
@@ -158,6 +163,58 @@
         
         .required-field {
             color: #dc3545;
+        }
+        
+        /* סגנון חלון מודל */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+            animation: modalFadeIn 0.3s;
+        }
+        
+        @keyframes modalFadeIn {
+            from {opacity: 0; transform: scale(0.8);}
+            to {opacity: 1; transform: scale(1);}
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #555;
+        }
+        
+        .close-button:hover {
+            color: #000;
+        }
+        
+        #summaryContent {
+            margin-top: 20px;
+            line-height: 1.6;
+            font-size: 18px;
+            text-align: center;
         }
     </style>
 </head>
@@ -207,20 +264,20 @@
             <!-- מי מגיע -->
             <div class="attendees-section">
                 <h2>מי מגיע?</h2>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" id="grandpaOption" name="attendee" value="grandpa" onchange="toggleAttendeeFields()">
+                <div class="checkbox-group">
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="grandpaOption" name="attendee" value="grandpa" onchange="toggleAttendeeFields()">
                         <label for="grandpaOption">סבא</label>
                     </div>
-                    <div class="radio-option">
-                        <input type="radio" id="grandmaOption" name="attendee" value="grandma" onchange="toggleAttendeeFields()">
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="grandmaOption" name="attendee" value="grandma" onchange="toggleAttendeeFields()">
                         <label for="grandmaOption">סבתא</label>
                     </div>
-                    <div class="radio-option">
-                        <input type="radio" id="noneOption" name="attendee" value="none" onchange="toggleAttendeeFields()">
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="noneOption" name="attendee" value="none" onchange="toggleAttendeeFields('none')">
                         <label for="noneOption">לצערינו לא נוכל להגיע</label>
                     </div>
-                    <div class="error-message" id="attendeeError">יש לבחור מי מגיע</div>
+                    <div class="error-message" id="attendeeError">יש לבחור לפחות אפשרות אחת</div>
                 </div>
                 
                 <!-- שדות לסבא -->
@@ -257,6 +314,15 @@
                 <button type="submit" id="submitButton">שליחה</button>
             </div>
         </form>
+    </div>
+    
+    <!-- חלון סיכום -->
+    <div id="summaryModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h2>תודה על הרישום!</h2>
+            <div id="summaryContent"></div>
+        </div>
     </div>
 
     <script>
@@ -344,18 +410,39 @@
         }
         
         // הצגת שדות לפי בחירת המשתתף
-        function toggleAttendeeFields() {
-            const attendeeValue = document.querySelector('input[name="attendee"]:checked')?.value;
+        function toggleAttendeeFields(source) {
+            const grandpaChecked = document.getElementById('grandpaOption').checked;
+            const grandmaChecked = document.getElementById('grandmaOption').checked;
+            const noneChecked = document.getElementById('noneOption').checked;
+            
             const grandpaFields = document.getElementById('grandpaFields');
             const grandmaFields = document.getElementById('grandmaFields');
             
-            grandpaFields.classList.add('hidden');
-            grandmaFields.classList.add('hidden');
+            // אם בחרו "לא נוכל להגיע", מנקים את הבחירות האחרות
+            if (source === 'none' && noneChecked) {
+                document.getElementById('grandpaOption').checked = false;
+                document.getElementById('grandmaOption').checked = false;
+                grandpaFields.classList.add('hidden');
+                grandmaFields.classList.add('hidden');
+                return;
+            }
             
-            if (attendeeValue === 'grandpa') {
+            // אם בחרו באחת האפשרויות האחרות, מנקים את "לא נוכל להגיע"
+            if (source !== 'none' && (grandpaChecked || grandmaChecked)) {
+                document.getElementById('noneOption').checked = false;
+            }
+            
+            // עדכון הצגת השדות
+            if (grandpaChecked) {
                 grandpaFields.classList.remove('hidden');
-            } else if (attendeeValue === 'grandma') {
+            } else {
+                grandpaFields.classList.add('hidden');
+            }
+            
+            if (grandmaChecked) {
                 grandmaFields.classList.remove('hidden');
+            } else {
+                grandmaFields.classList.add('hidden');
             }
         }
         
@@ -399,17 +486,19 @@
             }
             
             // בדיקת בחירת משתתף
-            const attendeeSelected = document.querySelector('input[name="attendee"]:checked');
+            const grandpaChecked = document.getElementById('grandpaOption').checked;
+            const grandmaChecked = document.getElementById('grandmaOption').checked;
+            const noneChecked = document.getElementById('noneOption').checked;
             const attendeeError = document.getElementById('attendeeError');
             
-            if (!attendeeSelected) {
+            if (!grandpaChecked && !grandmaChecked && !noneChecked) {
                 attendeeError.style.display = 'block';
                 isValid = false;
             } else {
                 attendeeError.style.display = 'none';
                 
-                // בדיקת פרטי סבא/סבתא אם נבחרו
-                if (attendeeSelected.value === 'grandpa') {
+                // בדיקת פרטי סבא אם נבחר
+                if (grandpaChecked) {
                     const grandpaName = document.getElementById('grandpaName');
                     const grandpaLastName = document.getElementById('grandpaLastName');
                     const grandpaNameError = document.getElementById('grandpaNameError');
@@ -428,7 +517,10 @@
                     } else {
                         grandpaLastNameError.style.display = 'none';
                     }
-                } else if (attendeeSelected.value === 'grandma') {
+                }
+                
+                // בדיקת פרטי סבתא אם נבחרה
+                if (grandmaChecked) {
                     const grandmaName = document.getElementById('grandmaName');
                     const grandmaLastName = document.getElementById('grandmaLastName');
                     const grandmaNameError = document.getElementById('grandmaNameError');
@@ -461,6 +553,11 @@
                 return;
             }
             
+            // נטרול כפתור השליחה
+            const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;
+            submitButton.innerText = 'שולח...';
+            
             // הכנת הנתונים לשליחה
             const formData = prepareFormData();
             
@@ -472,17 +569,11 @@
                 mode: 'no-cors',
                 body: formData
             }).then(() => {
-                alert('הטופס נשלח בהצלחה!');
-                document.getElementById('registrationForm').reset();
-                resetForm();
-            }).catch(error => {
-                console.error('Error:', error);
-                // נשלח בכל מקרה כי Google Forms לא מאפשר CORS
-                alert('הטופס נשלח בהצלחה!');
-                document.getElementById('registrationForm').reset();
-                resetForm();
-            });
-        }
+                showSummaryModal();
+                setTimeout(() => {
+                    submitButton.disabled = false;
+                    submitButton.innerText = 'שליחה';
+                }, 60000); // נ
         
         // הכנת הנתונים לשליחה
         function prepareFormData() {
