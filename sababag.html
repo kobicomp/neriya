@@ -418,6 +418,10 @@
                         <label for="grandmaOption">סבתא</label>
                     </div>
                     <div class="checkbox-option">
+                        <input type="checkbox" id="otherOption" onclick="toggleAttendeeFields()">
+                        <label for="otherOption">אחר</label>
+                    </div>
+                    <div class="checkbox-option">
                         <input type="checkbox" id="noneOption" onclick="toggleNoneOption()">
                         <label for="noneOption">לצערינו לא נוכל להגיע</label>
                     </div>
@@ -449,6 +453,25 @@
                         <label for="grandmaLastName">שם משפחה של סבתא <span class="required-field">*</span></label>
                         <input type="text" id="grandmaLastName">
                         <div class="error-message" id="grandmaLastNameError">יש להזין שם משפחה של סבתא</div>
+                    </div>
+                </div>
+                
+                <!-- שדות לקרוב משפחה אחר -->
+                <div id="otherFields" class="attendee-fields hidden">
+                    <div class="form-group">
+                        <label for="otherRelation">קרבה <span class="required-field">*</span></label>
+                        <input type="text" id="otherRelation" placeholder="לדוגמה: דוד, דודה, אח, אחות">
+                        <div class="error-message" id="otherRelationError">יש להזין קרבה משפחתית</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="otherName">שם פרטי <span class="required-field">*</span></label>
+                        <input type="text" id="otherName">
+                        <div class="error-message" id="otherNameError">יש להזין שם פרטי</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="otherLastName">שם משפחה <span class="required-field">*</span></label>
+                        <input type="text" id="otherLastName">
+                        <div class="error-message" id="otherLastNameError">יש להזין שם משפחה</div>
                     </div>
                 </div>
             </div>
@@ -570,8 +593,10 @@
                 // אם סימנו "לא נוכל להגיע", מנקים את האפשרויות האחרות
                 document.getElementById('grandpaOption').checked = false;
                 document.getElementById('grandmaOption').checked = false;
+                document.getElementById('otherOption').checked = false;
                 document.getElementById('grandpaFields').classList.add('hidden');
                 document.getElementById('grandmaFields').classList.add('hidden');
+                document.getElementById('otherFields').classList.add('hidden');
             }
         }
         
@@ -579,15 +604,17 @@
         function toggleAttendeeFields() {
             const grandpaChecked = document.getElementById('grandpaOption').checked;
             const grandmaChecked = document.getElementById('grandmaOption').checked;
+            const otherChecked = document.getElementById('otherOption').checked;
             
             // אם בחרו באחת האפשרויות, מנקים את "לא נוכל להגיע"
-            if (grandpaChecked || grandmaChecked) {
+            if (grandpaChecked || grandmaChecked || otherChecked) {
                 document.getElementById('noneOption').checked = false;
             }
             
             // עדכון הצגת השדות
             const grandpaFields = document.getElementById('grandpaFields');
             const grandmaFields = document.getElementById('grandmaFields');
+            const otherFields = document.getElementById('otherFields');
             
             if (grandpaChecked) {
                 grandpaFields.classList.remove('hidden');
@@ -599,6 +626,12 @@
                 grandmaFields.classList.remove('hidden');
             } else {
                 grandmaFields.classList.add('hidden');
+            }
+            
+            if (otherChecked) {
+                otherFields.classList.remove('hidden');
+            } else {
+                otherFields.classList.add('hidden');
             }
         }
         
@@ -644,10 +677,11 @@
             // בדיקת בחירת משתתף
             const grandpaChecked = document.getElementById('grandpaOption').checked;
             const grandmaChecked = document.getElementById('grandmaOption').checked;
+            const otherChecked = document.getElementById('otherOption').checked;
             const noneChecked = document.getElementById('noneOption').checked;
             const attendeeError = document.getElementById('attendeeError');
             
-            if (!grandpaChecked && !grandmaChecked && !noneChecked) {
+            if (!grandpaChecked && !grandmaChecked && !otherChecked && !noneChecked) {
                 attendeeError.style.display = 'block';
                 isValid = false;
             } else {
@@ -696,6 +730,37 @@
                         grandmaLastNameError.style.display = 'none';
                     }
                 }
+                
+                // בדיקת פרטי קרוב משפחה אחר אם נבחר
+                if (otherChecked) {
+                    const otherRelation = document.getElementById('otherRelation');
+                    const otherName = document.getElementById('otherName');
+                    const otherLastName = document.getElementById('otherLastName');
+                    const otherRelationError = document.getElementById('otherRelationError');
+                    const otherNameError = document.getElementById('otherNameError');
+                    const otherLastNameError = document.getElementById('otherLastNameError');
+                    
+                    if (!otherRelation.value.trim()) {
+                        otherRelationError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        otherRelationError.style.display = 'none';
+                    }
+                    
+                   if (!otherName.value.trim()) {
+                        otherNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        otherNameError.style.display = 'none';
+                    }
+                    
+                    if (!otherLastName.value.trim()) {
+                        otherLastNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        otherLastNameError.style.display = 'none';
+                    }
+                }
             }
             
             return isValid;
@@ -719,6 +784,7 @@
             // איסוף פרטי המשתתפים
             const grandpaChecked = document.getElementById('grandpaOption').checked;
             const grandmaChecked = document.getElementById('grandmaOption').checked;
+            const otherChecked = document.getElementById('otherOption').checked;
             const noneChecked = document.getElementById('noneOption').checked;
             
             let attendeesText = '';
@@ -727,16 +793,31 @@
                 return `לצערנו לא תוכלו להגיע ליום סבבא לאגף בנות בתאריך ז' אדר. מקווים לראותכם באירועים הבאים!`;
             }
             
-            if (grandpaChecked && grandmaChecked) {
+            let attendees = [];
+            
+            if (grandpaChecked) {
                 const grandpaName = document.getElementById('grandpaName').value;
+                attendees.push(`סבא ${grandpaName}`);
+            }
+            
+            if (grandmaChecked) {
                 const grandmaName = document.getElementById('grandmaName').value;
-                attendeesText = `סבא ${grandpaName} וסבתא ${grandmaName}`;
-            } else if (grandpaChecked) {
-                const grandpaName = document.getElementById('grandpaName').value;
-                attendeesText = `סבא ${grandpaName}`;
-            } else if (grandmaChecked) {
-                const grandmaName = document.getElementById('grandmaName').value;
-                attendeesText = `סבתא ${grandmaName}`;
+                attendees.push(`סבתא ${grandmaName}`);
+            }
+            
+            if (otherChecked) {
+                const otherRelation = document.getElementById('otherRelation').value;
+                const otherName = document.getElementById('otherName').value;
+                attendees.push(`${otherRelation} ${otherName}`);
+            }
+            
+            // חיבור המשתתפים לטקסט אחד
+            if (attendees.length === 1) {
+                attendeesText = attendees[0];
+            } else if (attendees.length === 2) {
+                attendeesText = `${attendees[0]} ו${attendees[1]}`;
+            } else if (attendees.length === 3) {
+                attendeesText = `${attendees[0]}, ${attendees[1]} ו${attendees[2]}`;
             }
             
             // יצירת רשימת התלמידות והכיתות
@@ -748,7 +829,7 @@
                 studentsList += `${studentsInfo[i]} מכיתה ${classesInfo[i]}`;
             }
             
-            return `שמחנו ש${attendeesText} של ${studentsList} ${studentsInfo.length > 1 ? 'יגיעו' : 'יגיע/תגיע'} ליום סבבא לאגף בנות בתאריך ז' אדר`;
+            return `שמחנו ש${attendeesText} של ${studentsList} ${studentsInfo.length > 1 || attendees.length > 1 ? 'יגיעו' : 'יגיע/תגיע'} ליום סבבא לאגף בנות בתאריך ז' אדר`;
         }
         
         // הצגת חלון הסיכום
@@ -756,7 +837,7 @@
             const summaryContent = document.getElementById('summaryContent');
             summaryContent.innerText = createSummaryMessage();
             
-         const modal = document.getElementById('summaryModal');
+            const modal = document.getElementById('summaryModal');
             modal.classList.remove('hidden');
             modal.style.display = 'flex'; // שימוש ב-flex כדי למרכז את התוכן
         }
@@ -857,6 +938,7 @@
             // הוספת פרטי המשתתף
             const grandpaChecked = document.getElementById('grandpaOption').checked;
             const grandmaChecked = document.getElementById('grandmaOption').checked;
+            const otherChecked = document.getElementById('otherOption').checked;
             const noneChecked = document.getElementById('noneOption').checked;
             
             if (noneChecked) {
@@ -864,6 +946,9 @@
                 formData.append('entry.825507375', '');
                 formData.append('entry.1006960794', '');
                 formData.append('entry.550793818', '');
+                formData.append('entry.1674672917', '');
+                formData.append('entry.842686301', '');
+                formData.append('entry.563967012', '');
                 formData.append('entry.1765091966', 'לא מגיעים');
             } else {
                 if (grandpaChecked) {
@@ -880,6 +965,16 @@
                 } else {
                     formData.append('entry.1006960794', '');
                     formData.append('entry.550793818', '');
+                }
+                
+                if (otherChecked) {
+                    formData.append('entry.1674672917', document.getElementById('otherRelation').value);
+                    formData.append('entry.842686301', document.getElementById('otherName').value);
+                    formData.append('entry.563967012', document.getElementById('otherLastName').value);
+                } else {
+                    formData.append('entry.1674672917', '');
+                    formData.append('entry.842686301', '');
+                    formData.append('entry.563967012', '');
                 }
                 
                 formData.append('entry.1765091966', '');
@@ -903,9 +998,11 @@
             // איפוס שדות המשתתף
             const grandpaFields = document.getElementById('grandpaFields');
             const grandmaFields = document.getElementById('grandmaFields');
+            const otherFields = document.getElementById('otherFields');
             
             grandpaFields.classList.add('hidden');
             grandmaFields.classList.add('hidden');
+            otherFields.classList.add('hidden');
             
             // הסתרת הודעות שגיאה
             const errorMessages = document.querySelectorAll('.error-message');
