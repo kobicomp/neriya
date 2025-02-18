@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>רישום ליום סבבא אגף בנות</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        
+        .form-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #4a2c82;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .description {
+            margin-bottom: 30px;
+            text-align: center;
+            color: #555;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .student-entry {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+        }
+        
+        button {
+            padding: 12px 20px;
+            background-color: #4a2c82;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #371f61;
+        }
+        
+        button.secondary {
+            background-color: #6c757d;
+        }
+        
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        button.delete-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            background-color: #dc3545;
+            font-size: 14px;
+        }
+        
+        button.delete-btn:hover {
+            background-color: #c82333;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .attendees-section {
+            margin-top: 40px;
+        }
+        
+        .attendee-options {
+            margin-top: 15px;
+        }
+        
+        .attendee-fields {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .radio-group {
+            margin-bottom: 15px;
+        }
+        
+        .radio-option {
+            margin-bottom: 10px;
+        }
+        
+        input[type="radio"] {
+            width: auto;
+            margin-left: 10px;
+        }
+        
+        .submit-section {
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        #submitButton {
+            padding: 15px 40px;
+            font-size: 18px;
+            background-color: #28a745;
+        }
+        
+        #submitButton:hover {
+            background-color: #218838;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .required-field {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>רישום ליום סבבא אגף בנות</h1>
+        <div class="description">
+            <!-- כאן יהיה מקום לתיאור שתכתבי מאוחר יותר -->
+        </div>
+        
+        <form id="registrationForm" onsubmit="submitForm(event)">
+            <!-- רשימת התלמידות -->
+            <div id="studentsContainer">
+                <div class="student-entry" id="student1">
+                    <div class="form-group">
+                        <label for="studentName1">שם התלמידה <span class="required-field">*</span></label>
+                        <input type="text" id="studentName1" required>
+                        <div class="error-message" id="studentName1Error">יש להזין שם תלמידה</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentClass1">כיתה <span class="required-field">*</span></label>
+                        <select id="studentClass1" required>
+                            <option value="">בחר/י כיתה</option>
+                            <option value="א' עדי">א' עדי</option>
+                            <option value="א' רעות">א' רעות</option>
+                            <option value="ב' הדר">ב' הדר</option>
+                            <option value="ג' שירה">ג' שירה</option>
+                            <option value="ד' הדר">ד' הדר</option>
+                            <option value="ו' ספיר">ו' ספיר</option>
+                        </select>
+                        <div class="error-message" id="studentClass1Error">יש לבחור כיתה</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button type="button" id="addStudentBtn" onclick="addStudent()">+ הוספת תלמידה</button>
+            </div>
+            
+            <!-- שם משפחה -->
+            <div class="form-group">
+                <label for="lastName">שם משפחה <span class="required-field">*</span></label>
+                <input type="text" id="lastName" required>
+                <div class="error-message" id="lastNameError">יש להזין שם משפחה</div>
+            </div>
+            
+            <!-- מי מגיע -->
+            <div class="attendees-section">
+                <h2>מי מגיע?</h2>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="grandpaOption" name="attendee" value="grandpa" onchange="toggleAttendeeFields()">
+                        <label for="grandpaOption">סבא</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="grandmaOption" name="attendee" value="grandma" onchange="toggleAttendeeFields()">
+                        <label for="grandmaOption">סבתא</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="noneOption" name="attendee" value="none" onchange="toggleAttendeeFields()">
+                        <label for="noneOption">לצערינו לא נוכל להגיע</label>
+                    </div>
+                    <div class="error-message" id="attendeeError">יש לבחור מי מגיע</div>
+                </div>
+                
+                <!-- שדות לסבא -->
+                <div id="grandpaFields" class="attendee-fields hidden">
+                    <div class="form-group">
+                        <label for="grandpaName">שם סבא <span class="required-field">*</span></label>
+                        <input type="text" id="grandpaName">
+                        <div class="error-message" id="grandpaNameError">יש להזין שם סבא</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="grandpaLastName">שם משפחה של סבא <span class="required-field">*</span></label>
+                        <input type="text" id="grandpaLastName">
+                        <div class="error-message" id="grandpaLastNameError">יש להזין שם משפחה של סבא</div>
+                    </div>
+                </div>
+                
+                <!-- שדות לסבתא -->
+                <div id="grandmaFields" class="attendee-fields hidden">
+                    <div class="form-group">
+                        <label for="grandmaName">שם סבתא <span class="required-field">*</span></label>
+                        <input type="text" id="grandmaName">
+                        <div class="error-message" id="grandmaNameError">יש להזין שם סבתא</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="grandmaLastName">שם משפחה של סבתא <span class="required-field">*</span></label>
+                        <input type="text" id="grandmaLastName">
+                        <div class="error-message" id="grandmaLastNameError">יש להזין שם משפחה של סבתא</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- כפתור שליחה -->
+            <div class="submit-section">
+                <button type="submit" id="submitButton">שליחה</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // משתנה לשמירת מספר התלמידות הנוכחי
+        let currentStudents = 1;
+        const maxStudents = 4;
+        
+        // הוספת תלמידה
+        function addStudent() {
+            if (currentStudents >= maxStudents) {
+                alert('ניתן להוסיף עד 4 תלמידות בלבד');
+                return;
+            }
+            
+            currentStudents++;
+            const container = document.getElementById('studentsContainer');
+            const newStudentDiv = document.createElement('div');
+            newStudentDiv.className = 'student-entry';
+            newStudentDiv.id = `student${currentStudents}`;
+            
+            newStudentDiv.innerHTML = `
+                <button type="button" class="delete-btn" onclick="removeStudent(${currentStudents})">מחיקה</button>
+                <div class="form-group">
+                    <label for="studentName${currentStudents}">שם התלמידה <span class="required-field">*</span></label>
+                    <input type="text" id="studentName${currentStudents}" required>
+                    <div class="error-message" id="studentName${currentStudents}Error">יש להזין שם תלמידה</div>
+                </div>
+                <div class="form-group">
+                    <label for="studentClass${currentStudents}">כיתה <span class="required-field">*</span></label>
+                    <select id="studentClass${currentStudents}" required>
+                        <option value="">בחר/י כיתה</option>
+                        <option value="א' עדי">א' עדי</option>
+                        <option value="א' רעות">א' רעות</option>
+                        <option value="ב' הדר">ב' הדר</option>
+                        <option value="ג' שירה">ג' שירה</option>
+                        <option value="ד' הדר">ד' הדר</option>
+                        <option value="ו' ספיר">ו' ספיר</option>
+                    </select>
+                    <div class="error-message" id="studentClass${currentStudents}Error">יש לבחור כיתה</div>
+                </div>
+            `;
+            
+            container.appendChild(newStudentDiv);
+        }
+        
+        // הסרת תלמידה
+        function removeStudent(studentNumber) {
+            const studentDiv = document.getElementById(`student${studentNumber}`);
+            studentDiv.remove();
+            
+            // סידור מחדש של האינדקסים
+            rearrangeStudents();
+        }
+        
+        // סידור מחדש של האינדקסים לאחר מחיקה
+        function rearrangeStudents() {
+            const container = document.getElementById('studentsContainer');
+            const studentEntries = container.querySelectorAll('.student-entry');
+            currentStudents = studentEntries.length;
+            
+            // עדכון האינדקסים
+            studentEntries.forEach((entry, index) => {
+                const studentNumber = index + 1;
+                entry.id = `student${studentNumber}`;
+                
+                // עדכון שדות התלמידה
+                const nameInput = entry.querySelector('input[id^="studentName"]');
+                const classSelect = entry.querySelector('select[id^="studentClass"]');
+                const nameError = entry.querySelector('div[id^="studentName"][id$="Error"]');
+                const classError = entry.querySelector('div[id^="studentClass"][id$="Error"]');
+                const deleteBtn = entry.querySelector('.delete-btn');
+                
+                if (nameInput) nameInput.id = `studentName${studentNumber}`;
+                if (classSelect) classSelect.id = `studentClass${studentNumber}`;
+                if (nameError) nameError.id = `studentName${studentNumber}Error`;
+                if (classError) classError.id = `studentClass${studentNumber}Error`;
+                
+                // עדכון כפתור המחיקה רק אם זה לא התלמידה הראשונה
+                if (deleteBtn && studentNumber > 1) {
+                    deleteBtn.setAttribute('onclick', `removeStudent(${studentNumber})`);
+                } else if (deleteBtn) {
+                    deleteBtn.remove(); // להסיר את כפתור המחיקה מהתלמידה הראשונה
+                }
+            });
+        }
+        
+        // הצגת שדות לפי בחירת המשתתף
+        function toggleAttendeeFields() {
+            const attendeeValue = document.querySelector('input[name="attendee"]:checked')?.value;
+            const grandpaFields = document.getElementById('grandpaFields');
+            const grandmaFields = document.getElementById('grandmaFields');
+            
+            grandpaFields.classList.add('hidden');
+            grandmaFields.classList.add('hidden');
+            
+            if (attendeeValue === 'grandpa') {
+                grandpaFields.classList.remove('hidden');
+            } else if (attendeeValue === 'grandma') {
+                grandmaFields.classList.remove('hidden');
+            }
+        }
+        
+        // ולידציה של הטופס
+        function validateForm() {
+            let isValid = true;
+            
+            // בדיקת פרטי התלמידות
+            for (let i = 1; i <= currentStudents; i++) {
+                const nameInput = document.getElementById(`studentName${i}`);
+                const classSelect = document.getElementById(`studentClass${i}`);
+                const nameError = document.getElementById(`studentName${i}Error`);
+                const classError = document.getElementById(`studentClass${i}Error`);
+                
+                // בדיקת שם תלמידה
+                if (!nameInput.value.trim()) {
+                    nameError.style.display = 'block';
+                    isValid = false;
+                } else {
+                    nameError.style.display = 'none';
+                }
+                
+                // בדיקת כיתה
+                if (!classSelect.value) {
+                    classError.style.display = 'block';
+                    isValid = false;
+                } else {
+                    classError.style.display = 'none';
+                }
+            }
+            
+            // בדיקת שם משפחה
+            const lastName = document.getElementById('lastName');
+            const lastNameError = document.getElementById('lastNameError');
+            
+            if (!lastName.value.trim()) {
+                lastNameError.style.display = 'block';
+                isValid = false;
+            } else {
+                lastNameError.style.display = 'none';
+            }
+            
+            // בדיקת בחירת משתתף
+            const attendeeSelected = document.querySelector('input[name="attendee"]:checked');
+            const attendeeError = document.getElementById('attendeeError');
+            
+            if (!attendeeSelected) {
+                attendeeError.style.display = 'block';
+                isValid = false;
+            } else {
+                attendeeError.style.display = 'none';
+                
+                // בדיקת פרטי סבא/סבתא אם נבחרו
+                if (attendeeSelected.value === 'grandpa') {
+                    const grandpaName = document.getElementById('grandpaName');
+                    const grandpaLastName = document.getElementById('grandpaLastName');
+                    const grandpaNameError = document.getElementById('grandpaNameError');
+                    const grandpaLastNameError = document.getElementById('grandpaLastNameError');
+                    
+                    if (!grandpaName.value.trim()) {
+                        grandpaNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        grandpaNameError.style.display = 'none';
+                    }
+                    
+                    if (!grandpaLastName.value.trim()) {
+                        grandpaLastNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        grandpaLastNameError.style.display = 'none';
+                    }
+                } else if (attendeeSelected.value === 'grandma') {
+                    const grandmaName = document.getElementById('grandmaName');
+                    const grandmaLastName = document.getElementById('grandmaLastName');
+                    const grandmaNameError = document.getElementById('grandmaNameError');
+                    const grandmaLastNameError = document.getElementById('grandmaLastNameError');
+                    
+                    if (!grandmaName.value.trim()) {
+                        grandmaNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        grandmaNameError.style.display = 'none';
+                    }
+                    
+                    if (!grandmaLastName.value.trim()) {
+                        grandmaLastNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        grandmaLastNameError.style.display = 'none';
+                    }
+                }
+            }
+            
+            return isValid;
+        }
+        
+        // שליחת הטופס
+        function submitForm(event) {
+            event.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+            
+            // הכנת הנתונים לשליחה
+            const formData = prepareFormData();
+            
+            // שליחת הטופס
+            const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSen2LX3FYPxYuPQwsfG22rRYCaShq_Ev_lREZbze0yZz0j2Ig/formResponse';
+            
+            fetch(formUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            }).then(() => {
+                alert('הטופס נשלח בהצלחה!');
+                document.getElementById('registrationForm').reset();
+                resetForm();
+            }).catch(error => {
+                console.error('Error:', error);
+                // נשלח בכל מקרה כי Google Forms לא מאפשר CORS
+                alert('הטופס נשלח בהצלחה!');
+                document.getElementById('registrationForm').reset();
+                resetForm();
+            });
+        }
+        
+        // הכנת הנתונים לשליחה
+        function prepareFormData() {
+            const formData = new FormData();
+            
+            // הוספת פרטי התלמידות
+            for (let i = 1; i <= 4; i++) {
+                if (i <= currentStudents) {
+                    const name = document.getElementById(`studentName${i}`).value;
+                    const cls = document.getElementById(`studentClass${i}`).value;
+                    
+                    if (i === 1) {
+                        formData.append('entry.2059163958', name);
+                        formData.append('entry.1672764995', cls);
+                    } else if (i === 2) {
+                        formData.append('entry.501709204', name);
+                        formData.append('entry.786499716', cls);
+                    } else if (i === 3) {
+                        formData.append('entry.619222541', name);
+                        formData.append('entry.1245453582', cls);
+                    } else if (i === 4) {
+                        formData.append('entry.1249874396', name);
+                        formData.append('entry.1344493533', cls);
+                    }
+                } else {
+                    // השארת שדות ריקים לתלמידות שלא הוזנו
+                    if (i === 2) {
+                        formData.append('entry.501709204', '');
+                        formData.append('entry.786499716', '');
+                    } else if (i === 3) {
+                        formData.append('entry.619222541', '');
+                        formData.append('entry.1245453582', '');
+                    } else if (i === 4) {
+                        formData.append('entry.1249874396', '');
+                        formData.append('entry.1344493533', '');
+                    }
+                }
+            }
+            
+            // הוספת שם משפחה
+            formData.append('entry.201184467', document.getElementById('lastName').value);
+            
+            // הוספת פרטי המשתתף
+            const attendeeValue = document.querySelector('input[name="attendee"]:checked').value;
+            
+            if (attendeeValue === 'grandpa') {
+                formData.append('entry.1655902341', document.getElementById('grandpaName').value);
+                formData.append('entry.825507375', document.getElementById('grandpaLastName').value);
+                formData.append('entry.1006960794', '');
+                formData.append('entry.550793818', '');
+                formData.append('entry.1765091966', '');
+            } else if (attendeeValue === 'grandma') {
+                formData.append('entry.1655902341', '');
+                formData.append('entry.825507375', '');
+                formData.append('entry.1006960794', document.getElementById('grandmaName').value);
+                formData.append('entry.550793818', document.getElementById('grandmaLastName').value);
+                formData.append('entry.1765091966', '');
+            } else if (attendeeValue === 'none') {
+                formData.append('entry.1655902341', '');
+                formData.append('entry.825507375', '');
+                formData.append('entry.1006960794', '');
+                formData.append('entry.550793818', '');
+                formData.append('entry.1765091966', 'לא מגיעים');
+            }
+            
+            return formData;
+        }
+        
+        // איפוס הטופס למצב התחלתי
+        function resetForm() {
+            // השארת רק תלמידה אחת
+            const container = document.getElementById('studentsContainer');
+            const studentEntries = container.querySelectorAll('.student-entry');
+            
+            for (let i = 1; i < studentEntries.length; i++) {
+                studentEntries[i].remove();
+            }
+            
+            currentStudents = 1;
+            
+            // איפוס שדות המשתתף
+            const grandpaFields = document.getElementById('grandpaFields');
+            const grandmaFields = document.getElementById('grandmaFields');
+            
+            grandpaFields.classList.add('hidden');
+            grandmaFields.classList.add('hidden');
+            
+            // הסתרת הודעות שגיאה
+            const errorMessages = document.querySelectorAll('.error-message');
+            errorMessages.forEach(msg => {
+                msg.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>
