@@ -108,7 +108,7 @@
         }
         
         .hidden {
-            display: none;
+            display: none !important;
         }
         
         .attendees-section {
@@ -316,8 +316,8 @@
         </form>
     </div>
     
-    <!-- חלון סיכום -->
-    <div id="summaryModal" class="modal hidden">
+    <!-- חלון סיכום - עם style inline בנוסף למחלקת hidden -->
+    <div id="summaryModal" class="modal hidden" style="display: none;">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal()">&times;</span>
             <h2>תודה על הרישום!</h2>
@@ -326,6 +326,15 @@
     </div>
 
     <script>
+        // וידוא הסתרת המודל בטעינת הדף
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('summaryModal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.classList.add('hidden');
+            }
+        });
+        
         // משתנה לשמירת מספר התלמידות הנוכחי
         let currentStudents = 1;
         const maxStudents = 4;
@@ -605,12 +614,14 @@
             
             const modal = document.getElementById('summaryModal');
             modal.classList.remove('hidden');
+            modal.style.display = 'flex'; // שימוש ב-flex כדי למרכז את התוכן
         }
         
         // סגירת חלון הסיכום
         function closeModal() {
             const modal = document.getElementById('summaryModal');
             modal.classList.add('hidden');
+            modal.style.display = 'none';
             
             // איפוס הטופס
             document.getElementById('registrationForm').reset();
@@ -724,6 +735,7 @@
                     formData.append('entry.550793818', document.getElementById('grandmaLastName').value);
                 } else {
                     formData.append('entry.1006960794', '');
+                    formData.append('entry.1006960794', '');
                     formData.append('entry.550793818', '');
                 }
                 
@@ -743,21 +755,21 @@
                 studentEntries[i].remove();
             }
             
-           currentStudents = 1;
-           
-           // איפוס שדות המשתתף
-           const grandpaFields = document.getElementById('grandpaFields');
-           const grandmaFields = document.getElementById('grandmaFields');
-           
-           grandpaFields.classList.add('hidden');
-           grandmaFields.classList.add('hidden');
-           
-           // הסתרת הודעות שגיאה
-           const errorMessages = document.querySelectorAll('.error-message');
-           errorMessages.forEach(msg => {
-               msg.style.display = 'none';
-           });
-       }
-   </script>
+            currentStudents = 1;
+            
+            // איפוס שדות המשתתף
+            const grandpaFields = document.getElementById('grandpaFields');
+            const grandmaFields = document.getElementById('grandmaFields');
+            
+            grandpaFields.classList.add('hidden');
+            grandmaFields.classList.add('hidden');
+            
+            // הסתרת הודעות שגיאה
+            const errorMessages = document.querySelectorAll('.error-message');
+            errorMessages.forEach(msg => {
+                msg.style.display = 'none';
+            });
+        }
+    </script>
 </body>
 </html>
