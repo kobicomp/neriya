@@ -266,15 +266,15 @@
                 <h2>מי מגיע?</h2>
                 <div class="checkbox-group">
                     <div class="checkbox-option">
-                        <input type="checkbox" id="grandpaOption" onchange="toggleAttendeeFields()">
+                        <input type="checkbox" id="grandpaOption" onclick="toggleAttendeeFields()">
                         <label for="grandpaOption">סבא</label>
                     </div>
                     <div class="checkbox-option">
-                        <input type="checkbox" id="grandmaOption" onchange="toggleAttendeeFields()">
+                        <input type="checkbox" id="grandmaOption" onclick="toggleAttendeeFields()">
                         <label for="grandmaOption">סבתא</label>
                     </div>
                     <div class="checkbox-option">
-                        <input type="checkbox" id="noneOption" onchange="toggleNoneOption()">
+                        <input type="checkbox" id="noneOption" onclick="toggleNoneOption()">
                         <label for="noneOption">לצערינו לא נוכל להגיע</label>
                     </div>
                     <div class="error-message" id="attendeeError">יש לבחור לפחות אפשרות אחת</div>
@@ -743,21 +743,21 @@
                 studentEntries[i].remove();
             }
             
-            currentStudents = 1;
-            
-            // איפוס שדות המשתתף
-            const grandpaFields = document.getElementById('grandpaFields');
-            const grandmaFields = document.getElementById('grandmaFields');
-            
-            grandpaFields.classList.add('hidden');
-            grandmaFields.classList.add('hidden');
-            
-            // הסתרת הודעות שגיאה
-            const errorMessages = document.querySelectorAll('.error-message');
-            errorMessages.forEach(msg => {
-                msg.style.display = 'none';
-            });
-        }
-</script>
+           currentStudents = 1;
+           
+           // איפוס שדות המשתתף
+           const grandpaFields = document.getElementById('grandpaFields');
+           const grandmaFields = document.getElementById('grandmaFields');
+           
+           grandpaFields.classList.add('hidden');
+           grandmaFields.classList.add('hidden');
+           
+           // הסתרת הודעות שגיאה
+           const errorMessages = document.querySelectorAll('.error-message');
+           errorMessages.forEach(msg => {
+               msg.style.display = 'none';
+           });
+       }
+   </script>
 </body>
 </html>
