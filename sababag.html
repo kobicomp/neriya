@@ -20,6 +20,17 @@
             padding: 40px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            max-width: 200px;
+            height: auto;
+            display: inline-block;
+        }
         
         h1 {
             color: #4a2c82;
@@ -350,6 +361,9 @@
 </head>
 <body>
     <div class="form-container">
+        <div class="logo-container">
+            <img src="logo.png" alt="לוגו" class="logo">
+        </div>
         <h1>רישום ליום סבבא אגף בנות</h1>
         <div class="description">
             הורים יקרים, על מנת שנוכל להיערך בהתאם נא מלאו את השאלון הבא
@@ -742,7 +756,7 @@
             const summaryContent = document.getElementById('summaryContent');
             summaryContent.innerText = createSummaryMessage();
             
-            const modal = document.getElementById('summaryModal');
+         const modal = document.getElementById('summaryModal');
             modal.classList.remove('hidden');
             modal.style.display = 'flex'; // שימוש ב-flex כדי למרכז את התוכן
         }
