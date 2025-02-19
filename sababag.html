@@ -35,8 +35,24 @@
         h1 {
             color: #4a2c82;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             font-size: 32px;
+        }
+
+        .highlight {
+            font-weight: 700;
+            color: #6a41b4;
+            background-color: #f0ebff;
+            padding: 0 5px;
+            border-radius: 4px;
+        }
+        
+        .event-details {
+            text-align: center;
+            font-size: 18px;
+            color: #4a2c82;
+            margin-bottom: 25px;
+            line-height: 1.6;
         }
         
         .description {
@@ -374,9 +390,12 @@
         <div class="logo-container">
             <img src="logo.png" alt="לוגו" class="logo">
         </div>
-        <h1>רישום ליום סבבא אגף בנות</h1>
+        <h1>רישום ליום סבבא <span class="highlight">אגף בנות</span></h1>
+        <div class="event-details">
+            ז' אדר התשפ"ה | 7 במרץ למניינם | זמן הפעילות: 9:00-11:00
+        </div>
         <div class="description">
-            הורים יקרים, על מנת שנוכל להיערך בהתאם נא מלאו את השאלון הבא
+            הורים יקרים, על מנת שנוכל להיערך בהתאם נא מלאו את השאלון הבא:
         </div>
         
         <form id="registrationForm" onsubmit="submitForm(event)">
@@ -721,6 +740,7 @@
             const attendeeError = document.getElementById('attendeeError');
             
             // בדיקת מספר המלווים
+           // בדיקת מספר המלווים
             const numAttendees = (grandpaChecked ? 1 : 0) + 
                                 (grandmaChecked ? 1 : 0) + 
                                 (otherChecked ? 1 : 0);
@@ -738,6 +758,7 @@
                 isValid = false;
             } else {
                 attendeeError.style.display = 'none';
+                
                 // בדיקת פרטי סבא אם נבחר
                 if (grandpaChecked) {
                     const grandpaName = document.getElementById('grandpaName');
