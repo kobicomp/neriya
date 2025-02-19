@@ -1,15 +1,27 @@
+תודה על שיתוף הדוגמה. אשתמש בגישה דומה לקוד שעובד אצלך כדי ליצור פתרון עבור ניתוח נתוני הרישום. הבעיה העיקרית הייתה קריאת הנתונים מגוגל שיטס, ואני רואה שהקוד שלך משתמש בגישה ישירה לקובץ ה-CSV.
+
+הנה דף הניתוח המעודכן:
+
+```html
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ניתוח נתוני רישום - יום סבבא אגף בנות</title>
-    
-    <!-- הכללת ספריות -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
     <style>
+        :root {
+            --primary-color: #4a2c82;
+            --primary-light: #f8f6ff;
+            --secondary-color: #6a41b4;
+            --success-color: #28a745;
+            --warning-color: #fd7e14;
+            --danger-color: #dc3545;
+            --border-radius: 12px;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 1200px;
@@ -17,6 +29,7 @@
             padding: 20px;
             background-color: #f7f6fb;
             color: #333;
+            line-height: 1.6;
         }
         
         header {
@@ -25,9 +38,15 @@
         }
         
         h1 {
-            color: #4a2c82;
+            color: var(--primary-color);
             font-size: 32px;
             margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin-bottom: 15px;
         }
         
         .logo-container {
@@ -46,7 +65,7 @@
         
         .card {
             background-color: white;
-            border-radius: 12px;
+            border-radius: var(--border-radius);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -58,7 +77,7 @@
         }
         
         .card-header {
-            background-color: #4a2c82;
+            background-color: var(--primary-color);
             color: white;
             padding: 15px 20px;
             font-size: 18px;
@@ -83,7 +102,7 @@
         .summary-item {
             text-align: center;
             padding: 15px;
-            background-color: #f8f6ff;
+            background-color: var(--primary-light);
             border-radius: 8px;
             display: flex;
             flex-direction: column;
@@ -94,7 +113,7 @@
         .summary-value {
             font-size: 32px;
             font-weight: 700;
-            color: #4a2c82;
+            color: var(--primary-color);
             margin: 10px 0;
         }
         
@@ -120,9 +139,9 @@
         }
         
         th {
-            background-color: #f5f2ff;
+            background-color: var(--primary-light);
             font-weight: 600;
-            color: #4a2c82;
+            color: var(--primary-color);
         }
         
         tr:hover {
@@ -140,7 +159,6 @@
         
         .progress-fill {
             height: 100%;
-            background-color: #6a41b4;
             border-radius: 12px;
             transition: width 1s ease;
             display: flex;
@@ -157,25 +175,17 @@
             width: 100%;
         }
         
-        .data-loader {
+        .loading-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .data-loader h2 {
-            margin-bottom: 20px;
-            color: #4a2c82;
+            min-height: 400px;
         }
         
         .loader {
             border: 5px solid #f3f3f3;
-            border-top: 5px solid #4a2c82;
+            border-top: 5px solid var(--primary-color);
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -187,6 +197,69 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        .error-message {
+            text-align: center;
+            color: var(--danger-color);
+            background-color: #f8d7da;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .pagination button {
+            background-color: var(--primary-light);
+            border: none;
+            color: var(--primary-color);
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover:not(.active) {
+            background-color: #e2dbff;
+        }
+        
+        .pagination button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .highlight {
+            background-color: #fff3cd;
+            padding: 3px 5px;
+            border-radius: 3px;
+        }
+        
+        select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: white;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-body {
+                padding: 15px;
+            }
+            
+            .summary-value {
+                font-size: 24px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -197,42 +270,42 @@
         <h1>ניתוח נתוני רישום - יום סבבא אגף בנות</h1>
     </header>
     
-    <div id="dataLoader" class="data-loader">
-        <h2>טעינת נתונים</h2>
+    <div id="loading" class="loading-container">
         <div class="loader"></div>
-        <p>מנתח את נתוני הרישום...</p>
-        <div id="uploadSection" style="display: none; margin-top: 20px; text-align: center;">
-            <p>לא הצלחנו לטעון את הנתונים אוטומטית. אנא העלה את קובץ ה-CSV:</p>
-            <input type="file" id="csvFileInput" accept=".csv">
-        </div>
+        <h2>טוען נתוני רישום...</h2>
+    </div>
+    
+    <div id="error" class="error-message" style="display: none;">
+        <p>אירעה שגיאה בטעינת הנתונים. אנא נסה שוב מאוחר יותר.</p>
+        <p id="errorDetails"></p>
     </div>
     
     <div id="dashboard" class="dashboard" style="display: none;">
-        <!-- כרטיס סיכום -->
+        <!-- כרטיס סיכום נתונים -->
         <div class="card summary-card">
             <div class="summary-item">
-                <div class="summary-value" id="totalStudents">0</div>
                 <div class="summary-label">סה"כ תלמידות</div>
+                <div id="totalStudents" class="summary-value">0</div>
             </div>
             <div class="summary-item">
-                <div class="summary-value" id="totalFamilies">0</div>
                 <div class="summary-label">סה"כ משפחות</div>
+                <div id="totalFamilies" class="summary-value">0</div>
             </div>
             <div class="summary-item">
-                <div class="summary-value" id="participationRate">0%</div>
                 <div class="summary-label">אחוז השתתפות</div>
+                <div id="participationRate" class="summary-value">0%</div>
             </div>
             <div class="summary-item">
-                <div class="summary-value" id="grandpaCount">0</div>
                 <div class="summary-label">סבים</div>
+                <div id="grandpaCount" class="summary-value">0</div>
             </div>
             <div class="summary-item">
-                <div class="summary-value" id="grandmaCount">0</div>
                 <div class="summary-label">סבתות</div>
+                <div id="grandmaCount" class="summary-value">0</div>
             </div>
             <div class="summary-item">
-                <div class="summary-value" id="otherCount">0</div>
                 <div class="summary-label">מלווים אחרים</div>
+                <div id="otherCount" class="summary-value">0</div>
             </div>
         </div>
         
@@ -295,10 +368,10 @@
             </div>
         </div>
         
-        <!-- כרטיס רשימת תלמידות לפי סטטוס הגעה -->
+        <!-- כרטיס רשימת תלמידות -->
         <div class="card">
             <div class="card-header">
-                <span>רשימת תלמידות מפורטת</span>
+                <span>רשימת תלמידות לפי סטטוס הגעה</span>
                 <select id="attendanceFilter" onchange="filterStudentList()">
                     <option value="all">כל התלמידות</option>
                     <option value="attending">מגיעים</option>
@@ -326,9 +399,15 @@
             </div>
         </div>
     </div>
-    
+
     <script>
-        // משתנים גלובליים
+        // ===== הגדרות =====
+        const CONFIG = {
+            // קישור לגליון הנתונים
+            SHEET_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS-tw481NC9DzPt3RBOEoiGdeGv6FNRjC28NbKUuvY2bNWIdSqR4BmQTe8-n6RndK4NDOgVFtUirqU4/pub?output=csv'
+        };
+        
+        // משתנים גלובליים לניתוח הנתונים
         let rawData = [];
         let processedData = {
             totalStudents: 0,
@@ -345,59 +424,26 @@
             studentList: []
         };
         
-        // משתנים לעמודים ברשימת התלמידות
+        // משתנים לתצוגת רשימת התלמידות
         let currentPage = 1;
         const rowsPerPage = 10;
         let filteredStudents = [];
         
-        // טעינת נתונים
-        window.addEventListener('DOMContentLoaded', function() {
-            loadCSVData();
-            
-            // טיפול בהעלאת קובץ
-            document.getElementById('csvFileInput').addEventListener('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        parseCSV(e.target.result);
-                    };
-                    reader.readAsText(file);
-                }
-            });
-        });
-        
         // טעינת נתונים מהקישור
-        function loadCSVData() {
-            // URL של ה-CSV
-            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS-tw481NC9DzPt3RBOEoiGdeGv6FNRjC28NbKUuvY2bNWIdSqR4BmQTe8-n6RndK4NDOgVFtUirqU4/pub?output=csv';
-            
-            // יצירת אלמנט script
-            const script = document.createElement('script');
-            
-            // יצירת callback function שתיקרא כשהנתונים יחזרו
-            window.handleCSVData = function(csv) {
-                parseCSV(csv);
-            };
-            
-            // הגדרת URL עם JSONP callback
-            script.src = `https://csv-to-json-service.vercel.app/api/convert?url=${encodeURIComponent(csvUrl)}&callback=handleCSVData`;
-            
-            // טיפול בשגיאות
-            script.onerror = function() {
-                console.error('שגיאה בטעינת הנתונים');
-                document.getElementById('uploadSection').style.display = 'block';
-            };
-            
-            // הגדרת timeout למקרה שאין תשובה
-            setTimeout(function() {
-                if (document.getElementById('dashboard').style.display === 'none') {
-                    document.getElementById('uploadSection').style.display = 'block';
-                }
-            }, 5000);
-            
-            // הוספת ה-script לעמוד
-            document.body.appendChild(script);
+        async function loadData() {
+            try {
+                const response = await fetch(CONFIG.SHEET_URL);
+                if (!response.ok) throw new Error(`שגיאה בטעינת הנתונים: ${response.status}`);
+                
+                const csvText = await response.text();
+                parseCSV(csvText);
+                
+            } catch (error) {
+                console.error('שגיאה בטעינת הנתונים:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('errorDetails').textContent = error.message;
+            }
         }
         
         // ניתוח קובץ CSV
@@ -409,7 +455,9 @@
                 complete: function(results) {
                     if (results.errors.length > 0) {
                         console.error("שגיאות בניתוח הקובץ:", results.errors);
-                        document.getElementById('uploadSection').style.display = 'block';
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('error').style.display = 'block';
+                        document.getElementById('errorDetails').textContent = "שגיאה בניתוח הקובץ";
                         return;
                     }
                     
@@ -419,7 +467,9 @@
                 },
                 error: function(error) {
                     console.error("שגיאה בניתוח הקובץ:", error);
-                    document.getElementById('uploadSection').style.display = 'block';
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('errorDetails').textContent = "שגיאה בניתוח הקובץ: " + error.message;
                 }
             });
         }
@@ -524,7 +574,7 @@
         
         // הצגת הדשבורד
         function renderDashboard() {
-            document.getElementById('dataLoader').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
             document.getElementById('dashboard').style.display = 'grid';
             
             updateSummaryCard();
@@ -791,7 +841,12 @@
                 const rateCell = document.createElement('td');
                 rateCell.textContent = `${rate}%`;
                 
-               row.appendChild(classCell);
+                // הדגשת אחוזים נמוכים
+                if (rate < 50) {
+                    rateCell.classList.add('highlight');
+                }
+                
+                row.appendChild(classCell);
                 row.appendChild(totalCell);
                 row.appendChild(attendingCell);
                 row.appendChild(notAttendingCell);
@@ -831,8 +886,8 @@
             
             tableBody.appendChild(totalRow);
         }
-
-        // רשימת תלמידות
+        
+        // הצגת רשימת תלמידות
         function renderStudentList() {
             // סינון התלמידות
             filterStudentList();
@@ -975,6 +1030,9 @@
                 paginationContainer.appendChild(nextButton);
             }
         }
+        
+        // טעינת הנתונים בטעינת הדף
+        window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
