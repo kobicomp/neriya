@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניתוח נתוני רישום סבבא</title>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2, h3 {
+            color: #4a2c82;
+        }
+        .data-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background-color: #f5f2ff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-right: 4px solid #6a41b4;
+        }
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4a2c82;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: right;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background-color: #f5f2ff;
+            color: #4a2c82;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .chart-container {
+            height: 400px;
+            margin: 30px 0;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 20px;
+            color: #6c757d;
+        }
+        .error {
+            color: #dc3545;
+            padding: 15px;
+            background-color: #f8d7da;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 25px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #4a2c82;
+            text-align: center;
+            color: white;
+            line-height: 25px;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <h1>ניתוח נתוני רישום ליום סבבא אגף בנות</h1>
+    
+    <div id="loading" class="loading">
+        טוען נתונים...
+    </div>
+    
+    <div id="error" class="error" style="display: none;"></div>
+    
+    <div id="dashboard" style="display: none;">
+        <div class="container">
+            <h2>סיכום נתונים</h2>
+            <div class="data-summary">
+                <div class="stat-card">
+                    <div>סה"כ תלמידות</div>
+                    <div id="totalStudents" class="stat-number">0</div>
+                </div>
+                <div class="stat-card">
+                    <div>סה"כ משפחות</div>
+                    <div id="totalFamilies" class="stat-number">0</div>
+                </div>
+                <div class="stat-card">
+                    <div>אחוז השתתפות</div>
+                    <div id="participationRate" class="stat-number">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div>סבים</div>
+                    <div id="grandpas" class="stat-number">0</div>
+                </div>
+                <div class="stat-card">
+                    <div>סבתות</div>
+                    <div id="grandmas" class="stat-number">0</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <h2>השתתפות לפי כיתות</h2>
+            <div class="chart-container">
+                <canvas id="classChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="container">
+            <h2>סוגי מלווים</h2>
+            <div class="chart-container" style="height: 300px;">
+                <canvas id="attendeesChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="container">
+            <h2>נתוני השתתפות מפורטים לפי כיתה</h2>
+            <table id="classDetailsTable">
+                <thead>
+                    <tr>
+                        <th>כיתה</th>
+                        <th>מספר תלמידות</th>
+                        <th>מגיעים</th>
+                        <th>לא מגיעים</th>
+                        <th>אחוז השתתפות</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- ימולא דינמית -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="container">
+            <h2>רשימת תלמידות שלא מגיעות</h2>
+            <table id="noShowStudents">
+                <thead>
+                    <tr>
+                        <th>שם התלמידה</th>
+                        <th>כיתה</th>
+                        <th>שם משפחה</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- ימולא דינמית -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // הגדרת URL לקובץ CSV עם פרוקסי כדי לעקוף מגבלות CORS
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS-tw481NC9DzPt3RBOEoiGdeGv6FNRjC28NbKUuvY2bNWIdSqR4BmQTe8-n6RndK4NDOgVFtUirqU4/pub?output=csv';
+        const proxyUrl = 'https://corsproxy.io/?';
+
+        // מבנה הנתונים המעובדים
+        const data = {
+            totalStudents: 0,
+            totalFamilies: 0,
+            attendingStudents: 0,
+            notAttendingStudents: 0,
+            attendees: {
+                grandpa: 0,
+                grandma: 0,
+                other: 0,
+                none: 0
+            },
+            classCounts: {},
+            classAttending: {},
+            classNotAttending: {},
+            noShowStudents: []
+        };
+
+        // טעינת הנתונים עם פרוקסי
+        async function loadData() {
+            try {
+                const response = await fetch(proxyUrl + encodeURIComponent(csvUrl));
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const csvText = await response.text();
+                parseCSV(csvText);
+            } catch (error) {
+                console.error('שגיאה בטעינת הנתונים:', error);
+                document.getElementById('loading').style.display = 'none';
+                const errorElement = document.getElementById('error');
+                errorElement.textContent = `שגיאה בטעינת הנתונים: ${error.message}`;
+                errorElement.style.display = 'block';
+                
+                // במקרה של שגיאה ננסה להשתמש בפתרון גיבוי
+                tryBackupMethod();
+            }
+        }
+
+        // פתרון גיבוי במקרה של שגיאת CORS
+        function tryBackupMethod() {
+            const errorElement = document.getElementById('error');
+            errorElement.textContent = 'מנסה פתרון חלופי...';
+            
+            // יצירת תגית script דינמית שתטען את הנתונים ב-JSONP
+            // הערה: שיטה זו עובדת רק אם השרת תומך ב-JSONP או אם יש אפשרות להשתמש ב-Google Sheets API
+            const script = document.createElement('script');
+            script.src = `https://sheets.googleapis.com/v4/spreadsheets/YOUR_SPREADSHEET_ID/values/YOUR_RANGE?key=YOUR_API_KEY&callback=parseGoogleSheetsData`;
+            document.body.appendChild(script);
+            
+            // נסיון שלישי: להציע למשתמש להעלות את הקובץ בעצמו
+            setTimeout(() => {
+                if (document.getElementById('dashboard').style.display === 'none') {
+                    errorElement.innerHTML = `
+                        לא הצלחנו לטעון את הנתונים באופן אוטומטי. 
+                        <br><br>
+                        אנא הורד את קובץ ה-CSV מהקישור 
+                        <a href="${csvUrl}" target="_blank">הזה</a>
+                        והעלה אותו כאן:
+                        <br><br>
+                        <input type="file" id="csvFileInput" accept=".csv">
+                    `;
+                    
+                    document.getElementById('csvFileInput').addEventListener('change', handleFileUpload);
+                }
+            }, 3000);
+        }
+
+        // טיפול בהעלאת קובץ ידנית
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    parseCSV(e.target.result);
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // ניתוח נתוני CSV
+        function parseCSV(csvText) {
+            Papa.parse(csvText, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results.errors.length > 0) {
+                        console.error('שגיאות בניתוח ה-CSV:', results.errors);
+                        document.getElementById('error').textContent = 'שגיאה בניתוח נתוני ה-CSV';
+                        document.getElementById('error').style.display = 'block';
+                        return;
+                    }
+                    
+                    analyzeData(results.data);
+                    renderDashboard();
+                },
+                error: function(error) {
+                    console.error('שגיאה בניתוח ה-CSV:', error);
+                    document.getElementById('error').textContent = 'שגיאה בניתוח נתוני ה-CSV: ' + error.message;
+                    document.getElementById('error').style.display = 'block';
+                }
+            });
+        }
+
+        // ניתוח הנתונים
+        function analyzeData(rows) {
+            data.totalFamilies = rows.length;
+            
+            // עיבוד כל שורה
+            rows.forEach(row => {
+                const isNotAttending = row['לא מגיעים'] ? true : false;
+                
+                // ספירת סוגי מלווים
+                if (isNotAttending) {
+                    data.attendees.none++;
+                } else {
+                    if (row['שם סבא מגיע']) data.attendees.grandpa++;
+                    if (row['שם סבתא מגיעה']) data.attendees.grandma++;
+                    if (row['אחר - קרבה']) data.attendees.other++;
+                }
+                
+                // איסוף נתוני תלמידות
+                for (let i = 1; i <= 4; i++) {
+                    const nameField = row[`שם התלמיד ${i}`] || row[`שם התלמידה ${i}`];
+                    const classField = row[`כיתה ${i}`];
+                    
+                    if (nameField && classField) {
+                        data.totalStudents++;
+                        
+                        // ספירה לפי כיתה
+                        if (!data.classCounts[classField]) {
+                            data.classCounts[classField] = 0;
+                            data.classAttending[classField] = 0;
+                            data.classNotAttending[classField] = 0;
+                        }
+                        data.classCounts[classField]++;
+                        
+                        if (isNotAttending) {
+                            data.notAttendingStudents++;
+                            data.classNotAttending[classField]++;
+                            
+                            // הוספה לרשימת התלמידות שלא מגיעות
+                            data.noShowStudents.push({
+                                name: nameField,
+                                className: classField,
+                                lastName: row['שם משפחה'] || ''
+                            });
+                        } else {
+                            data.attendingStudents++;
+                            data.classAttending[classField]++;
+                        }
+                    }
+                }
+            });
+            
+            // חישוב אחוז ההשתתפות הכללי
+            if (data.totalStudents > 0) {
+                data.participationRate = Math.round((data.attendingStudents / data.totalStudents) * 100);
+            }
+        }
+
+        // הצגת הדשבורד
+        function renderDashboard() {
+            // הסתרת טעינה והצגת הדשבורד
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            
+            // עדכון סיכום נתונים
+            document.getElementById('totalStudents').textContent = data.totalStudents;
+            document.getElementById('totalFamilies').textContent = data.totalFamilies;
+            document.getElementById('participationRate').textContent = `${data.participationRate}%`;
+            document.getElementById('grandpas').textContent = data.attendees.grandpa;
+            document.getElementById('grandmas').textContent = data.attendees.grandma;
+            
+            // יצירת תרשים כיתות
+            createClassChart();
+            
+            // יצירת תרשים מלווים
+            createAttendeesChart();
+            
+            // מילוי טבלת פרטי כיתות
+            fillClassDetailsTable();
+            
+            // מילוי טבלת תלמידות שלא מגיעות
+            fillNoShowStudentsTable();
+        }
+
+        // יצירת תרשים כיתות
+        function createClassChart() {
+            const ctx = document.getElementById('classChart').getContext('2d');
+            
+            // מיון כיתות
+            const sortedClasses = Object.keys(data.classCounts).sort();
+            
+            const attendingData = sortedClasses.map(cls => data.classAttending[cls]);
+            const notAttendingData = sortedClasses.map(cls => data.classNotAttending[cls]);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedClasses,
+                    datasets: [
+                        {
+                            label: 'מגיעים',
+                            data: attendingData,
+                            backgroundColor: '#4a2c82',
+                            barPercentage: 0.7
+                        },
+                        {
+                            label: 'לא מגיעים',
+                            data: notAttendingData,
+                            backgroundColor: '#dc3545',
+                            barPercentage: 0.7
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            rtl: true,
+                            textDirection: 'rtl'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // יצירת תרשים מלווים
+        function createAttendeesChart() {
+            const ctx = document.getElementById('attendeesChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['סבא', 'סבתא', 'אחר', 'לא מגיעים'],
+                    datasets: [{
+                        data: [
+                            data.attendees.grandpa,
+                            data.attendees.grandma,
+                            data.attendees.other,
+                            data.attendees.none
+                        ],
+                        backgroundColor: [
+                            '#4a2c82',
+                            '#e83e8c',
+                            '#fd7e14',
+                            '#dc3545'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // מילוי טבלת פרטי כיתות
+        function fillClassDetailsTable() {
+            const tableBody = document.querySelector('#classDetailsTable tbody');
+            tableBody.innerHTML = '';
+            
+            // מיון כיתות
+            const sortedClasses = Object.keys(data.classCounts).sort();
+            
+            sortedClasses.forEach(cls => {
+                const total = data.classCounts[cls];
+                const attending = data.classAttending[cls];
+                const notAttending = data.classNotAttending[cls];
+                const rate = Math.round((attending / total) * 100);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${cls}</td>
+                    <td>${total}</td>
+                    <td>${attending}</td>
+                    <td>${notAttending}</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${rate}%;">${rate}%</div>
+                        </div>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // שורת סיכום
+            const summaryRow = document.createElement('tr');
+            summaryRow.style.fontWeight = 'bold';
+            summaryRow.innerHTML = `
+                <td>סה"כ</td>
+                <td>${data.totalStudents}</td>
+                <td>${data.attendingStudents}</td>
+                <td>${data.notAttendingStudents}</td>
+                <td>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${data.participationRate}%;">${data.participationRate}%</div>
+                    </div>
+                </td>
+            `;
+            
+            tableBody.appendChild(summaryRow);
+        }
+
+        // מילוי טבלת תלמידות שלא מגיעות
+        function fillNoShowStudentsTable() {
+            const tableBody = document.querySelector('#noShowStudents tbody');
+            tableBody.innerHTML = '';
+            
+            // מיון לפי כיתה ושם
+            data.noShowStudents.sort((a, b) => {
+                if (a.className !== b.className) {
+                    return a.className.localeCompare(b.className);
+                }
+                return a.name.localeCompare(b.name);
+            });
+            
+            if (data.noShowStudents.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `<td colspan="3" style="text-align: center;">כל התלמידות מגיעות!</td>`;
+                tableBody.appendChild(emptyRow);
+                return;
+            }
+            
+            data.noShowStudents.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.name}</td>
+                    <td>${student.className}</td>
+                    <td>${student.lastName}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // טעינת הנתונים בטעינת הדף
+        window.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
