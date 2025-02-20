@@ -922,86 +922,85 @@
        }
        
        // יצירת תרשים התפלגות כיתות
-       function renderClassDistributionChart() {
-           const ctx = document.getElementById('classDistributionChart').getContext('2d');
-           
-           const labels = Object.keys(processedData.classCounts).sort();
-           const data = labels.map(cls => processedData.classCounts[cls]);
-           const notAttendingData = labels.map(cls => processedData.classesWithNoShow[cls] || 0);
-           const attendingData = labels.map((cls, i) => data[i] - notAttendingData[i]);
-           
-           // קבל תרשים קיים אם יש ועדכן אותו
-           const existingChart = Chart.getChart(ctx);
-           if (existingChart) {
-               existingChart.destroy();
-           }
-           
-           new Chart(ctx, {
-               type: 'bar',
-               data: {
-                   labels: labels,
-                   datasets: [{
-                       label: 'מגיעים',
-                       data: attendingData,
-                       backgroundColor: '#4a2c82',
-                       barPercentage: 0.7,
-                   }, {
-                       label: 'לא מגיעים',
-                       data: notAttendingData,
-                       backgroundColor: '#dc3545',
-                       barPercentage: 0.7,
-                   }]
-               },
-               options: {
-                   responsive: true,
-                   maintainAspectRatio: false,
-                   plugins: {
-                       title: {
-                           display: false
-                       },
-                       legend: {
-                           position: 'top',
-                           align: 'center',
-                           labels: {
-                               usePointStyle: true,
-                               boxWidth: 10,
-                               font: {
-                                   size: 12
-                               }
-                           }
-                       },
-                       tooltip: {
-                           rtl: true,
-                           textDirection: 'rtl'
-                       }
-                   },
-                   scales: {
-                       x: {
-                           ticks: {
-                               font: {
-                                   size: 12
-                               }
-                           },
-                           grid: {
-                               display: false
-                           }
-                       },
-                       y: {
-                           beginAtZero: true,
-                           ticks: {
-                               precision: 0,
-                               font: {
-                                   size: 12
-                               }
-                           },
-                           grid: {
-                               color: '#f0f0f0'
-                           }
-                       }
-                   }
-               }
-           });
-       }
+function renderClassDistributionChart() {
+    const ctx = document.getElementById('classDistributionChart').getContext('2d');
+    
+    const labels = Object.keys(processedData.classCounts).sort();
+    
+    // חישוב נתונים מפורטים לכל כיתה
+    const chartData = labels.map(cls => {
+        const totalInClass = CONFIG.CLASS_SIZES[cls] || 0; // גודל כיתה מלא
+        const respondedCount = processedData.classCounts[cls]; // סך העונות
+        const attendingCount = respondedCount - (processedData.classesWithNoShow[cls] || 0); // מאשרות הגעה
+
+        const respondedRate = (respondedCount / totalInClass) * 100;
+        const attendingRate = (attendingCount / respondedCount) * 100;
+
+        return {
+            className: cls,
+            totalStudents: totalInClass,
+            respondedCount: respondedCount,
+            attendingCount: attendingCount,
+            respondedRate: respondedRate.toFixed(1),
+            attendingRate: attendingRate.toFixed(1)
+        };
+    });
+    
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'אחוז תגובה מהכיתה',
+                data: chartData.map(item => item.respondedRate),
+                backgroundColor: function(context) {
+                    const item = chartData[context.dataIndex];
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                    gradient.addColorStop(0, '#4a2c82');  // צבע תגובות חיוביות
+                    gradient.addColorStop(item.attendingRate/100, '#4a2c82');  // צבע תגובות חיוביות
+                    gradient.addColorStop(item.attendingRate/100, '#dc3545');  // צבע לא מגיעים
+                    gradient.addColorStop(1, '#dc3545');
+                    return gradient;
+                },
+                barPercentage: 0.7,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const item = chartData[context.dataIndex];
+                            return [
+                                `סה"כ תלמידות: ${item.totalStudents}`,
+                                `אחוז תגובה: ${item.respondedRate}%`,
+                                `מגיעים: ${item.attendingCount}/${item.respondedCount} (${item.attendingRate}%)`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
        
        // יצירת תרשים סוגי מלווים
        function renderAttendeeTypesChart() {
@@ -1080,88 +1079,73 @@
        }
        
        // הצגת אחוזי השתתפות לפי כיתה
-       function renderParticipationRates() {
-           const container = document.getElementById('participationRates');
-           container.innerHTML = '';
-           
-           // מיון הכיתות
-           const sortedClasses = Object.keys(processedData.participationRates).sort();
-           
-           sortedClasses.forEach(className => {
-               const rate = processedData.participationRates[className];
-               const attendingCount = processedData.classCounts[className] - 
-                   (processedData.classesWithNoShow[className] || 0);
-               const totalCount = processedData.classCounts[className];
-               
-               // מידע נוסף על אחוז ההרשמה מתוך הכיתה המלאה
-               const classParticipation = processedData.totalClassParticipation[className] || 
-                   { registered: totalCount, totalSize: 0, rate: 0 };
-               
-               const rowDiv = document.createElement('div');
-               rowDiv.style.marginBottom = '20px';
-               
-               const headerDiv = document.createElement('div');
-               headerDiv.style.display = 'flex';
-               headerDiv.style.justifyContent = 'space-between';
-               headerDiv.style.marginBottom = '5px';
-               
-               const classNameSpan = document.createElement('span');
-               classNameSpan.textContent = className;
-               classNameSpan.style.fontWeight = '600';
-               
-               const rateSpan = document.createElement('span');
-               rateSpan.textContent = `${rate}% (${attendingCount}/${totalCount})`;
-               
-               headerDiv.appendChild(classNameSpan);
-               headerDiv.appendChild(rateSpan);
-               
-               const progressDiv = document.createElement('div');
-               progressDiv.className = 'progress-bar';
-               
-               const fillDiv = document.createElement('div');
-               fillDiv.className = 'progress-fill';
-               fillDiv.style.width = `${rate}%`;
-               
-               // צבע לפי אחוז ההשתתפות
-               if (rate >= 80) {
-                   fillDiv.style.backgroundColor = '#28a745';
-               } else if (rate >= 60) {
-                   fillDiv.style.backgroundColor = '#17a2b8';
-               } else if (rate >= 40) {
-                   fillDiv.style.backgroundColor = '#fd7e14';
-               } else {
-                   fillDiv.style.backgroundColor = '#dc3545';
-               }
-               
-               if (rate > 15) {
-                   fillDiv.textContent = `${rate}%`;
-               }
-               
-               progressDiv.appendChild(fillDiv);
-               rowDiv.appendChild(headerDiv);
-               rowDiv.appendChild(progressDiv);
-               
-               // הוסף מידע על אחוז הרישום מתוך הכיתה המלאה
-               if (classParticipation.totalSize > 0) {
-                   const registrationInfoDiv = document.createElement('div');
-                   registrationInfoDiv.style.fontSize = '13px';
-                   registrationInfoDiv.style.color = '#666';
-                   registrationInfoDiv.style.marginTop = '5px';
-                   
-                   const registrationRate = classParticipation.rate;
-                   let rateText = `${registrationRate}% מהכיתה (${classParticipation.registered}/${classParticipation.totalSize})`;
-                   
-                   if (registrationRate < 70) {
-                       rateText = `⚠️ ${rateText}`;
-                   }
-                   
-                   registrationInfoDiv.textContent = rateText;
-                   rowDiv.appendChild(registrationInfoDiv);
-               }
-               
-               container.appendChild(rowDiv);
-           });
-       }
+   function renderParticipationRates() {
+    const container = document.getElementById('participationRates');
+    container.innerHTML = '';
+    
+    const sortedClasses = Object.keys(processedData.classCounts).sort();
+    
+    sortedClasses.forEach(className => {
+        const totalInClass = CONFIG.CLASS_SIZES[className] || 0;
+        const respondedCount = processedData.classCounts[className];
+        const notAttendingInClass = processedData.classesWithNoShow[className] || 0;
+        const attendingCount = respondedCount - notAttendingInClass;
+
+        const respondedRate = (respondedCount / totalInClass) * 100;
+        const attendingRate = (attendingCount / respondedCount) * 100;
+        
+        const rowDiv = document.createElement('div');
+        rowDiv.style.marginBottom = '20px';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.style.display = 'flex';
+        headerDiv.style.justifyContent = 'space-between';
+        headerDiv.style.marginBottom = '5px';
+        
+        const classNameSpan = document.createElement('span');
+        classNameSpan.textContent = className;
+        classNameSpan.style.fontWeight = '600';
+        
+        const countRateSpan = document.createElement('span');
+        countRateSpan.textContent = `${respondedCount}/${totalInClass} (${respondedRate.toFixed(1)}%)`;
+        
+        headerDiv.appendChild(classNameSpan);
+        headerDiv.appendChild(countRateSpan);
+        
+        const progressDiv = document.createElement('div');
+        progressDiv.className = 'progress-bar';
+        
+        const fillDiv = document.createElement('div');
+        fillDiv.className = 'progress-fill';
+        
+        // יצירת גרדיאנט עם שני צבעים
+        fillDiv.style.background = `linear-gradient(to right, 
+            #4a2c82 ${(attendingCount/respondedCount)*100}%, 
+            #dc3545 ${(attendingCount/respondedCount)*100}%)`;
+        
+        fillDiv.style.width = `${respondedRate}%`;
+        fillDiv.style.height = '25px';
+        
+        if (respondedCount / totalInClass > 0.15) {
+            fillDiv.textContent = `${respondedCount}/${totalInClass}`;
+        }
+        
+        progressDiv.appendChild(fillDiv);
+        rowDiv.appendChild(headerDiv);
+        rowDiv.appendChild(progressDiv);
+        
+        // הוספת פירוט על אחוז המאשרים
+        const detailDiv = document.createElement('div');
+        detailDiv.style.fontSize = '13px';
+        detailDiv.style.color = '#666';
+        detailDiv.style.marginTop = '5px';
+        detailDiv.textContent = `מאשרים: ${attendingCount}/${respondedCount} (${attendingRate.toFixed(1)}%)`;
+        
+        rowDiv.appendChild(detailDiv);
+        
+        container.appendChild(rowDiv);
+    });
+}
        
        // הצגת טבלת נתונים מפורטת לפי כיתה
        function renderDetailedClassTable() {
