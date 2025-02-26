@@ -24,6 +24,14 @@
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            max-width: 200px;
+            height: auto;
+        }
         h1, h2, h3 {
             color: #2c3e50;
         }
@@ -206,6 +214,30 @@
             margin-bottom: 8px;
             color: #333;
         }
+        .segmented-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .segment {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .segment h3 {
+            margin-top: 0;
+            color: #3498db;
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+        .boys-segment {
+            border-left: 4px solid #3498db;
+        }
+        .girls-segment {
+            border-left: 4px solid #e84393;
+        }
         @media (max-width: 768px) {
             .chart-grid {
                 grid-template-columns: 1fr;
@@ -217,11 +249,19 @@
             .export-options {
                 flex-direction: column;
             }
+            .segmented-container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- הוספת לוגו בראש הדף -->
+        <div class="logo-container">
+            <img src="logo.png" alt="לוגו בית הספר" class="logo">
+        </div>
+        
         <h1>דשבורד ניהול הזמנות חולצות</h1>
         
         <!-- כרטיסי סטטיסטיקה -->
@@ -289,9 +329,103 @@
 
         <!-- תוכן לשונית סטטיסטיקה לפי מידות -->
         <div class="tab-content" id="sizeStats">
+            <div class="filter-container">
+                <div>
+                    <h2>התפלגות מידות לפי מגדר</h2>
+                </div>
+                <div>
+                    <button id="toggleSizeExportOptions" class="export-button">אפשרויות ייצוא</button>
+                </div>
+            </div>
+
+            <div id="sizeExportOptionsContainer" class="export-container" style="display: none;">
+                <div class="export-section-title">בחר שדות לייצוא:</div>
+                <div class="export-options">
+                    <div class="export-checkbox-group">
+                        <input type="checkbox" id="exportSizeGender" checked>
+                        <label for="exportSizeGender">מגדר</label>
+                    </div>
+                    <div class="export-checkbox-group">
+                        <input type="checkbox" id="exportSizeValue" checked>
+                        <label for="exportSizeValue">מידה</label>
+                    </div>
+                    <div class="export-checkbox-group">
+                        <input type="checkbox" id="exportSizeCount" checked>
+                        <label for="exportSizeCount">מספר הזמנות</label>
+                    </div>
+                    <div class="export-checkbox-group">
+                        <input type="checkbox" id="exportSizePercentage" checked>
+                        <label for="exportSizePercentage">אחוז</label>
+                    </div>
+                </div>
+                
+                <div class="export-section-title">סדר מיון:</div>
+                <div class="export-options">
+                    <div>
+                        <select id="sizeSortField" class="filter-select">
+                            <option value="size">מידה</option>
+                            <option value="count" selected>מספר הזמנות</option>
+                            <option value="percentage">אחוז</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select id="sizeSortDirection" class="filter-select">
+                            <option value="asc">סדר עולה</option>
+                            <option value="desc" selected>סדר יורד</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button id="exportSizeCsvBtn" class="export-button">ייצוא נתוני מידות לקובץ CSV</button>
+            </div>
+
+            <div class="segmented-container">
+                <div class="segment boys-segment">
+                    <h3>בנים</h3>
+                    <div class="chart-container">
+                        <canvas id="boysSizesDistributionChart"></canvas>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>מידה</th>
+                                    <th>מספר הזמנות</th>
+                                    <th>אחוז מסך ההזמנות</th>
+                                </tr>
+                            </thead>
+                            <tbody id="boysSizeStatsTable">
+                                <!-- הנתונים יוכנסו כאן באמצעות JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="segment girls-segment">
+                    <h3>בנות</h3>
+                    <div class="chart-container">
+                        <canvas id="girlsSizesDistributionChart"></canvas>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>מידה</th>
+                                    <th>מספר הזמנות</th>
+                                    <th>אחוז מסך ההזמנות</th>
+                                </tr>
+                            </thead>
+                            <tbody id="girlsSizeStatsTable">
+                                <!-- הנתונים יוכנסו כאן באמצעות JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <div class="chart-grid">
                 <div class="chart-container">
-                    <h2>התפלגות מידות</h2>
+                    <h2>התפלגות מידות (כללי)</h2>
                     <canvas id="sizesDistributionChart"></canvas>
                 </div>
                 <div class="chart-container">
@@ -301,7 +435,7 @@
             </div>
 
             <div class="table-container">
-                <h2>פירוט הזמנות לפי מידה</h2>
+                <h2>פירוט הזמנות לפי מידה (כללי)</h2>
                 <table>
                     <thead>
                         <tr>
@@ -420,22 +554,25 @@
     </div>
 
     <script>
-        // משתנה גלובלי לשמירת התוצאות המסוננות האחרונות
+        // משתנים גלובליים לשמירת נתונים
         let currentFilteredOrders = [];
+        let boysSizeCounts = {};
+        let girlsSizeCounts = {};
+        let allSizeCounts = {};
         
         // המידע על כל כיתה (מספר תלמידים בכל כיתה)
         const classData = {
-            "א' בנים רחל פרידמן": { total: 30, orders: 0 },
-            "א' בנות עדי רחמני": { total: 24, orders: 0 },
-            "א' בנות רעות שיף": { total: 23, orders: 0 },
-            "הכיתה של גל חודפי": { total: 7, orders: 0 },
-            "ב' בנים הילה אלבה": { total: 28, orders: 0 },
-            "ב' בנות הדר כהן": { total: 30, orders: 0 },
-            "ג' בנים מוריה מימון": { total: 22, orders: 0 },
-            "ג' בנות שירה חדאד": { total: 21, orders: 0 },
-            "ד' בנים נוי חנוכה": { total: 25, orders: 0 },
-            "ד' בנות הדר כחלון": { total: 30, orders: 0 },
-            "ו' בנות ספיר צדוק": { total: 25, orders: 0 }
+            "א' בנים רחל פרידמן": { total: 30, orders: 0, gender: "boys" },
+            "א' בנות עדי רחמני": { total: 24, orders: 0, gender: "girls" },
+            "א' בנות רעות שיף": { total: 23, orders: 0, gender: "girls" },
+            "הכיתה של גל חודפי": { total: 7, orders: 0, gender: "boys" },
+            "ב' בנים הילה אלבה": { total: 28, orders: 0, gender: "boys" },
+            "ב' בנות הדר כהן": { total: 30, orders: 0, gender: "girls" },
+            "ג' בנים מוריה מימון": { total: 22, orders: 0, gender: "boys" },
+            "ג' בנות שירה חדאד": { total: 21, orders: 0, gender: "girls" },
+            "ד' בנים נוי חנוכה": { total: 25, orders: 0, gender: "boys" },
+            "ד' בנות הדר כחלון": { total: 30, orders: 0, gender: "girls" },
+            "ו' בנות ספיר צדוק": { total: 25, orders: 0, gender: "girls" }
         };
 
         // חישוב סה"כ תלמידים
@@ -475,6 +612,11 @@
                     classData[className].orders = 0;
                 });
                 
+                // איפוס ספירת מידות לפי מגדר
+                boysSizeCounts = {};
+                girlsSizeCounts = {};
+                allSizeCounts = {};
+                
                 // טעינת הנתונים מהקישור של גוגל שיטס
                 const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQNi67IQpIrgugwrFtxPSOQjYMI0OtwOrPB8xdsseN-1RaWV9ARSkW-ZieaYvRTkBQvvjkHeESLHyQW/pub?output=csv');
                 const csvText = await response.text();
@@ -496,6 +638,18 @@
                     if (row['שם התלמיד1'] && row['כיתה1'] && row['מידה1']) {
                         if (classData[row['כיתה1']]) {
                             classData[row['כיתה1']].orders++;
+                            
+                            // תוספת לספירת מידות לפי מגדר
+                            const gender = classData[row['כיתה1']].gender;
+                            const size = row['מידה1'];
+                            
+                            if (gender === "boys") {
+                                boysSizeCounts[size] = (boysSizeCounts[size] || 0) + 1;
+                            } else {
+                                girlsSizeCounts[size] = (girlsSizeCounts[size] || 0) + 1;
+                            }
+                            
+                            allSizeCounts[size] = (allSizeCounts[size] || 0) + 1;
                         }
                         
                         ordersList.push({
@@ -503,7 +657,8 @@
                             student: row['שם התלמיד1'],
                             className: row['כיתה1'],
                             size: row['מידה1'],
-                            notes: row['הערות'] || ''
+                            notes: row['הערות'] || '',
+                            gender: classData[row['כיתה1']]?.gender || ''
                         });
                     }
                     
@@ -511,6 +666,18 @@
                     if (row['שם התלמיד2'] && row['כיתה2'] && row['מידה2']) {
                         if (classData[row['כיתה2']]) {
                             classData[row['כיתה2']].orders++;
+                            
+                            // תוספת לספירת מידות לפי מגדר
+                            const gender = classData[row['כיתה2']].gender;
+                            const size = row['מידה2'];
+                            
+                            if (gender === "boys") {
+                                boysSizeCounts[size] = (boysSizeCounts[size] || 0) + 1;
+                            } else {
+                                girlsSizeCounts[size] = (girlsSizeCounts[size] || 0) + 1;
+                            }
+                            
+                            allSizeCounts[size] = (allSizeCounts[size] || 0) + 1;
                         }
                         
                         ordersList.push({
@@ -518,7 +685,8 @@
                             student: row['שם התלמיד2'],
                             className: row['כיתה2'],
                             size: row['מידה2'],
-                            notes: row['הערות'] || ''
+                            notes: row['הערות'] || '',
+                            gender: classData[row['כיתה2']]?.gender || ''
                         });
                     }
                     
@@ -526,14 +694,30 @@
                     if (row['שם התלמיד3'] && row['כיתה3'] && row['מידה3']) {
                         if (classData[row['כיתה3']]) {
                             classData[row['כיתה3']].orders++;
+                            
+                            // תוספת לספירת מידות לפי מגדר
+                            const gender = classData[row['כיתה3']].gender;
+                            const size = row['מידה3'];
+                            
+                            if (gender === "boys") {
+                                boysSizeCounts[size] = (boysSizeCounts[size] || 0) + 1;
+                            } else {
+                                girlsSizeCounts[size] = (girlsSizeCounts[size] || 0) + 1;
+                            }
+                            
+                            allSizeCounts[size] = (allSizeCounts[size] || 0) + 1;
                         }
                         
+                       המשך הקוד:
+
+```javascript
                         ordersList.push({
                             family: familyName,
                             student: row['שם התלמיד3'],
                             className: row['כיתה3'],
                             size: row['מידה3'],
-                            notes: row['הערות'] || ''
+                            notes: row['הערות'] || '',
+                            gender: classData[row['כיתה3']]?.gender || ''
                         });
                     }
                     
@@ -541,6 +725,18 @@
                     if (row['שם התלמיד4'] && row['כיתה4'] && row['מידה4']) {
                         if (classData[row['כיתה4']]) {
                             classData[row['כיתה4']].orders++;
+                            
+                            // תוספת לספירת מידות לפי מגדר
+                            const gender = classData[row['כיתה4']].gender;
+                            const size = row['מידה4'];
+                            
+                            if (gender === "boys") {
+                                boysSizeCounts[size] = (boysSizeCounts[size] || 0) + 1;
+                            } else {
+                                girlsSizeCounts[size] = (girlsSizeCounts[size] || 0) + 1;
+                            }
+                            
+                            allSizeCounts[size] = (allSizeCounts[size] || 0) + 1;
                         }
                         
                         ordersList.push({
@@ -548,7 +744,8 @@
                             student: row['שם התלמיד4'],
                             className: row['כיתה4'],
                             size: row['מידה4'],
-                            notes: row['הערות'] || ''
+                            notes: row['הערות'] || '',
+                            gender: classData[row['כיתה4']]?.gender || ''
                         });
                     }
                 });
@@ -561,15 +758,10 @@
                 document.getElementById('participationRate').textContent = participationRate + '%';
                 
                 // חישוב המידה הפופולרית ביותר
-                const sizeCounts = {};
-                ordersList.forEach(order => {
-                    sizeCounts[order.size] = (sizeCounts[order.size] || 0) + 1;
-                });
-                
                 let popularSize = '';
                 let maxCount = 0;
                 
-                for (const [size, count] of Object.entries(sizeCounts)) {
+                for (const [size, count] of Object.entries(allSizeCounts)) {
                     if (count > maxCount) {
                         maxCount = count;
                         popularSize = size;
@@ -604,25 +796,16 @@
                     classStatsTable.appendChild(row);
                 }
                 
-                // מילוי טבלת סטטיסטיקות מידות
-                const sizeStatsTable = document.getElementById('sizeStatsTable');
-                sizeStatsTable.innerHTML = '';
+                // מילוי טבלאות סטטיסטיקות מידות
+                fillSizeStatsTable(allSizeCounts, 'sizeStatsTable', totalOrders);
                 
-                const sortedSizes = Object.entries(sizeCounts)
-                    .sort((a, b) => b[1] - a[1]);
+                // חישוב סה"כ הזמנות לבנים ובנות
+                const totalBoysOrders = Object.values(boysSizeCounts).reduce((sum, count) => sum + count, 0);
+                const totalGirlsOrders = Object.values(girlsSizeCounts).reduce((sum, count) => sum + count, 0);
                 
-                sortedSizes.forEach(([size, count]) => {
-                    const percentage = Math.round((count / totalOrders) * 100);
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${size}</td>
-                        <td>${count}</td>
-                        <td>${percentage}%</td>
-                    `;
-                    
-                    sizeStatsTable.appendChild(row);
-                });
+                // מילוי טבלאות סטטיסטיקות מידות לפי מגדר
+                fillSizeStatsTable(boysSizeCounts, 'boysSizeStatsTable', totalBoysOrders);
+                fillSizeStatsTable(girlsSizeCounts, 'girlsSizeStatsTable', totalGirlsOrders);
                 
                 // מילוי סינון כיתה
                 const classFilter = document.getElementById('classFilter');
@@ -642,22 +825,50 @@
                 fillOrdersTable(ordersList);
                 
                 // יצירת התרשימים
-                createCharts(classData, sizeCounts, ordersList);
+                createCharts(classData, allSizeCounts, boysSizeCounts, girlsSizeCounts, ordersList);
                 
                 // הוספת אירועי סינון
                 classFilter.addEventListener('change', () => filterOrders(ordersList));
                 document.getElementById('sizeFilter').addEventListener('change', () => filterOrders(ordersList));
                 document.getElementById('searchInput').addEventListener('input', () => filterOrders(ordersList));
                 
-                return { ordersList, classData, sizeCounts };
+                // עדכון כפתור הייצוא בלשונית סטטיסטיקה לפי מידות
+                const exportSizeCsvBtn = document.getElementById('exportSizeCsvBtn');
+                const boysCount = Object.values(boysSizeCounts).reduce((sum, count) => sum + count, 0);
+                const girlsCount = Object.values(girlsSizeCounts).reduce((sum, count) => sum + count, 0);
+                exportSizeCsvBtn.textContent = `ייצוא נתוני מידות (${boysCount} בנים, ${girlsCount} בנות) לקובץ CSV`;
+                
+                return { ordersList, classData, allSizeCounts, boysSizeCounts, girlsSizeCounts };
             } catch (error) {
                 console.error('Error loading data:', error);
                 document.getElementById('totalOrders').textContent = "שגיאה";
                 document.getElementById('participationRate').textContent = "שגיאה";
                 document.getElementById('popularSize').textContent = "שגיאה";
                 alert('אירעה שגיאה בטעינת הנתונים. אנא נסה שוב מאוחר יותר.');
-                return { ordersList: [], classData: {}, sizeCounts: {} };
+                return { ordersList: [], classData: {}, allSizeCounts: {}, boysSizeCounts: {}, girlsSizeCounts: {} };
             }
+        }
+
+        // פונקציה למילוי טבלת סטטיסטיקות מידות
+        function fillSizeStatsTable(sizeCounts, tableId, totalCount) {
+            const sizeStatsTable = document.getElementById(tableId);
+            sizeStatsTable.innerHTML = '';
+            
+            const sortedSizes = Object.entries(sizeCounts)
+                .sort((a, b) => b[1] - a[1]);
+            
+            sortedSizes.forEach(([size, count]) => {
+                const percentage = Math.round((count / totalCount) * 100);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${size}</td>
+                    <td>${count}</td>
+                    <td>${percentage}%</td>
+                `;
+                
+                sizeStatsTable.appendChild(row);
+            });
         }
 
         // מילוי רשימת הזמנות
@@ -721,7 +932,7 @@
         }
 
         // יצירת תרשימים
-        function createCharts(classData, sizeCounts, ordersList) {
+        function createCharts(classData, allSizeCounts, boysSizeCounts, girlsSizeCounts, ordersList) {
             try {
                 // תרשים אחוז השתתפות לפי כיתה
                 const classNames = Object.keys(classData);
@@ -730,7 +941,7 @@
                     return data.total > 0 ? Math.round((data.orders / data.total) * 100) : 0;
                 });
                 
-              const chart1 = new Chart(document.getElementById('classParticipationChart'), {
+                const chart1 = new Chart(document.getElementById('classParticipationChart'), {
                     type: 'bar',
                     data: {
                         labels: classNames,
@@ -793,57 +1004,18 @@
                     }
                 });
                 
-                // תרשים התפלגות מידות
-                const sizes = Object.keys(sizeCounts);
-                const sizesData = sizes.map(size => sizeCounts[size]);
+                // תרשים התפלגות מידות (כללי)
+                createSizeDistributionChart('sizesDistributionChart', allSizeCounts, 'rgba(52, 152, 219, 0.6)', 'rgba(52, 152, 219, 1)');
                 
-                const chart3 = new Chart(document.getElementById('sizesDistributionChart'), {
-                    type: 'pie',
-                    data: {
-                        labels: sizes,
-                        datasets: [{
-                            data: sizesData,
-                            backgroundColor: [
-                                'rgba(52, 152, 219, 0.6)',
-                                'rgba(46, 204, 113, 0.6)',
-                                'rgba(155, 89, 182, 0.6)',
-                                'rgba(52, 73, 94, 0.6)',
-                                'rgba(230, 126, 34, 0.6)',
-                                'rgba(231, 76, 60, 0.6)',
-                                'rgba(241, 196, 15, 0.6)',
-                                'rgba(26, 188, 156, 0.6)',
-                                'rgba(127, 140, 141, 0.6)',
-                                'rgba(189, 195, 199, 0.6)',
-                                'rgba(44, 62, 80, 0.6)'
-                            ],
-                            borderColor: [
-                                'rgba(52, 152, 219, 1)',
-                                'rgba(46, 204, 113, 1)',
-                                'rgba(155, 89, 182, 1)',
-                                'rgba(52, 73, 94, 1)',
-                                'rgba(230, 126, 34, 1)',
-                                'rgba(231, 76, 60, 1)',
-                                'rgba(241, 196, 15, 1)',
-                                'rgba(26, 188, 156, 1)',
-                                'rgba(127, 140, 141, 1)',
-                                'rgba(189, 195, 199, 1)',
-                                'rgba(44, 62, 80, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                            }
-                        }
-                    }
-                });
+                // תרשים התפלגות מידות (בנים)
+                createSizeDistributionChart('boysSizesDistributionChart', boysSizeCounts, 'rgba(52, 152, 219, 0.6)', 'rgba(52, 152, 219, 1)');
+                
+                // תרשים התפלגות מידות (בנות)
+                createSizeDistributionChart('girlsSizesDistributionChart', girlsSizeCounts, 'rgba(233, 67, 147, 0.6)', 'rgba(233, 67, 147, 1)');
                 
                 // הכנת נתונים למידות פופולריות לפי כיתה
                 const sizesByClass = {};
+                const sizes = Object.keys(allSizeCounts);
                 
                 classNames.forEach(className => {
                     sizesByClass[className] = {};
@@ -902,6 +1074,66 @@
             } catch (error) {
                 console.error('Error creating charts:', error);
             }
+        }
+
+        // יצירת תרשים עוגה להתפלגות מידות
+        function createSizeDistributionChart(canvasId, sizeCounts, backgroundColor, borderColor) {
+            const sizes = Object.keys(sizeCounts);
+            const sizesData = sizes.map(size => sizeCounts[size]);
+            
+            // צבעים עבור התרשים
+            const backgroundColors = [
+                'rgba(52, 152, 219, 0.6)',
+                'rgba(46, 204, 113, 0.6)',
+                'rgba(155, 89, 182, 0.6)',
+                'rgba(52, 73, 94, 0.6)',
+                'rgba(230, 126, 34, 0.6)',
+                'rgba(231, 76, 60, 0.6)',
+                'rgba(241, 196, 15, 0.6)',
+                'rgba(26, 188, 156, 0.6)',
+                'rgba(127, 140, 141, 0.6)',
+                'rgba(189, 195, 199, 0.6)',
+                'rgba(44, 62, 80, 0.6)'
+            ];
+            
+            const borderColors = [
+                'rgba(52, 152, 219, 1)',
+                'rgba(46, 204, 113, 1)',
+                'rgba(155, 89, 182, 1)',
+                'rgba(52, 73, 94, 1)',
+                'rgba(230, 126, 34, 1)',
+                'rgba(231, 76, 60, 1)',
+                'rgba(241, 196, 15, 1)',
+                'rgba(26, 188, 156, 1)',
+                'rgba(127, 140, 141, 1)',
+                'rgba(189, 195, 199, 1)',
+                'rgba(44, 62, 80, 1)'
+            ];
+            
+            // יצירת מערך צבעים באורך מתאים
+            const chartBackgroundColors = sizes.map((_, i) => backgroundColors[i % backgroundColors.length]);
+            const chartBorderColors = sizes.map((_, i) => borderColors[i % borderColors.length]);
+            
+            new Chart(document.getElementById(canvasId), {
+                type: 'pie',
+                data: {
+                    labels: sizes,
+                    datasets: [{
+                        data: sizesData,
+                        backgroundColor: chartBackgroundColors,
+                        borderColor: chartBorderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
         }
 
         // ייצוא נתונים מסוננים לקובץ CSV
@@ -1017,9 +1249,122 @@
             document.body.removeChild(link);
         }
 
+        // ייצוא נתוני מידות לקובץ CSV
+        function exportSizeDataToCSV() {
+            // בדיקה שנבחר לפחות שדה אחד לייצוא
+            const exportFields = {
+                gender: document.getElementById('exportSizeGender').checked,
+                size: document.getElementById('exportSizeValue').checked,
+                count: document.getElementById('exportSizeCount').checked,
+                percentage: document.getElementById('exportSizePercentage').checked
+            };
+            
+            if (!Object.values(exportFields).some(value => value)) {
+                alert('יש לבחור לפחות שדה אחד לייצוא.');
+                return;
+            }
+            
+            // הכנת כותרות ה-CSV
+            const headers = [];
+            if (exportFields.gender) headers.push('מגדר');
+            if (exportFields.size) headers.push('מידה');
+            if (exportFields.count) headers.push('מספר הזמנות');
+            if (exportFields.percentage) headers.push('אחוז');
+            
+            // מיון הנתונים לפי השדה שנבחר
+            const sortField = document.getElementById('sizeSortField').value;
+            const sortDirection = document.getElementById('sizeSortDirection').value;
+            
+            // הכנת נתוני מידות מאורגנים לפי מגדר
+            const totalBoysOrders = Object.values(boysSizeCounts).reduce((sum, count) => sum + count, 0);
+            const totalGirlsOrders = Object.values(girlsSizeCounts).reduce((sum, count) => sum + count, 0);
+            
+            let boysData = Object.entries(boysSizeCounts).map(([size, count]) => ({
+                gender: 'בנים',
+                size,
+                count,
+                percentage: Math.round((count / totalBoysOrders) * 100)
+            }));
+            
+            let girlsData = Object.entries(girlsSizeCounts).map(([size, count]) => ({
+                gender: 'בנות',
+                size,
+                count,
+                percentage: Math.round((count / totalGirlsOrders) * 100)
+            }));
+            
+            // מיזוג הנתונים
+            let combinedData = [...boysData, ...girlsData];
+            
+            // מיון הנתונים
+            combinedData.sort((a, b) => {
+                let valueA, valueB;
+                
+                if (sortField === 'size') {
+                    const sizeOrder = ['6', '8', '10', '12', '14', '16', '18', 'S', 'M', 'L', 'XL'];
+                    valueA = sizeOrder.indexOf(a.size);
+                    valueB = sizeOrder.indexOf(b.size);
+                } else if (sortField === 'count') {
+                    valueA = a.count;
+                    valueB = b.count;
+                } else if (sortField === 'percentage') {
+                    valueA = a.percentage;
+                    valueB = b.percentage;
+                } else {
+                    valueA = a[sortField];
+                    valueB = b[sortField];
+                }
+                
+                if (sortDirection === 'asc') {
+                    return valueA > valueB ? 1 : -1;
+                } else {
+                    return valueA < valueB ? 1 : -1;
+                }
+            });
+            
+            // המרת הנתונים לפורמט CSV
+            let csvContent = headers.join(',') + '\n';
+            
+            // הוספת כל שורת נתונים
+            combinedData.forEach(item => {
+                // בניית השורה רק עם השדות שנבחרו לייצוא
+                const row = [];
+                
+                if (exportFields.gender) row.push(`"${item.gender}"`);
+                if (exportFields.size) row.push(`"${item.size}"`);
+                if (exportFields.count) row.push(item.count);
+                if (exportFields.percentage) row.push(`${item.percentage}%`);
+                
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // הוספת BOM לתמיכה בעברית
+            const BOM = '\uFEFF';
+            csvContent = BOM + csvContent;
+            
+            // יצירת קובץ להורדה
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            // יצירת קישור להורדה והפעלתו
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            
+            // שם הקובץ עם תאריך ושעה נוכחיים
+            const date = new Date();
+            const formattedDate = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            const formattedTime = `${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}`;
+            
+            link.setAttribute('download', `נתוני-מידות-חולצות_${formattedDate}_${formattedTime}.csv`);
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         // אתחול אפשרויות הייצוא
         function setupExportOptions() {
-            // הוספת אירוע לחיצה על כפתור הצגת/הסתרת אפשרויות ייצוא
+            // הוספת אירוע לחיצה על כפתור הצגת/הסתרת אפשרויות ייצוא בלשונית רשימת הזמנות
             const toggleExportBtn = document.getElementById('toggleExportOptions');
             const exportContainer = document.getElementById('exportOptionsContainer');
             
@@ -1033,8 +1378,25 @@
                 }
             });
             
-            // הוספת אירוע לחיצה על כפתור הייצוא
+        // הוספת אירוע לחיצה על כפתור הצגת/הסתרת אפשרויות ייצוא בלשונית סטטיסטיקה לפי מידות
+            const toggleSizeExportBtn = document.getElementById('toggleSizeExportOptions');
+            const sizeExportContainer = document.getElementById('sizeExportOptionsContainer');
+            
+            toggleSizeExportBtn.addEventListener('click', function() {
+                if (sizeExportContainer.style.display === 'none') {
+                    sizeExportContainer.style.display = 'block';
+                    toggleSizeExportBtn.textContent = 'הסתר אפשרויות ייצוא';
+                } else {
+                    sizeExportContainer.style.display = 'none';
+                    toggleSizeExportBtn.textContent = 'אפשרויות ייצוא';
+                }
+            });
+            
+            // הוספת אירוע לחיצה על כפתור הייצוא בלשונית רשימת הזמנות
             document.getElementById('exportCsvBtn').addEventListener('click', exportFilteredDataToCSV);
+            
+            // הוספת אירוע לחיצה על כפתור הייצוא בלשונית סטטיסטיקה לפי מידות
+            document.getElementById('exportSizeCsvBtn').addEventListener('click', exportSizeDataToCSV);
         }
 
         // אתחול הדף
