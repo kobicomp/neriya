@@ -98,6 +98,11 @@
             flex-wrap: wrap;
             gap: 10px;
         }
+        .filter-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
         .filter-select {
             padding: 10px;
             border-radius: 5px;
@@ -161,9 +166,56 @@
         .tab-content.active {
             display: block;
         }
+        .export-button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .export-button:hover {
+            background-color: #219653;
+        }
+        .export-container {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .export-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        .export-checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+        .export-checkbox-group input {
+            margin-left: 5px;
+        }
+        .export-section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
         @media (max-width: 768px) {
             .chart-grid {
                 grid-template-columns: 1fr;
+            }
+            .filter-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .export-options {
+                flex-direction: column;
             }
         }
     </style>
@@ -268,33 +320,84 @@
         <!-- תוכן לשונית רשימת הזמנות -->
         <div class="tab-content" id="ordersList">
             <div class="filter-container">
-                <div>
-                    <span class="filter-label">סינון לפי כיתה:</span>
-                    <select id="classFilter" class="filter-select">
-                        <option value="all">כל הכיתות</option>
-                        <!-- אפשרויות יוכנסו כאן באמצעות JavaScript -->
-                    </select>
+                <div class="filter-options">
+                    <div>
+                        <span class="filter-label">סינון לפי כיתה:</span>
+                        <select id="classFilter" class="filter-select">
+                            <option value="all">כל הכיתות</option>
+                            <!-- אפשרויות יוכנסו כאן באמצעות JavaScript -->
+                        </select>
+                    </div>
+                    <div>
+                        <span class="filter-label">סינון לפי מידה:</span>
+                        <select id="sizeFilter" class="filter-select">
+                            <option value="all">כל המידות</option>
+                            <option value="6">6</option>
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
+                            <option value="18">18</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="search-input" placeholder="חיפוש לפי שם...">
+                    </div>
                 </div>
                 <div>
-                    <span class="filter-label">סינון לפי מידה:</span>
-                    <select id="sizeFilter" class="filter-select">
-                        <option value="all">כל המידות</option>
-                        <option value="6">6</option>
-                        <option value="8">8</option>
-                        <option value="10">10</option>
-                        <option value="12">12</option>
-                        <option value="14">14</option>
-                        <option value="16">16</option>
-                        <option value="18">18</option>
-                        <option value="S">S</option>
-                        <option value="M">M</option>
-                        <option value="L">L</option>
-                        <option value="XL">XL</option>
-                    </select>
+                    <button id="toggleExportOptions" class="export-button">אפשרויות ייצוא</button>
                 </div>
-                <div class="search-container">
-                    <input type="text" id="searchInput" class="search-input" placeholder="חיפוש לפי שם...">
+            </div>
+
+            <div id="exportOptionsContainer" class="export-container" style="display: none;">
+                <div class="export-section-title">בחר שדות לייצוא:</div>
+                <div class="export-options">
+                    <div class="export-checkbox-group">
+                        <input type="checkbox" id="exportFamily" checked>
+                        <label for="exportFamily">שם משפחה</label>
+                    </div>
+                    <div class="export-checkbox-group">
+                        <input type="checkbox" id="exportStudent" checked>
+                        <label for="exportStudent">שם תלמיד/ה</label>
+                    </div>
+                    <div class="export-checkbox-group">
+                        <input type="checkbox" id="exportClass" checked>
+                        <label for="exportClass">כיתה</label>
+                    </div>
+                    <div class="export-checkbox-group">
+                        <input type="checkbox" id="exportSize" checked>
+                        <label for="exportSize">מידה</label>
+                    </div>
+                    <div class="export-checkbox-group">
+                        <input type="checkbox" id="exportNotes" checked>
+                        <label for="exportNotes">הערות</label>
+                    </div>
                 </div>
+                
+                <div class="export-section-title">סדר מיון:</div>
+                <div class="export-options">
+                    <div>
+                        <select id="sortField" class="filter-select">
+                            <option value="family">שם משפחה</option>
+                            <option value="student">שם תלמיד/ה</option>
+                            <option value="className">כיתה</option>
+                            <option value="size">מידה</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select id="sortDirection" class="filter-select">
+                            <option value="asc">סדר עולה (א-ת)</option>
+                            <option value="desc">סדר יורד (ת-א)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button id="exportCsvBtn" class="export-button">ייצוא נתונים לקובץ CSV</button>
             </div>
 
             <div class="table-container">
@@ -317,6 +420,9 @@
     </div>
 
     <script>
+        // משתנה גלובלי לשמירת התוצאות המסוננות האחרונות
+        let currentFilteredOrders = [];
+        
         // המידע על כל כיתה (מספר תלמידים בכל כיתה)
         const classData = {
             "א' בנים רחל פרידמן": { total: 30, orders: 0 },
@@ -529,6 +635,9 @@
                     classFilter.appendChild(option);
                 }
                 
+                // אתחול משתנה גלובלי עם כל ההזמנות
+                currentFilteredOrders = [...ordersList];
+                
                 // מילוי רשימת ההזמנות
                 fillOrdersTable(ordersList);
                 
@@ -575,6 +684,10 @@
                 
                 ordersTable.appendChild(row);
             });
+            
+            // עדכון כפתור הייצוא עם מספר ההזמנות
+            const exportCsvBtn = document.getElementById('exportCsvBtn');
+            exportCsvBtn.textContent = `ייצוא ${orders.length} הזמנות לקובץ CSV`;
         }
 
         // סינון הזמנות
@@ -583,7 +696,7 @@
             const sizeFilter = document.getElementById('sizeFilter').value;
             const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
             
-            let filteredOrders = allOrders;
+            let filteredOrders = [...allOrders];
             
             if (classFilter !== 'all') {
                 filteredOrders = filteredOrders.filter(order => order.className === classFilter);
@@ -600,6 +713,10 @@
                 );
             }
             
+            // שמירת התוצאות המסוננות במשתנה הגלובלי
+            currentFilteredOrders = filteredOrders;
+            
+            // מילוי הטבלה
             fillOrdersTable(filteredOrders);
         }
 
@@ -613,7 +730,7 @@
                     return data.total > 0 ? Math.round((data.orders / data.total) * 100) : 0;
                 });
                 
-                const chart1 = new Chart(document.getElementById('classParticipationChart'), {
+              const chart1 = new Chart(document.getElementById('classParticipationChart'), {
                     type: 'bar',
                     data: {
                         labels: classNames,
@@ -740,7 +857,8 @@
                         sizesByClass[order.className][order.size]++;
                     }
                 });
-         // יצירת דאטאסט עבור כל מידה
+                
+                // יצירת דאטאסט עבור כל מידה
                 const datasets = sizes.map((size, index) => {
                     const data = classNames.map(className => sizesByClass[className][size] || 0);
                     
@@ -786,18 +904,154 @@
             }
         }
 
+        // ייצוא נתונים מסוננים לקובץ CSV
+        function exportFilteredDataToCSV() {
+            // בדיקה שיש נתונים לייצוא
+            if (currentFilteredOrders.length === 0) {
+                alert('אין נתונים לייצוא. בחר סינון אחר.');
+                return;
+            }
+            
+            // בדיקה שנבחר לפחות שדה אחד לייצוא
+            const exportFields = {
+                family: document.getElementById('exportFamily').checked,
+                student: document.getElementById('exportStudent').checked,
+                className: document.getElementById('exportClass').checked,
+                size: document.getElementById('exportSize').checked,
+                notes: document.getElementById('exportNotes').checked
+            };
+            
+            if (!Object.values(exportFields).some(value => value)) {
+                alert('יש לבחור לפחות שדה אחד לייצוא.');
+                return;
+            }
+            
+            // מיון הנתונים לפי השדה שנבחר
+            const sortField = document.getElementById('sortField').value;
+            const sortDirection = document.getElementById('sortDirection').value;
+            
+            let sortedOrders = [...currentFilteredOrders];
+            
+            sortedOrders.sort((a, b) => {
+                let valueA = a[sortField] || '';
+                let valueB = b[sortField] || '';
+                
+                // טיפול מיוחד בשדה מידה (סדר לוגי במקום אלפביתי)
+                if (sortField === 'size') {
+                    const sizeOrder = ['6', '8', '10', '12', '14', '16', '18', 'S', 'M', 'L', 'XL'];
+                    valueA = sizeOrder.indexOf(valueA);
+                    valueB = sizeOrder.indexOf(valueB);
+                }
+                
+                if (sortDirection === 'asc') {
+                    return valueA > valueB ? 1 : -1;
+                } else {
+                    return valueA < valueB ? 1 : -1;
+                }
+            });
+            
+            // הכנת כותרות ה-CSV
+            const headers = [];
+            if (exportFields.family) headers.push('שם משפחה');
+            if (exportFields.student) headers.push('שם תלמיד/ה');
+            if (exportFields.className) headers.push('כיתה');
+            if (exportFields.size) headers.push('מידה');
+            if (exportFields.notes) headers.push('הערות');
+            
+            // המרת הנתונים לפורמט CSV
+            let csvContent = headers.join(',') + '\n';
+            
+            // הוספת כל שורת נתונים
+            sortedOrders.forEach(order => {
+                // בניית השורה רק עם השדות שנבחרו לייצוא
+                const row = [];
+                
+                if (exportFields.family) row.push(`"${order.family.replace(/"/g, '""')}"`);
+                if (exportFields.student) row.push(`"${order.student.replace(/"/g, '""')}"`);
+                if (exportFields.className) row.push(`"${order.className.replace(/"/g, '""')}"`);
+                if (exportFields.size) row.push(`"${order.size}"`);
+                if (exportFields.notes) row.push(`"${(order.notes || '').replace(/"/g, '""')}"`);
+                
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // הוספת BOM לתמיכה בעברית
+            const BOM = '\uFEFF';
+            csvContent = BOM + csvContent;
+            
+            // יצירת קובץ להורדה
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            // יצירת קישור להורדה והפעלתו
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            
+            // שם הקובץ עם תאריך ושעה נוכחיים
+            const date = new Date();
+            const formattedDate = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            const formattedTime = `${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}`;
+            
+            // הוספת מידע על הסינון לשם הקובץ
+            let filterInfo = '';
+            
+            const classFilter = document.getElementById('classFilter').value;
+            if (classFilter !== 'all') {
+                filterInfo += `_כיתה-${classFilter.replace(/["' ]/g, '')}`;
+            }
+            
+            const sizeFilter = document.getElementById('sizeFilter').value;
+            if (sizeFilter !== 'all') {
+                filterInfo += `_מידה-${sizeFilter}`;
+            }
+            
+            const searchInput = document.getElementById('searchInput').value.trim();
+            if (searchInput) {
+                filterInfo += `_חיפוש-${searchInput.replace(/["' ]/g, '')}`;
+            }
+            
+            link.setAttribute('download', `הזמנות-חולצות${filterInfo}_${formattedDate}_${formattedTime}.csv`);
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // אתחול אפשרויות הייצוא
+        function setupExportOptions() {
+            // הוספת אירוע לחיצה על כפתור הצגת/הסתרת אפשרויות ייצוא
+            const toggleExportBtn = document.getElementById('toggleExportOptions');
+            const exportContainer = document.getElementById('exportOptionsContainer');
+            
+            toggleExportBtn.addEventListener('click', function() {
+                if (exportContainer.style.display === 'none') {
+                    exportContainer.style.display = 'block';
+                    toggleExportBtn.textContent = 'הסתר אפשרויות ייצוא';
+                } else {
+                    exportContainer.style.display = 'none';
+                    toggleExportBtn.textContent = 'אפשרויות ייצוא';
+                }
+            });
+            
+            // הוספת אירוע לחיצה על כפתור הייצוא
+            document.getElementById('exportCsvBtn').addEventListener('click', exportFilteredDataToCSV);
+        }
+
         // אתחול הדף
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                // אתחול הלשוניות
-                initializeTabs();
-                
                 // הצגת הודעת טעינה ראשונית
                 const loadingDiv = document.createElement('div');
                 loadingDiv.id = 'loading-indicator';
                 loadingDiv.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; font-size: 24px; font-weight: bold;';
                 loadingDiv.innerHTML = '<div>טוען נתונים מגוגל שיטס...</div>';
                 document.body.appendChild(loadingDiv);
+                
+                // אתחול הלשוניות
+                initializeTabs();
+                
+                // אתחול אפשרויות הייצוא
+                setupExportOptions();
                 
                 // טעינת ספריית PapaParse לפענוח קבצי CSV
                 await loadScript('https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js');
@@ -807,6 +1061,16 @@
                 
                 // הסרת הודעת הטעינה
                 document.body.removeChild(loadingDiv);
+                
+                // הגדרת רענון אוטומטי כל 5 דקות
+                setInterval(async () => {
+                    try {
+                        await loadData();
+                        console.log('Data refreshed automatically');
+                    } catch (error) {
+                        console.error('Error refreshing data:', error);
+                    }
+                }, 5 * 60 * 1000); // 5 דקות
             } catch (error) {
                 console.error('Error initializing dashboard:', error);
                 
@@ -817,16 +1081,6 @@
                     alert('אירעה שגיאה בטעינת הדשבורד. אנא רענן את הדף ונסה שנית.');
                 }
             }
-            
-            // הגדרת רענון אוטומטי כל 5 דקות
-            setInterval(async () => {
-                try {
-                    await loadData();
-                    console.log('Data refreshed automatically');
-                } catch (error) {
-                    console.error('Error refreshing data:', error);
-                }
-            }, 5 * 60 * 1000); // 5 דקות
         });
         
         // פונקציית עזר לטעינת סקריפטים חיצוניים
