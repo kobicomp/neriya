@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>טופס הזמנת חולצות לבית הספר</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .student-form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-right: 4px solid #3498db;
+        }
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .student-header h3 {
+            margin: 0;
+            color: #3498db;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #addStudentBtn {
+            background-color: #27ae60;
+        }
+        #addStudentBtn:hover {
+            background-color: #219653;
+        }
+        #submitBtn {
+            display: block;
+            width: 100%;
+            font-size: 18px;
+            margin-top: 30px;
+            background-color: #e74c3c;
+        }
+        #submitBtn:hover {
+            background-color: #c0392b;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            min-height: 100px;
+            resize: vertical;
+        }
+        .hidden {
+            display: none;
+        }
+        .required:after {
+            content: " *";
+            color: red;
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>טופס הזמנת חולצות לבית הספר</h1>
+        <form id="shirtOrderForm">
+            <div class="form-group">
+                <label for="familyName" class="required">שם משפחה</label>
+                <input type="text" id="familyName" name="שם משפחה" required>
+                <div class="error-message" id="familyName-error">שדה חובה - נא למלא שם משפחה</div>
+            </div>
+
+            <div id="studentsContainer">
+                <!-- תלמיד ראשון (תמיד מוצג) -->
+                <div class="student-form" id="student1">
+                    <div class="student-header">
+                        <h3>תלמיד/ה 1</h3>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentName1" class="required">שם התלמיד/ה</label>
+                        <input type="text" id="studentName1" name="שם התלמיד1" required>
+                        <div class="error-message" id="studentName1-error">שדה חובה - נא למלא שם תלמיד/ה</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="class1" class="required">כיתה</label>
+                        <select id="class1" name="כיתה1" required>
+                            <option value="">בחר/י כיתה</option>
+                            <option value="א' בנים רחל פרידמן">א' בנים רחל פרידמן</option>
+                            <option value="א' בנות עדי רחמני">א' בנות עדי רחמני</option>
+                            <option value="א' בנות רעות שיף">א' בנות רעות שיף</option>
+                            <option value="הכיתה של גל חודפי">הכיתה של גל חודפי</option>
+                            <option value="ב' בנים הילה אלבה">ב' בנים הילה אלבה</option>
+                            <option value="ב' בנות הדר כהן">ב' בנות הדר כהן</option>
+                            <option value="ג' בנים מוריה מימון">ג' בנים מוריה מימון</option>
+                            <option value="ג' בנות שירה חדאד">ג' בנות שירה חדאד</option>
+                            <option value="ד' בנים נוי חנוכה">ד' בנים נוי חנוכה</option>
+                            <option value="ד' בנות הדר כחלון">ד' בנות הדר כחלון</option>
+                            <option value="ו' בנות ספיר צדוק">ו' בנות ספיר צדוק</option>
+                        </select>
+                        <div class="error-message" id="class1-error">שדה חובה - נא לבחור כיתה</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="size1" class="required">מידה</label>
+                        <select id="size1" name="מידה1" required>
+                            <option value="">בחר/י מידה</option>
+                            <option value="6">6</option>
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
+                            <option value="18">18</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                        <div class="error-message" id="size1-error">שדה חובה - נא לבחור מידה</div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="addStudentBtn">הוספת תלמיד/ה נוסף/ת</button>
+
+            <div class="form-group">
+                <label for="comments">הערות (אופציונלי)</label>
+                <textarea id="comments" name="הערות"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn">שלח הזמנה</button>
+        </form>
+    </div>
+
+    <script>
+        // מונה תלמידים נוכחי
+        let currentStudentCount = 1;
+        const maxStudents = 4;
+
+        // התבנית של טופס תלמיד/ה חדש/ה
+        function getStudentFormTemplate(number) {
+            return `
+                <div class="student-form" id="student${number}">
+                    <div class="student-header">
+                        <h3>תלמיד/ה ${number}</h3>
+                        <button type="button" class="removeStudentBtn" data-student="${number}">הסר</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentName${number}" class="required">שם התלמיד/ה</label>
+                        <input type="text" id="studentName${number}" name="שם התלמיד${number}" required>
+                        <div class="error-message" id="studentName${number}-error">שדה חובה - נא למלא שם תלמיד/ה</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="class${number}" class="required">כיתה</label>
+                        <select id="class${number}" name="כיתה${number}" required>
+                            <option value="">בחר/י כיתה</option>
+                            <option value="א' בנים רחל פרידמן">א' בנים רחל פרידמן</option>
+                            <option value="א' בנות עדי רחמני">א' בנות עדי רחמני</option>
+                            <option value="א' בנות רעות שיף">א' בנות רעות שיף</option>
+                            <option value="הכיתה של גל חודפי">הכיתה של גל חודפי</option>
+                            <option value="ב' בנים הילה אלבה">ב' בנים הילה אלבה</option>
+                            <option value="ב' בנות הדר כהן">ב' בנות הדר כהן</option>
+                            <option value="ג' בנים מוריה מימון">ג' בנים מוריה מימון</option>
+                            <option value="ג' בנות שירה חדאד">ג' בנות שירה חדאד</option>
+                            <option value="ד' בנים נוי חנוכה">ד' בנים נוי חנוכה</option>
+                            <option value="ד' בנות הדר כחלון">ד' בנות הדר כחלון</option>
+                            <option value="ו' בנות ספיר צדוק">ו' בנות ספיר צדוק</option>
+                        </select>
+                        <div class="error-message" id="class${number}-error">שדה חובה - נא לבחור כיתה</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="size${number}" class="required">מידה</label>
+                        <select id="size${number}" name="מידה${number}" required>
+                            <option value="">בחר/י מידה</option>
+                            <option value="6">6</option>
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
+                            <option value="18">18</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                        <div class="error-message" id="size${number}-error">שדה חובה - נא לבחור מידה</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // התאמת הוספת תלמיד/ה
+        document.getElementById('addStudentBtn').addEventListener('click', function() {
+            if (currentStudentCount < maxStudents) {
+                currentStudentCount++;
+                const container = document.getElementById('studentsContainer');
+                container.insertAdjacentHTML('beforeend', getStudentFormTemplate(currentStudentCount));
+                
+                // הסתרת/הצגת כפתור ההוספה בהתאם למספר התלמידים הנוכחי
+                if (currentStudentCount === maxStudents) {
+                    document.getElementById('addStudentBtn').style.display = 'none';
+                }
+                
+                // הוספת מאזיני אירועים לכפתורי ההסרה
+                addRemoveListeners();
+            }
+        });
+
+        // הוספת מאזין אירועים לכפתורי הסרה
+        function addRemoveListeners() {
+            document.querySelectorAll('.removeStudentBtn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const studentNumber = this.getAttribute('data-student');
+                    const studentElement = document.getElementById('student' + studentNumber);
+                    studentElement.remove();
+                    
+                    // סידור מחדש של מספרי התלמידים
+                    rearrangeStudents();
+                    
+                    // הצגת כפתור ההוספה אם היה מוסתר
+                    document.getElementById('addStudentBtn').style.display = 'block';
+                });
+            });
+        }
+
+        // סידור מחדש של מספרי התלמידים
+        function rearrangeStudents() {
+            const studentForms = document.querySelectorAll('.student-form');
+            currentStudentCount = studentForms.length;
+            
+            studentForms.forEach((form, index) => {
+                const newNumber = index + 1;
+                form.id = 'student' + newNumber;
+                
+                // עדכון כותרת התלמיד/ה
+                const header = form.querySelector('.student-header h3');
+                header.textContent = 'תלמיד/ה ' + newNumber;
+                
+                // עדכון כפתור ההסרה
+                const removeBtn = form.querySelector('.removeStudentBtn');
+                if (removeBtn) {
+                    removeBtn.setAttribute('data-student', newNumber);
+                }
+                
+                // עדכון שדות הקלט
+                const nameInput = form.querySelector('input[id^="studentName"]');
+                const classSelect = form.querySelector('select[id^="class"]');
+                const sizeSelect = form.querySelector('select[id^="size"]');
+                
+                nameInput.id = 'studentName' + newNumber;
+                nameInput.name = 'שם התלמיד' + newNumber;
+                
+                classSelect.id = 'class' + newNumber;
+                classSelect.name = 'כיתה' + newNumber;
+                
+                sizeSelect.id = 'size' + newNumber;
+                sizeSelect.name = 'מידה' + newNumber;
+                
+                // עדכון הודעות שגיאה
+                const nameError = form.querySelector(`div[id^="studentName"][id$="-error"]`);
+                const classError = form.querySelector(`div[id^="class"][id$="-error"]`);
+                const sizeError = form.querySelector(`div[id^="size"][id$="-error"]`);
+                
+                nameError.id = 'studentName' + newNumber + '-error';
+                classError.id = 'class' + newNumber + '-error';
+                sizeError.id = 'size' + newNumber + '-error';
+            });
+        }
+
+        // אימות הטופס לפני השליחה
+        document.getElementById('shirtOrderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // אימות שם משפחה
+            const familyName = document.getElementById('familyName').value.trim();
+            if (!familyName) {
+                document.getElementById('familyName-error').style.display = 'block';
+                document.getElementById('familyName').focus();
+                return;
+            } else {
+                document.getElementById('familyName-error').style.display = 'none';
+            }
+            
+            // אימות שדות התלמידים
+            let isValid = true;
+            
+            for (let i = 1; i <= currentStudentCount; i++) {
+                const studentName = document.getElementById('studentName' + i).value.trim();
+                const studentClass = document.getElementById('class' + i).value;
+                const studentSize = document.getElementById('size' + i).value;
+                
+                // אימות שם תלמיד/ה
+                if (!studentName) {
+                    document.getElementById('studentName' + i + '-error').style.display = 'block';
+                    if (isValid) {
+                        document.getElementById('studentName' + i).focus();
+                        isValid = false;
+                    }
+                } else {
+                    document.getElementById('studentName' + i + '-error').style.display = 'none';
+                }
+                
+                // אימות כיתה
+                if (!studentClass) {
+                    document.getElementById('class' + i + '-error').style.display = 'block';
+                    if (isValid) {
+                        document.getElementById('class' + i).focus();
+                        isValid = false;
+                    }
+                } else {
+                    document.getElementById('class' + i + '-error').style.display = 'none';
+                }
+                
+                // אימות מידה
+                if (!studentSize) {
+                    document.getElementById('size' + i + '-error').style.display = 'block';
+                    if (isValid) {
+                        document.getElementById('size' + i).focus();
+                        isValid = false;
+                    }
+                } else {
+                    document.getElementById('size' + i + '-error').style.display = 'none';
+                }
+            }
+            
+            // אם הטופס תקין, שלח אותו
+            if (isValid) {
+                submitToGoogleForm();
+            }
+        });
+
+        // שליחה לטופס גוגל
+        function submitToGoogleForm() {
+            const formData = new FormData();
+            const formEntries = {
+                "שם התלמיד1": "entry.427931047",
+                "כיתה1": "entry.1209002967",
+                "מידה1": "entry.1484248099",
+                "שם התלמיד2": "entry.1297843816",
+                "כיתה2": "entry.968393499",
+                "מידה2": "entry.1308086078",
+                "שם התלמיד3": "entry.1748745000",
+                "כיתה3": "entry.1765693970",
+                "מידה3": "entry.2079927188",
+                "שם התלמיד4": "entry.1907939400",
+                "כיתה4": "entry.1428639233",
+                "מידה4": "entry.984858093",
+                "שם משפחה": "entry.1292126361",
+                "הערות": "entry.1154280259"
+            };
+            
+            // הוספת כל השדות לטופס
+            for (const key in formEntries) {
+                const element = document.querySelector(`[name="${key}"]`);
+                if (element) {
+                    formData.append(formEntries[key], element.value);
+                }
+            }
+            
+            // שליחת הטופס באמצעות fetch
+            fetch('https://docs.google.com/forms/d/e/1FAIpQLSdpzTx4rj5YDBaKiWcz7JCmTJRm9wPW6szXhAhK0w5BWF83bg/formResponse', {
+                method: 'POST',
+                mode: 'no-cors', // חשוב עבור שליחה לגוגל פורמס
+                body: formData
+            })
+            .then(() => {
+                alert('ההזמנה נשלחה בהצלחה!');
+                document.getElementById('shirtOrderForm').reset();
+                
+                // הסרת כל התלמידים למעט הראשון
+                const studentForms = document.querySelectorAll('.student-form');
+                for (let i = 1; i < studentForms.length; i++) {
+                    studentForms[i].remove();
+                }
+                
+                // איפוס הגלובלים
+                currentStudentCount = 1;
+                document.getElementById('addStudentBtn').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('אירעה שגיאה בעת שליחת ההזמנה. אנא נסו שוב מאוחר יותר.');
+            });
+        }
+    </script>
+</body>
+</html>
