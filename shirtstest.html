@@ -1,4 +1,41 @@
-<!DOCTYPE html>
+// נתוני הזמנות לדוגמה - במציאות אלו יגיעו מהשרת או מקובץ ה-CSV
+        let sampleOrders = [
+            { family: "דוד", student: "יובל", className: "א' בנים רחל פרידמן", size: "10", notes: "" },
+            { family: "אזולאי", student: "אריאל", className: "א' בנים רחל פרידמן", size: "12", notes: "צריך/ה מידה מיוחדת" },
+            { family: "פרץ", student: "דניאל", className: "א' בנים רחל פרידמן", size: "10", notes: "לא להדק יותר מדי" },
+            { family: "מזרחי", student: "נדב", className: "א' בנים רחל פרידמן", size: "6", notes: "" },
+            { family: "יעקובי", student: "יוסף", className: "א' בנים רחל פרידמן", size: "6", notes: "" },
+            { family: "אברהם", student: "אריאל", className: "א' בנים רחל פרידמן", size: "8", notes: "ילד/ה רזה" },
+            { family: "גבאי", student: "איתי", className: "א' בנים רחל פרידמן", size: "10", notes: "" },
+            { family: "חדד", student: "יוסף", className: "א' בנים רחל פרידמן", size: "10", notes: "" },
+            { family: "ביטון", student: "רועי", className: "א' בנים רחל פרידמן", size: "6", notes: "לא להדק יותר מדי" },
+            { family: "מזרחי", student: "רועי", className: "א' בנים רחל פרידמן", size: "6", notes: "" },
+            { family: "לוי", student: "יוסף", className: "א' בנים רחל פרידמן", size: "12", notes: "צבע כהה יותר" },
+            { family: "ביטון", student: "איתי", className: "א' בנים רחל פרידמן", size: "12", notes: "צריך/ה מידה מיוחדת" },
+            { family: "כהן", student: "יוסף", className: "א' בנים רחל פרידמן", size: "6", notes: "" },
+            { family: "טולדנו", student: "מיכל", className: "א' בנות עדי רחמני", size: "6", notes: "לא להדק יותר מדי" },
+            { family: "חדד", student: "רותם", className: "א' בנות עדי רחמני", size: "10", notes: "" },
+            { family: "כהן", student: "מאיה", className: "א' בנות עדי רחמני", size: "12", notes: "אלרגיה לבד" },
+            { family: "דוד", student: "שיר", className: "א' בנות עדי רחמני", size: "12", notes: "לא להדק יותר מדי" },
+            { family: "לוי", student: "אלה", className: "א' בנות עדי רחמני", size: "10", notes: "אלרגיה לבד" },
+            { family: "פרץ", student: "שירה", className: "א' בנות עדי רחמני", size: "12", notes: "צבע כהה יותר" },
+            { family: "יעקובי", student: "שירה", className: "א' בנות עדי רחמני", size: "10", notes: "" },
+            { family: "דוד", student: "אביב", className: "א' בנות עדי רחמני", size: "12", notes: "צריך/ה מידה מיוחדת" },
+            { family: "טולדנו", student: "נועה", className: "א' בנות עדי רחמני", size: "12", notes: "" },
+            { family: "חדד", student: "מעיין", className: "א' בנות עדי רחמני", size: "10", notes: "ילד/ה רזה" },
+            { family: "אברהם", student: "מאיה", className: "א' בנות עדי רחמני", size: "6", notes: "" },
+            { family: "פרץ", student: "רותם", className: "א' בנות עדי רחמני", size: "10", notes: "אלרגיה לבד" },
+            { family: "מזרחי", student: "ליאת", className: "א' בנות עדי רחמני", size: "12", notes: "" },
+            { family: "יעקובי", student: "אביב", className: "א' בנות עדי רחמני", size: "10", notes: "" },
+            { family: "מזרחי", student: "שיר", className: "א' בנות רעות שיף", size: "8", notes: "צריך/ה מידה מיוחדת" },
+            { family: "חדד", student: "אלה", className: "א' בנות רעות שיף", size: "12", notes: "לא להדק יותר מדי" },
+            { family: "לוי", student: "אלה", className: "א' בנות רעות שיף", size: "6", notes: "צריך/ה מידה מיוחדת" },
+            { family: "יעקובי", student: "ליאת", className: "א' בנות רעות שיף", size: "12", notes: "אלרגיה לבד" },
+            { family: "דוד", student: "הילה", className: "א' בנות רעות שיף", size: "10", notes: "" },
+            { family: "ביטון", student: "מאיה", className: "א' בנות רעות שיף", size: "8", notes: "" },
+            { family: "חדד", student: "שיר", className: "א' בנות רעות שיף", size: "6", notes: "אלרגיה לבד" },
+            { family: "חדד", student: "מאיה", className: "א' בנות רעות שיף", size: "12", notes: "אלרגיה לבד" },
+            { family: "טולדנו", student<!DOCTYPE html>
 <html dir="rtl" lang="he">
 <head>
     <meta charset="UTF-8">
@@ -317,7 +354,7 @@
     </div>
 
     <script>
-        // נתוני כיתות
+        // המידע על כל כיתה (מספר תלמידים בכל כיתה)
         const classData = {
             "א' בנים רחל פרידמן": { total: 30, orders: 0 },
             "א' בנות עדי רחמני": { total: 24, orders: 0 },
@@ -336,101 +373,194 @@
         const totalStudents = Object.values(classData).reduce((sum, curr) => sum + curr.total, 0);
         document.getElementById('totalStudents').textContent = totalStudents;
 
-        // נתוני הזמנות לדוגמה - במציאות אלו יגיעו מהשרת
-        let sampleOrders = [
-            { family: "כהן", student: "דניאל", className: "א' בנים רחל פרידמן", size: "8", notes: "" },
-            { family: "כהן", student: "שירה", className: "ג' בנות שירה חדאד", size: "10", notes: "" },
-            { family: "לוי", student: "אלון", className: "ב' בנים הילה אלבה", size: "8", notes: "" },
-            { family: "מזרחי", student: "נועה", className: "א' בנות עדי רחמני", size: "6", notes: "ילדה רזה" },
-            { family: "אברהם", student: "יוסף", className: "ג' בנים מוריה מימון", size: "10", notes: "" },
-            { family: "דוד", student: "מיכל", className: "ד' בנות הדר כחלון", size: "12", notes: "" },
-            { family: "פרץ", student: "איתי", className: "א' בנים רחל פרידמן", size: "6", notes: "" },
-            { family: "אזולאי", student: "שיר", className: "ו' בנות ספיר צדוק", size: "14", notes: "" },
-            { family: "ביטון", student: "עידו", className: "ד' בנים נוי חנוכה", size: "12", notes: "" },
-            { family: "גבאי", student: "רותם", className: "ב' בנות הדר כהן", size: "8", notes: "" },
-            { family: "חדד", student: "אביב", className: "א' בנות רעות שיף", size: "6", notes: "" },
-            { family: "טולדנו", student: "נדב", className: "ג' בנים מוריה מימון", size: "10", notes: "" },
-            { family: "יעקובי", student: "תמר", className: "ד' בנות הדר כחלון", size: "12", notes: "" },
-            { family: "כהן", student: "יובל", className: "ב' בנים הילה אלבה", size: "8", notes: "" },
-            { family: "לוי", student: "מאיה", className: "א' בנות עדי רחמני", size: "6", notes: "" },
-            { family: "מלכה", student: "עומר", className: "הכיתה של גל חודפי", size: "8", notes: "" },
-            { family: "נחום", student: "ליאת", className: "ג' בנות שירה חדאד", size: "10", notes: "" },
-            { family: "סויסה", student: "אורי", className: "א' בנים רחל פרידמן", size: "8", notes: "" },
-            { family: "עמר", student: "הילה", className: "ו' בנות ספיר צדוק", size: "16", notes: "" },
-            { family: "פרץ", student: "אלה", className: "ב' בנות הדר כהן", size: "8", notes: "" }
-        ];
-
-        // עדכון נתוני ההזמנות לפי כיתה
-        sampleOrders.forEach(order => {
-            if (classData[order.className]) {
-                classData[order.className].orders++;
+        // פונקציה לטעינת הנתונים מגוגל שיטס
+        async function loadData() {
+            try {
+                // הצגת הודעת טעינה
+                document.getElementById('totalOrders').textContent = "טוען...";
+                document.getElementById('participationRate').textContent = "טוען...";
+                document.getElementById('popularSize').textContent = "טוען...";
+                
+                // טעינת הנתונים מהקישור של גוגל שיטס
+                const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQNi67IQpIrgugwrFtxPSOQjYMI0OtwOrPB8xdsseN-1RaWV9ARSkW-ZieaYvRTkBQvvjkHeESLHyQW/pub?output=csv');
+                const csvText = await response.text();
+                
+                // פענוח ה-CSV בעזרת PapaParse
+                const parsedData = Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true
+                });
+                
+                // מערך שיכיל את כל ההזמנות
+                const ordersList = [];
+                
+                // עיבוד הנתונים מהקובץ
+                parsedData.data.forEach(row => {
+                    const familyName = row['שם משפחה'] || '';
+                    
+                    // עיבוד תלמיד 1
+                    if (row['שם התלמיד1'] && row['כיתה1'] && row['מידה1']) {
+                        if (classData[row['כיתה1']]) {
+                            classData[row['כיתה1']].orders++;
+                        }
+                        
+                        ordersList.push({
+                            family: familyName,
+                            student: row['שם התלמיד1'],
+                            className: row['כיתה1'],
+                            size: row['מידה1'],
+                            notes: row['הערות'] || ''
+                        });
+                    }
+                    
+                    // עיבוד תלמיד 2
+                    if (row['שם התלמיד2'] && row['כיתה2'] && row['מידה2']) {
+                        if (classData[row['כיתה2']]) {
+                            classData[row['כיתה2']].orders++;
+                        }
+                        
+                        ordersList.push({
+                            family: familyName,
+                            student: row['שם התלמיד2'],
+                            className: row['כיתה2'],
+                            size: row['מידה2'],
+                            notes: row['הערות'] || ''
+                        });
+                    }
+                    
+                    // עיבוד תלמיד 3
+                    if (row['שם התלמיד3'] && row['כיתה3'] && row['מידה3']) {
+                        if (classData[row['כיתה3']]) {
+                            classData[row['כיתה3']].orders++;
+                        }
+                        
+                        ordersList.push({
+                            family: familyName,
+                            student: row['שם התלמיד3'],
+                            className: row['כיתה3'],
+                            size: row['מידה3'],
+                            notes: row['הערות'] || ''
+                        });
+                    }
+                    
+                    // עיבוד תלמיד 4
+                    if (row['שם התלמיד4'] && row['כיתה4'] && row['מידה4']) {
+                        if (classData[row['כיתה4']]) {
+                            classData[row['כיתה4']].orders++;
+                        }
+                        
+                        ordersList.push({
+                            family: familyName,
+                            student: row['שם התלמיד4'],
+                            className: row['כיתה4'],
+                            size: row['מידה4'],
+                            notes: row['הערות'] || ''
+                        });
+                    }
+                });
+                
+                // עדכון סטטיסטיקות כלליות
+                const totalOrders = ordersList.length;
+                document.getElementById('totalOrders').textContent = totalOrders;
+                
+                const participationRate = Math.round((totalOrders / totalStudents) * 100);
+                document.getElementById('participationRate').textContent = participationRate + '%';
+                
+                // חישוב המידה הפופולרית ביותר
+                const sizeCounts = {};
+                ordersList.forEach(order => {
+                    sizeCounts[order.size] = (sizeCounts[order.size] || 0) + 1;
+                });
+                
+                let popularSize = '';
+                let maxCount = 0;
+                
+                for (const [size, count] of Object.entries(sizeCounts)) {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        popularSize = size;
+                    }
+                }
+                
+                document.getElementById('popularSize').textContent = popularSize;
+                
+                // מילוי טבלת סטטיסטיקות כיתה
+                const classStatsTable = document.getElementById('classStatsTable');
+                classStatsTable.innerHTML = '';
+                
+                for (const [className, data] of Object.entries(classData)) {
+                    const participationRate = data.total > 0 ? Math.round((data.orders / data.total) * 100) : 0;
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${className}</td>
+                        <td>${data.total}</td>
+                        <td>${data.orders}</td>
+                        <td>${participationRate}%</td>
+                        <td>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${participationRate}%"></div>
+                                </div>
+                                <div class="progress-text">${participationRate}%</div>
+                            </div>
+                        </td>
+                    `;
+                    
+                    classStatsTable.appendChild(row);
+                }
+                
+                // מילוי טבלת סטטיסטיקות מידות
+                const sizeStatsTable = document.getElementById('sizeStatsTable');
+                sizeStatsTable.innerHTML = '';
+                
+                const sortedSizes = Object.entries(sizeCounts)
+                    .sort((a, b) => b[1] - a[1]);
+                
+                sortedSizes.forEach(([size, count]) => {
+                    const percentage = Math.round((count / totalOrders) * 100);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${size}</td>
+                        <td>${count}</td>
+                        <td>${percentage}%</td>
+                    `;
+                    
+                    sizeStatsTable.appendChild(row);
+                });
+                
+                // מילוי סינון כיתה
+                const classFilter = document.getElementById('classFilter');
+                classFilter.innerHTML = '<option value="all">כל הכיתות</option>';
+                
+                for (const className in classData) {
+                    const option = document.createElement('option');
+                    option.value = className;
+                    option.textContent = className;
+                    classFilter.appendChild(option);
+                }
+                
+                // מילוי רשימת ההזמנות
+                fillOrdersTable(ordersList);
+                
+                // יצירת התרשימים
+                createCharts(classData, sizeCounts, ordersList);
+                
+                // הוספת אירועי סינון
+                classFilter.addEventListener('change', () => filterOrders(ordersList));
+                document.getElementById('sizeFilter').addEventListener('change', () => filterOrders(ordersList));
+                document.getElementById('searchInput').addEventListener('input', () => filterOrders(ordersList));
+                
+                return { ordersList, classData, sizeCounts };
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('totalOrders').textContent = "שגיאה";
+                document.getElementById('participationRate').textContent = "שגיאה";
+                document.getElementById('popularSize').textContent = "שגיאה";
+                alert('אירעה שגיאה בטעינת הנתונים. אנא נסה שוב מאוחר יותר.');
+                return { ordersList: [], classData: {}, sizeCounts: {} };
             }
-        });
-
-        // עדכון סטטיסטיקות כלליות
-        const totalOrders = sampleOrders.length;
-        document.getElementById('totalOrders').textContent = totalOrders;
-        
-        const participationRate = Math.round((totalOrders / totalStudents) * 100);
-        document.getElementById('participationRate').textContent = participationRate + '%';
-
-        // חישוב המידה הפופולרית ביותר
-        const sizeCounts = {};
-        sampleOrders.forEach(order => {
-            sizeCounts[order.size] = (sizeCounts[order.size] || 0) + 1;
-        });
-        
-        let popularSize = '';
-        let maxCount = 0;
-        
-        for (const [size, count] of Object.entries(sizeCounts)) {
-            if (count > maxCount) {
-                maxCount = count;
-                popularSize = size;
-            }
-        }
-        
-        document.getElementById('popularSize').textContent = popularSize;
-
-        // מילוי טבלת סטטיסטיקות כיתה
-        const classStatsTable = document.getElementById('classStatsTable');
-        
-        for (const [className, data] of Object.entries(classData)) {
-            const participationRate = data.total > 0 ? Math.round((data.orders / data.total) * 100) : 0;
-            
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${className}</td>
-                <td>${data.total}</td>
-                <td>${data.orders}</td>
-                <td>${participationRate}%</td>
-                <td>
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${participationRate}%"></div>
-                        </div>
-                        <div class="progress-text">${participationRate}%</div>
-                    </div>
-                </td>
-            `;
-            
-            classStatsTable.appendChild(row);
-        }
-
-        // מילוי טבלת סטטיסטיקות מידות
-        const sizeStatsTable = document.getElementById('sizeStatsTable');
-        
-        for (const [size, count] of Object.entries(sizeCounts)) {
-            const percentage = Math.round((count / totalOrders) * 100);
-            
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${size}</td>
-                <td>${count}</td>
-                <td>${percentage}%</td>
-            `;
-            
-            sizeStatsTable.appendChild(row);
         }
 
         // מילוי רשימת הזמנות
@@ -459,34 +589,13 @@
             });
         }
 
-        // אתחול סינון והזמנות
-        function initializeFilters() {
-            const classFilter = document.getElementById('classFilter');
-            
-            // מילוי אפשרויות סינון כיתה
-            for (const className in classData) {
-                const option = document.createElement('option');
-                option.value = className;
-                option.textContent = className;
-                classFilter.appendChild(option);
-            }
-            
-            // אירועי סינון
-            classFilter.addEventListener('change', filterOrders);
-            document.getElementById('sizeFilter').addEventListener('change', filterOrders);
-            document.getElementById('searchInput').addEventListener('input', filterOrders);
-            
-            // אתחול טבלת הזמנות
-            fillOrdersTable(sampleOrders);
-        }
-
         // סינון הזמנות
-        function filterOrders() {
+        function filterOrders(allOrders) {
             const classFilter = document.getElementById('classFilter').value;
             const sizeFilter = document.getElementById('sizeFilter').value;
             const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
             
-            let filteredOrders = sampleOrders;
+            let filteredOrders = allOrders;
             
             if (classFilter !== 'all') {
                 filteredOrders = filteredOrders.filter(order => order.className === classFilter);
@@ -504,6 +613,311 @@
             }
             
             fillOrdersTable(filteredOrders);
+        }: "הילה", className: "ג' בנות שירה חדאד", size: "16", notes: "ילד/ה רזה" },
+            { family: "אברהם", student: "מעיין", className: "ג' בנות שירה חדאד", size: "14", notes: "צבע כהה יותר" },
+            { family: "טולדנו", student: "הילה", className: "ג' בנות שירה חדאד", size: "12", notes: "ילד/ה רזה" },
+            { family: "אברהם", student: "מאיה", className: "ג' בנות שירה חדאד", size: "10", notes: "צריך/ה מידה מיוחדת" },
+            { family: "לוי", student: "אביב", className: "ג' בנות שירה חדאד", size: "8", notes: "לא להדק יותר מדי" },
+            { family: "גבאי", student: "רותם", className: "ג' בנות שירה חדאד", size: "14", notes: "" },
+            { family: "כהן", student: "שירה", className: "ג' בנות שירה חדאד", size: "14", notes: "" },
+            { family: "אברהם", student: "הילה", className: "ג' בנות שירה חדאד", size: "12", notes: "" },
+            { family: "אברהם", student: "מיכל", className: "ג' בנות שירה חדאד", size: "12", notes: "" },
+            { family: "פרץ", student: "עומר", className: "ד' בנים נוי חנוכה", size: "12", notes: "אלרגיה לבד" },
+            { family: "טולדנו", student: "אלון", className: "ד' בנים נוי חנוכה", size: "14", notes: "צבע כהה יותר" },
+            { family: "חדד", student: "נדב", className: "ד' בנים נוי חנוכה", size: "S", notes: "אלרגיה לבד" },
+            { family: "אזולאי", student: "דניאל", className: "ד' בנים נוי חנוכה", size: "M", notes: "צריך/ה מידה מיוחדת" },
+            { family: "דוד", student: "אורי", className: "ד' בנים נוי חנוכה", size: "S", notes: "" },
+            { family: "יעקובי", student: "נדב", className: "ד' בנים נוי חנוכה", size: "14", notes: "" },
+            { family: "כהן", student: "אריאל", className: "ד' בנים נוי חנוכה", size: "12", notes: "צבע כהה יותר" },
+            { family: "דוד", student: "יאיר", className: "ד' בנים נוי חנוכה", size: "14", notes: "אלרגיה לבד" },
+            { family: "דוד", student: "איתי", className: "ד' בנים נוי חנוכה", size: "18", notes: "צריך/ה מידה מיוחדת" },
+            { family: "אברהם", student: "רועי", className: "ד' בנים נוי חנוכה", size: "S", notes: "" },
+            { family: "מזרחי", student: "רועי", className: "ד' בנים נוי חנוכה", size: "14", notes: "" },
+            { family: "כהן", student: "אלון", className: "ד' בנים נוי חנוכה", size: "S", notes: "" },
+            { family: "לוי", student: "יאיר", className: "ד' בנים נוי חנוכה", size: "18", notes: "צריך/ה מידה מיוחדת" },
+            { family: "דוד", student: "נדב", className: "ד' בנים נוי חנוכה", size: "18", notes: "צבע כהה יותר" },
+            { family: "גבאי", student: "שירה", className: "ד' בנות הדר כחלון", size: "16", notes: "" },
+            { family: "מזרחי", student: "אביב", className: "ד' בנות הדר כחלון", size: "16", notes: "" },
+            { family: "אזולאי", student: "מיכל", className: "ד' בנות הדר כחלון", size: "S", notes: "צריך/ה מידה מיוחדת" },
+            { family: "דוד", student: "מיכל", className: "ד' בנות הדר כחלון", size: "14", notes: "" },
+            { family: "טולדנו", student: "אלה", className: "ד' בנות הדר כחלון", size: "M", notes: "ילד/ה רזה" },
+            { family: "כהן", student: "ליאת", className: "ד' בנות הדר כחלון", size: "14", notes: "" },
+            { family: "לוי", student: "תמר", className: "ד' בנות הדר כחלון", size: "18", notes: "אלרגיה לבד" },
+            { family: "פרץ", student: "מאיה", className: "ד' בנות הדר כחלון", size: "14", notes: "לא להדק יותר מדי" },
+            { family: "דוד", student: "מיכל", className: "ד' בנות הדר כחלון", size: "S", notes: "צבע כהה יותר" },
+            { family: "יעקובי", student: "רותם", className: "ד' בנות הדר כחלון", size: "14", notes: "" },
+            { family: "יעקובי", student: "אלה", className: "ד' בנות הדר כחלון", size: "14", notes: "צבע כהה יותר" },
+            { family: "כהן", student: "מאיה", className: "ד' בנות הדר כחלון", size: "12", notes: "לא להדק יותר מדי" },
+            { family: "אברהם", student: "הילה", className: "ד' בנות הדר כחלון", size: "S", notes: "צריך/ה מידה מיוחדת" },
+            { family: "כהן", student: "שירה", className: "ד' בנות הדר כחלון", size: "S", notes: "אלרגיה לבד" },
+            { family: "לוי", student: "מאיה", className: "ד' בנות הדר כחלון", size: "M", notes: "" },
+            { family: "לוי", student: "תמר", className: "ד' בנות הדר כחלון", size: "14", notes: "לא להדק יותר מדי" },
+            { family: "פרץ", student: "אלה", className: "ד' בנות הדר כחלון", size: "M", notes: "" },
+            { family: "גבאי", student: "ליאת", className: "ד' בנות הדר כחלון", size: "14", notes: "צריך/ה מידה מיוחדת" },
+            { family: "חדד", student: "ליאת", className: "ד' בנות הדר כחלון", size: "18", notes: "" },
+            { family: "דוד", student: "ליאת", className: "ד' בנות הדר כחלון", size: "16", notes: "ילד/ה רזה" },
+            { family: "ביטון", student: "מאיה", className: "ו' בנות ספיר צדוק", size: "16", notes: "" },
+            { family: "אברהם", student: "אלה", className: "ו' בנות ספיר צדוק", size: "12", notes: "אלרגיה לבד" },
+            { family: "חדד", student: "אביב", className: "ו' בנות ספיר צדוק", size: "S", notes: "" },
+            { family: "דוד", student: "אביב", className: "ו' בנות ספיר צדוק", size: "S", notes: "לא להדק יותר מדי" },
+            { family: "אברהם", student: "רותם", className: "ו' בנות ספיר צדוק", size: "M", notes: "" },
+            { family: "אזולאי", student: "תמר", className: "ו' בנות ספיר צדוק", size: "S", notes: "לא להדק יותר מדי" },
+            { family: "אזולאי", student: "רותם", className: "ו' בנות ספיר צדוק", size: "14", notes: "" },
+            { family: "כהן", student: "הילה", className: "ו' בנות ספיר צדוק", size: "12", notes: "ילד/ה רזה" },
+            { family: "אזולאי", student: "הילה", className: "ו' בנות ספיר צדוק", size: "12", notes: "" },
+            { family: "טולדנו", student: "אלה", className: "ו' בנות ספיר צדוק", size: "16", notes: "צריך/ה מידה מיוחדת" },
+            { family: "טולדנו", student: "מיכל", className: "ו' בנות ספיר צדוק", size: "18", notes: "" }
+        ];: "" }
+        ];
+
+        // יצירת תרשימים
+        function createCharts(classData, sizeCounts, ordersList) {
+            // מחיקת תרשימים קיימים אם יש כאלה
+            document.querySelectorAll('canvas').forEach(canvas => {
+                canvas.remove();
+            });
+            
+            // יצירת אלמנטי canvas חדשים
+            const chartContainers = document.querySelectorAll('.chart-container');
+            chartContainers.forEach(container => {
+                const id = container.querySelector('canvas')?.id || '';
+                container.innerHTML = `<h2>${container.querySelector('h2').textContent}</h2><canvas id="${id}"></canvas>`;
+            });
+            
+            // תרשים אחוז השתתפות לפי כיתה
+            const classNames = Object.keys(classData);
+            const participationRates = classNames.map(className => {
+                const data = classData[className];
+                return data.total > 0 ? Math.round((data.orders / data.total) * 100) : 0;
+            });
+            
+            new Chart(document.getElementById('classParticipationChart'), {
+                type: 'bar',
+                data: {
+                    labels: classNames,
+                    datasets: [{
+                        label: 'אחוז השתתפות',
+                        data: participationRates,
+                        backgroundColor: 'rgba(52, 152, 219, 0.6)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // תרשים כמות הזמנות לפי כיתה
+            const orderCounts = classNames.map(className => classData[className].orders);
+            
+            new Chart(document.getElementById('classOrdersChart'), {
+                type: 'bar',
+                data: {
+                    labels: classNames,
+                    datasets: [{
+                        label: 'מספר הזמנות',
+                        data: orderCounts,
+                        backgroundColor: 'rgba(46, 204, 113, 0.6)',
+                        borderColor: 'rgba(46, 204, 113, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // תרשים התפלגות מידות
+            const sizes = Object.keys(sizeCounts);
+            const sizesData = sizes.map(size => sizeCounts[size]);
+            
+            new Chart(document.getElementById('sizesDistributionChart'), {
+                type: 'pie',
+                data: {
+                    labels: sizes,
+                    datasets: [{
+                        data: sizesData,
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.6)',
+                            'rgba(46, 204, 113, 0.6)',
+                            'rgba(155, 89, 182, 0.6)',
+                            'rgba(52, 73, 94, 0.6)',
+                            'rgba(230, 126, 34, 0.6)',
+                            'rgba(231, 76, 60, 0.6)',
+                            'rgba(241, 196, 15, 0.6)',
+                            'rgba(26, 188, 156, 0.6)',
+                            'rgba(127, 140, 141, 0.6)',
+                            'rgba(189, 195, 199, 0.6)',
+                            'rgba(44, 62, 80, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(52, 152, 219, 1)',
+                            'rgba(46, 204, 113, 1)',
+                            'rgba(155, 89, 182, 1)',
+                            'rgba(52, 73, 94, 1)',
+                            'rgba(230, 126, 34, 1)',
+                            'rgba(231, 76, 60, 1)',
+                            'rgba(241, 196, 15, 1)',
+                            'rgba(26, 188, 156, 1)',
+                            'rgba(127, 140, 141, 1)',
+                            'rgba(189, 195, 199, 1)',
+                            'rgba(44, 62, 80, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+            
+            // הכנת נתונים למידות פופולריות לפי כיתה
+            const sizesByClass = {};
+            
+            classNames.forEach(className => {
+                sizesByClass[className] = {};
+                sizes.forEach(size => {
+                    sizesByClass[className][size] = 0;
+                });
+            });
+            
+            ordersList.forEach(order => {
+                if (sizesByClass[order.className] && sizesByClass[order.className][order.size] !== undefined) {
+                    sizesByClass[order.className][order.size]++;
+                }
+            });
+            
+            // יצירת דאטאסט עבור כל מידה
+            const datasets = sizes.map((size, index) => {
+                const data = classNames.map(className => sizesByClass[className][size] || 0);
+                
+                // יצירת צבע אקראי קבוע לכל מידה
+                const hue = (index * 30) % 360;
+                const color = `hsla(${hue}, 70%, 60%, 0.6)`;
+                const borderColor = `hsla(${hue}, 70%, 50%, 1)`;
+                
+                return {
+                    label: `מידה ${size}`,
+                    data: data,
+                    backgroundColor: color,
+                    borderColor: borderColor,
+                    borderWidth: 1
+                };
+            });
+            
+            new Chart(document.getElementById('sizesByClassChart'), {
+                type: 'bar',
+                data: {
+                    labels: classNames,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        },
+                        x: {
+                            stacked: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // ניהול לשוניות
+        function initializeTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // הסרת active מכל הלשוניות והתוכן
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // הוספת active ללשונית וההתוכן הנבחרים
+                    tab.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
+        // אתחול הדף
+        document.addEventListener('DOMContentLoaded', async function() {
+            // הצגת הודעת טעינה ראשונית
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading-indicator';
+            loadingDiv.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; font-size: 24px; font-weight: bold;';
+            loadingDiv.innerHTML = '<div>טוען נתונים מגוגל שיטס...</div>';
+            document.body.appendChild(loadingDiv);
+            
+            try {
+                // אתחול הלשוניות
+                initializeTabs();
+                
+                // טעינת ספריית PapaParse לפענוח קבצי CSV
+                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js');
+                
+                // טעינת הנתונים מגוגל שיטס
+                await loadData();
+                
+                // הסרת הודעת הטעינה
+                document.body.removeChild(loadingDiv);
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                loadingDiv.innerHTML = '<div>אירעה שגיאה בטעינת הנתונים. אנא רענן את הדף ונסה שנית.</div>';
+            }
+        });
+        
+        // פונקציית עזר לטעינת סקריפטים חיצוניים
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
         }
 
         // יצירת תרשימים
