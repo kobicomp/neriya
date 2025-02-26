@@ -23,6 +23,80 @@
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
+        #orderModal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            margin: 0;
+            color: #27ae60;
+        }
+        .modal-close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-close:hover {
+            color: black;
+        }
+        .order-summary {
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+        .summary-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .modal-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .confirm-button {
+            background-color: #27ae60;
+            color: white;
+        }
+        .edit-button {
+            background-color: #e67e22;
+            color: white;
+        }
         h1 {
             text-align: center;
             color: #2c3e50;
@@ -116,6 +190,21 @@
     </style>
 </head>
 <body>
+    <!-- מודאל סיכום הזמנה -->
+    <div id="orderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>סיכום הזמנה</h2>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div id="orderSummaryContent" class="order-summary"></div>
+            <div class="button-container">
+                <button class="modal-button edit-button" id="editOrderBtn">עריכת הזמנה</button>
+                <button class="modal-button confirm-button" id="confirmOrderBtn">אישור ושליחה</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <h1>טופס הזמנת חולצות לבית הספר</h1>
         <form id="shirtOrderForm">
@@ -322,7 +411,64 @@
             });
         }
 
-        // אימות הטופס לפני השליחה
+        // טיפול במודאל סיכום הזמנה
+        const modal = document.getElementById('orderModal');
+        const closeModal = document.querySelector('.modal-close');
+        const confirmOrderBtn = document.getElementById('confirmOrderBtn');
+        const editOrderBtn = document.getElementById('editOrderBtn');
+        
+        // סגירת המודאל בלחיצה על X
+        closeModal.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+        // סגירת המודאל בלחיצה מחוץ לתוכן
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+        
+        // לחיצה על כפתור עריכת הזמנה
+        editOrderBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+        // לחיצה על כפתור אישור ושליחה
+        confirmOrderBtn.addEventListener('click', function() {
+            submitToGoogleForm();
+        });
+        
+        // יצירת סיכום הזמנה עם HTML מעוצב
+        function createOrderSummary() {
+            const familyName = document.getElementById('familyName').value.trim();
+            let summaryHTML = `<div class="summary-item"><strong>משפחת:</strong> ${familyName}</div>`;
+            
+            // הוספת פרטי כל תלמיד לסיכום
+            for (let i = 1; i <= currentStudentCount; i++) {
+                const studentName = document.getElementById('studentName' + i).value.trim();
+                const studentClass = document.getElementById('class' + i).value;
+                const studentSize = document.getElementById('size' + i).value;
+                
+                if (studentName && studentClass && studentSize) {
+                    summaryHTML += `<div class="summary-item">
+                        <strong>תלמיד/ה ${i}:</strong> ${studentName}<br>
+                        <strong>כיתה:</strong> ${studentClass}<br>
+                        <strong>מידה:</strong> ${studentSize}
+                    </div>`;
+                }
+            }
+            
+            // הוספת הערות אם ישנן
+            const comments = document.getElementById('comments').value.trim();
+            if (comments) {
+                summaryHTML += `<div class="summary-item"><strong>הערות:</strong><br>${comments}</div>`;
+            }
+            
+            return summaryHTML;
+        }
+        
+        // אימות הטופס לפני השליחה והצגת סיכום
         document.getElementById('shirtOrderForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -378,9 +524,11 @@
                 }
             }
             
-            // אם הטופס תקין, שלח אותו
+            // אם הטופס תקין, הצג את סיכום ההזמנה
             if (isValid) {
-                submitToGoogleForm();
+                // הצג את סיכום ההזמנה במודאל
+                document.getElementById('orderSummaryContent').innerHTML = createOrderSummary();
+                modal.style.display = 'block';
             }
         });
 
@@ -412,6 +560,9 @@
                 }
             }
             
+            // סגירת המודאל
+            modal.style.display = 'none';
+            
             // שליחת הטופס באמצעות fetch
             fetch('https://docs.google.com/forms/d/e/1FAIpQLSdpzTx4rj5YDBaKiWcz7JCmTJRm9wPW6szXhAhK0w5BWF83bg/formResponse', {
                 method: 'POST',
@@ -420,6 +571,7 @@
             })
             .then(() => {
                 alert('ההזמנה נשלחה בהצלחה!');
+                
                 document.getElementById('shirtOrderForm').reset();
                 
                 // הסרת כל התלמידים למעט הראשון
