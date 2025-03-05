@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>רישום ליום סבבא אגף בנים</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f7f6fb;
+            color: #333;
+        }
+        
+        .form-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            max-width: 200px;
+            height: auto;
+            display: inline-block;
+        }
+        
+        h1 {
+            color: #4a2c82;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .highlight {
+            font-weight: 700;
+            color: #6a41b4;
+            background-color: #f0ebff;
+            padding: 0 5px;
+            border-radius: 4px;
+        }
+        
+        .event-details {
+            text-align: center;
+            font-size: 18px;
+            color: #4a2c82;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .description {
+            margin-bottom: 35px;
+            text-align: center;
+            color: #555;
+            font-size: 18px;
+            line-height: 1.6;
+            background-color: #f9f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-right: 4px solid #4a2c82;
+        }
+        
+        .form-group {
+            margin-bottom: 22px;
+        }
+        
+        .student-entry {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 25px;
+            position: relative;
+            background-color: #fafafa;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .student-entry:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #6a41b4;
+            box-shadow: 0 0 0 3px rgba(106, 65, 180, 0.15);
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 35px 0;
+        }
+        
+        button {
+            padding: 14px 24px;
+            background-color: #4a2c82;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover:not(:disabled) {
+            background-color: #371f61;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:disabled {
+            background-color: #9d9d9d;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        button.secondary {
+            background-color: #6c757d;
+        }
+        
+        button.secondary:hover:not(:disabled) {
+            background-color: #5a6268;
+        }
+        
+        button.delete-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 8px 14px;
+            background-color: #dc3545;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+        }
+        
+        button.delete-btn:hover:not(:disabled) {
+            background-color: #c82333;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .attendees-section {
+            margin-top: 45px;
+            background-color: #f8f6ff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-right: 4px solid #6a41b4;
+        }
+        
+        .attendees-section h2 {
+            margin-top: 0;
+            color: #4a2c82;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .attendee-options {
+            margin-top: 20px;
+        }
+
+        .note {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fff3cd;
+            border-radius: 8px;
+            border-right: 3px solid #ffc107;
+            font-size: 15px;
+            text-align: center;
+        }
+        
+        .attendee-fields {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .checkbox-option {
+            background-color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            flex: 1;
+            min-width: 150px;
+            max-width: 200px;
+        }
+        
+        .checkbox-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+        
+        .checkbox-option label {
+            margin-bottom: 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        input[type="checkbox"] {
+            width: auto;
+            margin-left: 10px;
+            cursor: pointer;
+            transform: scale(1.2);
+            accent-color: #4a2c82;
+        }
+        
+        .submit-section {
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        #submitButton {
+            padding: 16px 50px;
+            font-size: 20px;
+            background-color: #28a745;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        #submitButton:hover:not(:disabled) {
+            background-color: #218838;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(40, 167, 69, 0.4);
+        }
+        
+        #submitButton:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 6px;
+            display: none;
+            padding-right: 8px;
+            border-right: 2px solid #dc3545;
+        }
+        
+        .required-field {
+            color: #dc3545;
+            margin-right: 4px;
+        }
+        
+        /* סגנון חלון סיכום */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: auto;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 85%;
+            max-width: 600px;
+            position: relative;
+            animation: modalFadeIn 0.4s;
+        }
+        
+        @keyframes modalFadeIn {
+            from {opacity: 0; transform: scale(0.8) translateY(20px);}
+            to {opacity: 1; transform: scale(1) translateY(0);}
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.2s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-button:hover {
+            color: #000;
+            background-color: #f5f5f5;
+        }
+        
+        #summaryContent {
+            margin-top: 25px;
+            line-height: 1.8;
+            font-size: 20px;
+            text-align: center;
+            color: #333;
+        }
+        
+        .modal h2 {
+            color: #4a2c82;
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 25px;
+            }
+            
+            .checkbox-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .checkbox-option {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            #submitButton {
+                width: 100%;
+            }
+            
+            .modal-content {
+                width: 90%;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="logo-container">
+            <img src="logo.png" alt="לוגו" class="logo">
+        </div>
+        <h1>רישום ליום סבבא <span class="highlight">אגף בנים</span></h1>
+        <div class="event-details">
+            ז' אדר התשפ"ה | 7 במרץ למניינם | זמן הפעילות: 9:00-11:00
+        </div>
+        <div class="description">
+            הורים יקרים, על מנת שנוכל להיערך בהתאם נא מלאו את השאלון הבא:
+        </div>
+        
+        <form id="registrationForm" onsubmit="submitForm(event)">
+            <!-- רשימת התלמידים -->
+            <div id="studentsContainer">
+                <div class="student-entry" id="student1">
+                    <div class="form-group">
+                        <label for="studentName1">שם התלמיד <span class="required-field">*</span></label>
+                        <input type="text" id="studentName1" required>
+                        <div class="error-message" id="studentName1Error">יש להזין שם תלמיד</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentClass1">כיתה <span class="required-field">*</span></label>
+                        <select id="studentClass1" required>
+                            <option value="">בחר/י כיתה</option>
+                            <option value="א' בנים רחל פרידמן">א' בנים רחל פרידמן</option>
+                            <option value="ב' בנים הילה אלבה">ב' בנים הילה אלבה</option>
+                            <option value="ג' בנים מוריה מימון">ג' בנים מוריה מימון</option>
+                            <option value="ד' בנים נוי חנוכה">ד' בנים נוי חנוכה</option>
+                            <option value="הכיתה של גל">הכיתה של גל</option>
+                        </select>
+                        <div class="error-message" id="studentClass1Error">יש לבחור כיתה</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button type="button" id="addStudentBtn" onclick="addStudent()">+ הוספת תלמיד</button>
+            </div>
+            
+            <!-- שם משפחה -->
+            <div class="form-group">
+                <label for="lastName">שם משפחה <span class="required-field">*</span></label>
+                <input type="text" id="lastName" required>
+                <div class="error-message" id="lastNameError">יש להזין שם משפחה</div>
+            </div>
+            
+            <!-- מי מגיע -->
+            <div class="attendees-section">
+                <h2>מי מגיע?</h2>
+                <div class="checkbox-group">
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="grandpaOption" onclick="toggleAttendeeFields()">
+                        <label for="grandpaOption">סבא</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="grandmaOption" onclick="toggleAttendeeFields()">
+                        <label for="grandmaOption">סבתא</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="otherOption" onclick="toggleAttendeeFields()">
+                        <label for="otherOption">אחר</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="noneOption" onclick="toggleNoneOption()">
+                        <label for="noneOption">לא נוכל להגיע</label>
+                    </div>
+                </div>
+                <div class="note">
+                    <strong>שימו לב:</strong> ניתן לבחור עד שני מלווים בלבד
+                </div>
+                <div class="error-message" id="attendeeError" style="text-align: center; margin-bottom: 20px;">יש לבחור לפחות אפשרות אחת</div>
+                <div class="error-message" id="maxAttendeesError" style="text-align: center; margin-bottom: 20px;">ניתן לבחור עד שני מלווים בלבד</div>
+                
+                <!-- שדות לסבא -->
+                <div id="grandpaFields" class="attendee-fields hidden">
+                    <div class="form-group">
+                        <label for="grandpaName">שם סבא <span class="required-field">*</span></label>
+                        <input type="text" id="grandpaName">
+                        <div class="error-message" id="grandpaNameError">יש להזין שם סבא</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="grandpaLastName">שם משפחה של סבא <span class="required-field">*</span></label>
+                        <input type="text" id="grandpaLastName">
+                        <div class="error-message" id="grandpaLastNameError">יש להזין שם משפחה של סבא</div>
+                    </div>
+                </div>
+                
+                <!-- שדות לסבתא -->
+                <div id="grandmaFields" class="attendee-fields hidden">
+                    <div class="form-group">
+                        <label for="grandmaName">שם סבתא <span class="required-field">*</span></label>
+                        <input type="text" id="grandmaName">
+                        <div class="error-message" id="grandmaNameError">יש להזין שם סבתא</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="grandmaLastName">שם משפחה של סבתא <span class="required-field">*</span></label>
+                        <input type="text" id="grandmaLastName">
+                        <div class="error-message" id="grandmaLastNameError">יש להזין שם משפחה של סבתא</div>
+                    </div>
+                </div>
+                
+                <!-- שדות לקרוב משפחה אחר -->
+                <div id="otherFields" class="attendee-fields hidden">
+                    <div class="form-group">
+                        <label for="otherRelation">קרבה <span class="required-field">*</span></label>
+                        <input type="text" id="otherRelation" placeholder="לדוגמה: דוד, דודה, אח, אחות">
+                        <div class="error-message" id="otherRelationError">יש להזין קרבה משפחתית</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="otherName">שם פרטי <span class="required-field">*</span></label>
+                        <input type="text" id="otherName">
+                        <div class="error-message" id="otherNameError">יש להזין שם פרטי</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="otherLastName">שם משפחה <span class="required-field">*</span></label>
+                        <input type="text" id="otherLastName">
+                        <div class="error-message" id="otherLastNameError">יש להזין שם משפחה</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- כפתור שליחה -->
+            <div class="submit-section">
+                <button type="submit" id="submitButton">שליחה</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- חלון סיכום - עם style inline בנוסף למחלקת hidden -->
+    <div id="summaryModal" class="modal hidden" style="display: none;">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h2>תודה על הרישום!</h2>
+            <div id="summaryContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // וידוא הסתרת המודל בטעינת הדף
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('summaryModal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.classList.add('hidden');
+            }
+        });
+        
+        // משתנה לשמירת מספר התלמידים הנוכחי
+        let currentStudents = 1;
+        const maxStudents = 4;
+        
+        // הוספת תלמיד
+        function addStudent() {
+            if (currentStudents >= maxStudents) {
+                alert('ניתן להוסיף עד 4 תלמידים בלבד');
+                return;
+            }
+            
+            currentStudents++;
+            const container = document.getElementById('studentsContainer');
+            const newStudentDiv = document.createElement('div');
+            newStudentDiv.className = 'student-entry';
+            newStudentDiv.id = `student${currentStudents}`;
+            
+            newStudentDiv.innerHTML = `
+                <button type="button" class="delete-btn" onclick="removeStudent(${currentStudents})">מחיקה</button>
+                <div class="form-group">
+                    <label for="studentName${currentStudents}">שם התלמיד <span class="required-field">*</span></label>
+                    <input type="text" id="studentName${currentStudents}" required>
+                    <div class="error-message" id="studentName${currentStudents}Error">יש להזין שם תלמיד</div>
+                </div>
+                <div class="form-group">
+                    <label for="studentClass${currentStudents}">כיתה <span class="required-field">*</span></label>
+                    <select id="studentClass${currentStudents}" required>
+                        <option value="">בחר/י כיתה</option>
+                        <option value="א' בנים רחל פרידמן">א' בנים רחל פרידמן</option>
+                        <option value="ב' בנים הילה אלבה">ב' בנים הילה אלבה</option>
+                        <option value="ג' בנים מוריה מימון">ג' בנים מוריה מימון</option>
+                        <option value="ד' בנים נוי חנוכה">ד' בנים נוי חנוכה</option>
+                        <option value="הכיתה של גל">הכיתה של גל</option>
+                    </select>
+                    <div class="error-message" id="studentClass${currentStudents}Error">יש לבחור כיתה</div>
+                </div>
+            `;
+            
+            container.appendChild(newStudentDiv);
+        }
+        
+        // הסרת תלמיד
+        function removeStudent(studentNumber) {
+            const studentDiv = document.getElementById(`student${studentNumber}`);
+            studentDiv.remove();
+            
+            // סידור מחדש של האינדקסים
+            rearrangeStudents();
+        }
+        
+        // סידור מחדש של האינדקסים לאחר מחיקה
+        function rearrangeStudents() {
+            const container = document.getElementById('studentsContainer');
+            const studentEntries = container.querySelectorAll('.student-entry');
+            currentStudents = studentEntries.length;
+            
+            // עדכון האינדקסים
+            studentEntries.forEach((entry, index) => {
+                const studentNumber = index + 1;
+                entry.id = `student${studentNumber}`;
+                
+                // עדכון שדות התלמיד
+                const nameInput = entry.querySelector('input[id^="studentName"]');
+                const classSelect = entry.querySelector('select[id^="studentClass"]');
+                const nameError = entry.querySelector('div[id^="studentName"][id$="Error"]');
+                const classError = entry.querySelector('div[id^="studentClass"][id$="Error"]');
+                const deleteBtn = entry.querySelector('.delete-btn');
+                
+                if (nameInput) nameInput.id = `studentName${studentNumber}`;
+                if (classSelect) classSelect.id = `studentClass${studentNumber}`;
+                if (nameError) nameError.id = `studentName${studentNumber}Error`;
+                if (classError) classError.id = `studentClass${studentNumber}Error`;
+                
+                // עדכון כפתור המחיקה רק אם זה לא התלמיד הראשון
+                if (deleteBtn && studentNumber > 1) {
+                    deleteBtn.setAttribute('onclick', `removeStudent(${studentNumber})`);
+                } else if (deleteBtn) {
+                    deleteBtn.remove(); // להסיר את כפתור המחיקה מהתלמיד הראשון
+                }
+            });
+        }
+        
+        // טיפול בתיבת הסימון "לא נוכל להגיע"
+        function toggleNoneOption() {
+            const noneChecked = document.getElementById('noneOption').checked;
+            
+            if (noneChecked) {
+                // אם סימנו "לא נוכל להגיע", מנקים את האפשרויות האחרות
+                document.getElementById('grandpaOption').checked = false;
+                document.getElementById('grandmaOption').checked = false;
+                document.getElementById('otherOption').checked = false;
+                document.getElementById('grandpaFields').classList.add('hidden');
+                document.getElementById('grandmaFields').classList.add('hidden');
+                document.getElementById('otherFields').classList.add('hidden');
+            }
+            
+            // הסתרת הודעת שגיאת מספר המלווים
+            document.getElementById('maxAttendeesError').style.display = 'none';
+        }
+        
+        // הצגת שדות לפי בחירת המשתתף
+        function toggleAttendeeFields() {
+            const grandpaChecked = document.getElementById('grandpaOption').checked;
+            const grandmaChecked = document.getElementById('grandmaOption').checked;
+            const otherChecked = document.getElementById('otherOption').checked;
+            
+            // בדיקת מספר המלווים
+            const numAttendees = (grandpaChecked ? 1 : 0) + 
+                                (grandmaChecked ? 1 : 0) + 
+                                (otherChecked ? 1 : 0);
+            
+            const maxAttendeesError = document.getElementById('maxAttendeesError');
+            
+            if (numAttendees > 2) {
+                maxAttendeesError.style.display = 'block';
+                // ביטול האפשרות האחרונה שנבחרה
+                if (this === document.getElementById('grandpaOption')) {
+                    document.getElementById('grandpaOption').checked = false;
+                } else if (this === document.getElementById('grandmaOption')) {
+                    document.getElementById('grandmaOption').checked = false;
+                } else if (this === document.getElementById('otherOption')) {
+                    document.getElementById('otherOption').checked = false;
+                }
+                return;
+            } else {
+                maxAttendeesError.style.display = 'none';
+            }
+            
+            // אם בחרו באחת האפשרויות, מנקים את "לא נוכל להגיע"
+            if (grandpaChecked || grandmaChecked || otherChecked) {
+                document.getElementById('noneOption').checked = false;
+            }
+            
+            // עדכון הצגת השדות
+            const grandpaFields = document.getElementById('grandpaFields');
+            const grandmaFields = document.getElementById('grandmaFields');
+            const otherFields = document.getElementById('otherFields');
+            
+            if (grandpaChecked) {
+                grandpaFields.classList.remove('hidden');
+            } else {
+                grandpaFields.classList.add('hidden');
+            }
+            
+            if (grandmaChecked) {
+                grandmaFields.classList.remove('hidden');
+            } else {
+                grandmaFields.classList.add('hidden');
+            }
+            
+            if (otherChecked) {
+                otherFields.classList.remove('hidden');
+            } else {
+                otherFields.classList.add('hidden');
+            }
+        }
+        
+        // ולידציה של הטופס
+        function validateForm() {
+            let isValid = true;
+            
+            // בדיקת פרטי התלמידים
+            for (let i = 1; i <= currentStudents; i++) {
+                const nameInput = document.getElementById(`studentName${i}`);
+                const classSelect = document.getElementById(`studentClass${i}`);
+                const nameError = document.getElementById(`studentName${i}Error`);
+                const classError = document.getElementById(`studentClass${i}Error`);
+                
+                // בדיקת שם תלמיד
+                if (!nameInput.value.trim()) {
+                    nameError.style.display = 'block';
+                    isValid = false;
+                } else {
+                    nameError.style.display = 'none';
+                }
+                
+                // בדיקת כיתה
+                if (!classSelect.value) {
+                    classError.style.display = 'block';
+                    isValid = false;
+                } else {
+                    classError.style.display = 'none';
+                }
+            }
+            
+            // בדיקת שם משפחה
+            const lastName = document.getElementById('lastName');
+            const lastNameError = document.getElementById('lastNameError');
+            
+            if (!lastName.value.trim()) {
+                lastNameError.style.display = 'block';
+                isValid = false;
+            } else {
+                lastNameError.style.display = 'none';
+            }
+            
+            // בדיקת בחירת משתתף
+            const grandpaChecked = document.getElementById('grandpaOption').checked;
+            const grandmaChecked = document.getElementById('grandmaOption').checked;
+            const otherChecked = document.getElementById('otherOption').checked;
+            const noneChecked = document.getElementById('noneOption').checked;
+            const attendeeError = document.getElementById('attendeeError');
+            
+        // בדיקת מספר המלווים
+            const numAttendees = (grandpaChecked ? 1 : 0) + 
+                                (grandmaChecked ? 1 : 0) + 
+                                (otherChecked ? 1 : 0);
+            const maxAttendeesError = document.getElementById('maxAttendeesError');
+            
+            if (numAttendees > 2 && !noneChecked) {
+                maxAttendeesError.style.display = 'block';
+                isValid = false;
+            } else {
+                maxAttendeesError.style.display = 'none';
+            }
+            
+            if (!grandpaChecked && !grandmaChecked && !otherChecked && !noneChecked) {
+                attendeeError.style.display = 'block';
+                isValid = false;
+            } else {
+                attendeeError.style.display = 'none';
+                
+                // בדיקת פרטי סבא אם נבחר
+                if (grandpaChecked) {
+                    const grandpaName = document.getElementById('grandpaName');
+                    const grandpaLastName = document.getElementById('grandpaLastName');
+                    const grandpaNameError = document.getElementById('grandpaNameError');
+                    const grandpaLastNameError = document.getElementById('grandpaLastNameError');
+                    
+                    if (!grandpaName.value.trim()) {
+                        grandpaNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        grandpaNameError.style.display = 'none';
+                    }
+                    
+                    if (!grandpaLastName.value.trim()) {
+                        grandpaLastNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        grandpaLastNameError.style.display = 'none';
+                    }
+                }
+                
+                // בדיקת פרטי סבתא אם נבחרה
+                if (grandmaChecked) {
+                    const grandmaName = document.getElementById('grandmaName');
+                    const grandmaLastName = document.getElementById('grandmaLastName');
+                    const grandmaNameError = document.getElementById('grandmaNameError');
+                    const grandmaLastNameError = document.getElementById('grandmaLastNameError');
+                    
+                    if (!grandmaName.value.trim()) {
+                        grandmaNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        grandmaNameError.style.display = 'none';
+                    }
+                    
+                    if (!grandmaLastName.value.trim()) {
+                        grandmaLastNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        grandmaLastNameError.style.display = 'none';
+                    }
+                }
+                
+                // בדיקת פרטי קרוב משפחה אחר אם נבחר
+                if (otherChecked) {
+                    const otherRelation = document.getElementById('otherRelation');
+                    const otherName = document.getElementById('otherName');
+                    const otherLastName = document.getElementById('otherLastName');
+                    const otherRelationError = document.getElementById('otherRelationError');
+                    const otherNameError = document.getElementById('otherNameError');
+                    const otherLastNameError = document.getElementById('otherLastNameError');
+                    
+                    if (!otherRelation.value.trim()) {
+                        otherRelationError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        otherRelationError.style.display = 'none';
+                    }
+                    
+                    if (!otherName.value.trim()) {
+                        otherNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        otherNameError.style.display = 'none';
+                    }
+                    
+                    if (!otherLastName.value.trim()) {
+                        otherLastNameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        otherLastNameError.style.display = 'none';
+                    }
+                }
+            }
+            
+            return isValid;
+        }
+        
+        // יצירת הודעת הסיכום
+        function createSummaryMessage() {
+            let studentsInfo = [];
+            let classesInfo = [];
+            
+            // איסוף פרטי התלמידים
+            for (let i = 1; i <= currentStudents; i++) {
+                const name = document.getElementById(`studentName${i}`).value;
+                const cls = document.getElementById(`studentClass${i}`).value;
+                if (name && cls) {
+                    studentsInfo.push(name);
+                    classesInfo.push(cls);
+                }
+            }
+            
+            // איסוף פרטי המשתתפים
+            const grandpaChecked = document.getElementById('grandpaOption').checked;
+            const grandmaChecked = document.getElementById('grandmaOption').checked;
+            const otherChecked = document.getElementById('otherOption').checked;
+            const noneChecked = document.getElementById('noneOption').checked;
+            
+            let attendeesText = '';
+            
+            if (noneChecked) {
+                return `לא נוכל להגיע ליום סבבא לאגף בנים בתאריך ז' אדר. מקווים לראותכם באירועים הבאים!`;
+            }
+            
+            let attendees = [];
+            
+            if (grandpaChecked) {
+                const grandpaName = document.getElementById('grandpaName').value;
+                attendees.push(`סבא ${grandpaName}`);
+            }
+            
+            if (grandmaChecked) {
+                const grandmaName = document.getElementById('grandmaName').value;
+                attendees.push(`סבתא ${grandmaName}`);
+            }
+            
+            if (otherChecked) {
+                const otherRelation = document.getElementById('otherRelation').value;
+                const otherName = document.getElementById('otherName').value;
+                attendees.push(`${otherRelation} ${otherName}`);
+            }
+            
+            // חיבור המשתתפים לטקסט אחד
+            if (attendees.length === 1) {
+                attendeesText = attendees[0];
+            } else if (attendees.length === 2) {
+                attendeesText = `${attendees[0]} ו${attendees[1]}`;
+            }
+            
+            // יצירת רשימת התלמידים והכיתות
+            let studentsList = '';
+            for (let i = 0; i < studentsInfo.length; i++) {
+                if (i > 0) {
+                    studentsList += i === studentsInfo.length - 1 ? ' ו' : ', ';
+                }
+                studentsList += `${studentsInfo[i]} מכיתה ${classesInfo[i]}`;
+            }
+            
+            return `שמחנו ש${attendeesText} של ${studentsList} ${studentsInfo.length > 1 || attendees.length > 1 ? 'יגיעו' : 'יגיע/תגיע'} ליום סבבא לאגף בנים בתאריך ז' אדר`;
+        }
+        
+        // הצגת חלון הסיכום
+        function showSummaryModal() {
+            const summaryContent = document.getElementById('summaryContent');
+            summaryContent.innerText = createSummaryMessage();
+            
+            const modal = document.getElementById('summaryModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex'; // שימוש ב-flex כדי למרכז את התוכן
+        }
+        
+        // סגירת חלון הסיכום
+        function closeModal() {
+            const modal = document.getElementById('summaryModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+            
+            // איפוס הטופס
+            document.getElementById('registrationForm').reset();
+            resetForm();
+        }
+        
+        // שליחת הטופס
+        function submitForm(event) {
+            event.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+            
+            // נטרול כפתור השליחה
+            const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;
+            submitButton.innerText = 'שולח...';
+            
+            // הכנת הנתונים לשליחה
+            const formData = prepareFormData();
+            
+            // שליחת הטופס
+            const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSen2LX3FYPxYuPQwsfG22rRYCaShq_Ev_lREZbze0yZz0j2Ig/formResponse';
+            
+            fetch(formUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            }).then(() => {
+                showSummaryModal();
+                // נטרול כפתור השליחה לדקה
+                setTimeout(() => {
+                    submitButton.disabled = false;
+                    submitButton.innerText = 'שליחה';
+                }, 60000);
+            }).catch(error => {
+                console.error('Error:', error);
+                // נשלח בכל מקרה כי Google Forms לא מאפשר CORS
+                showSummaryModal();
+                setTimeout(() => {
+                    submitButton.disabled = false;
+                    submitButton.innerText = 'שליחה';
+                }, 60000);
+            });
+        }
+        
+        // הכנת הנתונים לשליחה
+        function prepareFormData() {
+            const formData = new FormData();
+            
+            // הוספת פרטי התלמידים
+            for (let i = 1; i <= 4; i++) {
+                if (i <= currentStudents) {
+                    const name = document.getElementById(`studentName${i}`).value;
+                    const cls = document.getElementById(`studentClass${i}`).value;
+                    
+                    if (i === 1) {
+                        formData.append('entry.2059163958', name);
+                        formData.append('entry.1672764995', cls);
+                    } else if (i === 2) {
+                        formData.append('entry.501709204', name);
+                        formData.append('entry.786499716', cls);
+                    } else if (i === 3) {
+                        formData.append('entry.619222541', name);
+                        formData.append('entry.1245453582', cls);
+                    } else if (i === 4) {
+                        formData.append('entry.1249874396', name);
+                        formData.append('entry.1344493533', cls);
+                    }
+                } else {
+                    // השארת שדות ריקים לתלמידים שלא הוזנו
+                    if (i === 2) {
+                        formData.append('entry.501709204', '');
+                        formData.append('entry.786499716', '');
+                    } else if (i === 3) {
+                        formData.append('entry.619222541', '');
+                        formData.append('entry.1245453582', '');
+                    } else if (i === 4) {
+                        formData.append('entry.1249874396', '');
+                        formData.append('entry.1344493533', '');
+                    }
+                }
+            }
+            
+            // הוספת שם משפחה
+            formData.append('entry.201184467', document.getElementById('lastName').value);
+            
+            // הוספת פרטי המשתתף
+            const grandpaChecked = document.getElementById('grandpaOption').checked;
+            const grandmaChecked = document.getElementById('grandmaOption').checked;
+            const otherChecked = document.getElementById('otherOption').checked;
+            const noneChecked = document.getElementById('noneOption').checked;
+            
+            if (noneChecked) {
+                formData.append('entry.1655902341', '');
+                formData.append('entry.825507375', '');
+                formData.append('entry.1006960794', '');
+                formData.append('entry.550793818', '');
+                formData.append('entry.1674672917', '');
+                formData.append('entry.842686301', '');
+                formData.append('entry.563967012', '');
+                formData.append('entry.1765091966', 'לא מגיעים');
+            } else {
+                if (grandpaChecked) {
+                    formData.append('entry.1655902341', document.getElementById('grandpaName').value);
+                    formData.append('entry.825507375', document.getElementById('grandpaLastName').value);
+                } else {
+                    formData.append('entry.1655902341', '');
+                    formData.append('entry.825507375', '');
+                }
+                
+                if (grandmaChecked) {
+                    formData.append('entry.1006960794', document.getElementById('grandmaName').value);
+                    formData.append('entry.550793818', document.getElementById('grandmaLastName').value);
+                } else {
+                    formData.append('entry.1006960794', '');
+                    formData.append('entry.550793818', '');
+                }
+                
+                if (otherChecked) {
+                    formData.append('entry.1674672917', document.getElementById('otherRelation').value);
+                    formData.append('entry.842686301', document.getElementById('otherName').value);
+                    formData.append('entry.563967012', document.getElementById('otherLastName').value);
+                } else {
+                    formData.append('entry.1674672917', '');
+                    formData.append('entry.842686301', '');
+                    formData.append('entry.563967012', '');
+                }
+                
+                formData.append('entry.1765091966', '');
+            }
+            
+            return formData;
+        }
+        
+        // איפוס הטופס למצב התחלתי
+        function resetForm() {
+            // השארת רק תלמיד אחד
+            const container = document.getElementById('studentsContainer');
+            const studentEntries = container.querySelectorAll('.student-entry');
+            
+            for (let i = 1; i < studentEntries.length; i++) {
+                studentEntries[i].remove();
+            }
+            
+            currentStudents = 1;
+            
+            // איפוס שדות המשתתף
+            const grandpaFields = document.getElementById('grandpaFields');
+            const grandmaFields = document.getElementById('grandmaFields');
+            const otherFields = document.getElementById('otherFields');
+            
+            grandpaFields.classList.add('hidden');
+            grandmaFields.classList.add('hidden');
+            otherFields.classList.add('hidden');
+            
+            // הסתרת הודעות שגיאה
+            const errorMessages = document.querySelectorAll('.error-message');
+            errorMessages.forEach(msg => {
+                msg.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>
