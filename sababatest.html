@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ניתוח נתוני רישום - יום סבבא אגף בנות</title>
+    <title>ניתוח נתוני רישום - יום סבבא</title>
     <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=laCptcXrTBj0nQfsmVob8SZieijOEGgMXaX3HQMGfFoBkUDglSRylRf6ulTSDU_CpYawEtNbExLGWPyFktxiHhOe_4M4JAySOYRENxeKL4E" charset="UTF-8"></script><script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
     <style>
@@ -344,6 +344,32 @@
             margin-bottom: 15px;
         }
         
+        .main-filter {
+            background-color: var(--primary-light);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-button {
+            padding: 8px 15px;
+            border-radius: 5px;
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
         .export-controls {
             margin-top: 20px;
             display: flex;
@@ -385,7 +411,7 @@
             }
             
             .btn, .pagination, .filter-controls, select, 
-            .export-controls, .notification, .page-controls {
+            .export-controls, .notification, .page-controls, .main-filter {
                 display: none;
             }
             
@@ -423,6 +449,11 @@
             .filter-controls {
                 flex-direction: column;
             }
+            
+            .main-filter {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
@@ -431,7 +462,7 @@
         <div class="logo-container">
             <img src="logo.png" alt="לוגו" class="logo" onerror="this.style.display='none'">
         </div>
-        <h1>ניתוח נתוני רישום - יום סבבא אגף בנות</h1>
+        <h1>ניתוח נתוני רישום - יום סבבא</h1>
     </header>
     
     <div id="notification" class="notification"></div>
@@ -453,10 +484,17 @@
     </div>
     
     <div id="dashboard" class="dashboard" style="display: none;">
+        <!-- פילטר ראשי -->
+        <div class="main-filter" style="grid-column: 1 / -1;">
+            <button class="filter-button active" data-filter="all" onclick="applyMainFilter('all')">כל בית הספר</button>
+            <button class="filter-button" data-filter="boys" onclick="applyMainFilter('boys')">כיתות בנים</button>
+            <button class="filter-button" data-filter="girls" onclick="applyMainFilter('girls')">כיתות בנות</button>
+        </div>
+        
         <!-- כרטיס סיכום נתונים -->
         <div class="card summary-card">
             <div class="summary-item">
-                <div class="summary-label">סה"כ תלמידות</div>
+                <div class="summary-label">סה"כ תלמידים</div>
                 <div id="totalStudents" class="summary-value">0</div>
             </div>
             <div class="summary-item">
@@ -484,7 +522,7 @@
         <!-- כרטיס התפלגות לפי כיתות -->
         <div class="card">
             <div class="card-header">
-                התפלגות תלמידות לפי כיתה
+                התפלגות תלמידים לפי כיתה
             </div>
             <div class="card-body">
                 <div class="chart-container">
@@ -530,7 +568,7 @@
                         <thead>
                             <tr>
                                 <th onclick="sortTable('detailedClassTable', 0)">כיתה</th>
-                                <th onclick="sortTable('detailedClassTable', 1)">מספר תלמידות</th>
+                                <th onclick="sortTable('detailedClassTable', 1)">מספר תלמידים</th>
                                 <th onclick="sortTable('detailedClassTable', 2)">מגיעים</th>
                                 <th onclick="sortTable('detailedClassTable', 3)">לא מגיעים</th>
                                 <th onclick="sortTable('detailedClassTable', 4)">אחוז השתתפות</th>
@@ -546,10 +584,10 @@
             </div>
         </div>
         
-        <!-- כרטיס רשימת תלמידות -->
+        <!-- כרטיס רשימת תלמידים -->
         <div class="card">
             <div class="card-header">
-                <span>רשימת תלמידות לפי סטטוס הגעה</span>
+                <span>רשימת תלמידים לפי סטטוס הגעה</span>
             </div>
             <div class="card-body">
                 <div class="filter-controls">
@@ -561,9 +599,17 @@
                         </select>
                     </div>
                     <div>
+                        <label for="genderFilter">סינון לפי מגדר:</label>
+                        <select id="genderFilter" onchange="filterStudentList()">
+                            <option value="all">הכל</option>
+                            <option value="boys">בנים</option>
+                            <option value="girls">בנות</option>
+                        </select>
+                    </div>
+                    <div>
                         <label for="attendanceFilter">סינון לפי סטטוס:</label>
                         <select id="attendanceFilter" onchange="filterStudentList()">
-                            <option value="all">כל התלמידות</option>
+                            <option value="all">כל התלמידים</option>
                             <option value="attending">מגיעים</option>
                             <option value="notAttending">לא מגיעים</option>
                         </select>
@@ -591,7 +637,7 @@
                         </select>
                     </div>
                     <div>
-                        <span id="studentListInfo">מציג <span id="startDisplayIndex">1</span>-<span id="endDisplayIndex">10</span> מתוך <span id="totalFilteredCount">0</span> תלמידות</span>
+                        <span id="studentListInfo">מציג <span id="startDisplayIndex">1</span>-<span id="endDisplayIndex">10</span> מתוך <span id="totalFilteredCount">0</span> תלמידים</span>
                     </div>
                 </div>
                 
@@ -599,7 +645,7 @@
                     <table id="studentList">
                         <thead>
                             <tr>
-                                <th onclick="sortStudentList('name')">שם התלמידה</th>
+                                <th onclick="sortStudentList('name')">שם התלמיד/ה</th>
                                 <th onclick="sortStudentList('className')">כיתה</th>
                                 <th onclick="sortStudentList('lastName')">שם משפחה</th>
                                 <th onclick="sortStudentList('attendees')">מי מגיע</th>
@@ -622,14 +668,29 @@
             // קישור לגליון הנתונים
             SHEET_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS-tw481NC9DzPt3RBOEoiGdeGv6FNRjC28NbKUuvY2bNWIdSqR4BmQTe8-n6RndK4NDOgVFtUirqU4/pub?output=csv',
             // מידע מעודכן על גודלי כיתות
-             CLASS_SIZES: {
-        'א\' עדי רחמני': 24,
-        'א\' רעות שיף': 23,
-        'ב\' הדר כהן': 30,
-        'ג\' שירה חדאד': 21,
-        'ד\' הדר כחלון': 30,
-        'ו\' ספיר צדוק': 25
-    }
+            CLASS_SIZES: {
+                // כיתות בנות
+                'א\' עדי רחמני': 24,
+                'א\' רעות שיף': 23,
+                'ב\' הדר כהן': 30,
+                'ג\' שירה חדאד': 21,
+                'ד\' הדר כחלון': 30,
+                'ו\' ספיר צדוק': 25,
+                // כיתות בנים - מעודכן
+                'א\' בנים רחל פרידמן': 29,
+                'ב\' בנים הילה אלבה': 28,
+                'ג\' בנים מוריה מימון': 22,
+                'ד\' בנים נוי חנוכה': 25,
+                'הכיתה של גל': 7
+            },
+            // רשימת כיתות בנים
+            BOYS_CLASSES: [
+                'א\' בנים רחל פרידמן',
+                'ב\' בנים הילה אלבה',
+                'ג\' בנים מוריה מימון',
+                'ד\' בנים נוי חנוכה',
+                'הכיתה של גל'
+            ]
         };
         
         // משתנים גלובליים לניתוח הנתונים
@@ -648,15 +709,23 @@
             participationRates: {},
             studentList: [],
             // מידע חדש: אחוז ההשתתפות מתוך הכיתה המלאה
-            totalClassParticipation: {}
+            totalClassParticipation: {},
+            // מיפוי משפחות לפי כיתות ומגדר לצורך ספירה תקינה
+            familyMapping: {}
         };
         
-        // משתנים לתצוגת רשימת התלמידות
+        // עותק שלם של הנתונים המעובדים לשימוש עם פילטרים
+        let fullProcessedData = {};
+        
+        // משתנים לתצוגת רשימת התלמידים
         let currentPage = 1;
         let rowsPerPage = 10;
         let filteredStudents = [];
         let currentSortColumn = 'name';
         let currentSortDirection = 'asc';
+        
+        // משתנה לסינון הנוכחי
+        let currentFilter = 'all'; // 'all', 'boys', 'girls'
         
         // פונקציית debounce למניעת קריאות תכופות מדי
         function debounce(func, wait) {
@@ -706,6 +775,11 @@
             }
         }
         
+        // בדיקה אם כיתה היא כיתת בנים
+        function isBoysClass(className) {
+            return CONFIG.BOYS_CLASSES.includes(className);
+        }
+        
         // פונקציה לטעינה עם ניסיון חוזר
         async function fetchWithRetry(url, maxRetries = 3, retryDelay = 1000) {
             let lastError;
@@ -731,8 +805,6 @@
         // ניסיון מחדש של טעינת הנתונים
         function retryLoading() {
             loadData();
-        }
-        
         // טעינה מהמטמון המקומי
         function tryLoadFromCache() {
             try {
@@ -808,7 +880,8 @@
                 },
                 participationRates: {},
                 studentList: [],
-                totalClassParticipation: {}
+                totalClassParticipation: {},
+                familyMapping: {} // מיפוי משפחות לפי מגדר/כיתה
             };
             
             // מעבר על הנתונים
@@ -816,7 +889,6 @@
                 // בדיקה האם המשפחה לא מגיעה
                 const notAttending = row["לא מגיעים"] ? true : false;
                 
-                // חיפוש מידע על מלווים
                 // חיפוש מידע על מלווים
                 const hasGrandpa = row["שם סבא מגיע"] ? true : false;
                 const hasGrandma = row["שם סבתא מגיעה"] ? true : false;
@@ -837,7 +909,16 @@
                     attendeeInfo = attendees.join(", ");
                 }
                 
-                // חיפוש תלמידות ברשומה
+                // פרטי המשפחה לצורך ספירה
+                const familyInfo = {
+                    rowId: rowIndex,
+                    lastName: row["שם משפחה"] || "",
+                    hasBoysClasses: false,
+                    hasGirlsClasses: false,
+                    status: notAttending ? "לא מגיעים" : "מגיעים"
+                };
+                
+                // חיפוש תלמידים ברשומה
                 for (let i = 1; i <= 4; i++) {
                     const nameKey = `שם התלמיד ${i}`;
                     const classKey = `כיתה ${i}`;
@@ -845,678 +926,873 @@
                     if (row[nameKey] && row[classKey]) {
                         const studentName = row[nameKey];
                         const studentClass = row[classKey];
+                        const gender = isBoysClass(studentClass) ? 'boys' : 'girls';
+                        
+                        // עדכון סוג כיתות במשפחה
+                        if (gender === 'boys') {
+                            familyInfo.hasBoysClasses = true;
+                        } else {
+                            familyInfo.hasGirlsClasses = true;
+                        }
                         
                         processedData.totalStudents++;
                         
                         // ספירה לפי כיתה
-                    if (!processedData.classCounts[studentClass]) {
-                           processedData.classCounts[studentClass] = 0;
-                       }
-                       processedData.classCounts[studentClass]++;
-                       
-                       // ספירת לא מגיעים לפי כיתה
-                       if (notAttending) {
-                           if (!processedData.classesWithNoShow[studentClass]) {
-                               processedData.classesWithNoShow[studentClass] = 0;
-                           }
-                           processedData.classesWithNoShow[studentClass]++;
-                       }
-                       
-                       // הוספה לרשימת התלמידות
-                       processedData.studentList.push({
-                           name: studentName,
-                           className: studentClass,
-                           lastName: row["שם משפחה"] || "",
-                           attendees: attendeeInfo,
-                           status: notAttending ? "לא מגיעים" : "מגיעים",
-                           rowId: rowIndex
-                       });
-                   }
-               }
-           });
-           
-           // חישוב אחוזי השתתפות לפי כיתה
-           Object.keys(processedData.classCounts).forEach(className => {
-               const totalInClass = processedData.classCounts[className];
-               const notAttendingInClass = processedData.classesWithNoShow[className] || 0;
-               const attendingInClass = totalInClass - notAttendingInClass;
-               const rate = (attendingInClass / totalInClass) * 100;
-               processedData.participationRates[className] = parseFloat(rate.toFixed(1));
-               
-               // חישוב אחוז ההשתתפות מתוך הכיתה המלאה
-               const totalClassSize = CONFIG.CLASS_SIZES[className] || 0;
-               if (totalClassSize > 0) {
-                   const classParticipationRate = (totalInClass / totalClassSize) * 100;
-                   processedData.totalClassParticipation[className] = {
-                       registered: totalInClass,
-                       totalSize: totalClassSize,
-                       rate: parseFloat(classParticipationRate.toFixed(1))
-                   };
-               }
-           });
-           
-           // חישוב אחוז השתתפות כללי
-           const totalAttending = processedData.totalStudents - 
-               (Object.values(processedData.classesWithNoShow).reduce((a, b) => a + b, 0) || 0);
-           processedData.overallParticipationRate = parseFloat(
-               ((totalAttending / processedData.totalStudents) * 100).toFixed(1)
-           );
-       }
-       
-       // ===== הצגת הדשבורד =====
-       
-       // הצגת הדשבורד
-       function renderDashboard() {
-           document.getElementById('loading').style.display = 'none';
-           document.getElementById('dashboard').style.display = 'grid';
-           
-           updateSummaryCard();
-           renderClassDistributionChart();
-           renderAttendeeTypesChart();
-           renderParticipationRates();
-           renderDetailedClassTable();
-           renderStudentList();
-           
-           // אתחול רשימת הכיתות לסינון
-           populateClassFilter();
-       }
-       
-       // מילוי רשימת הכיתות לסינון
-       function populateClassFilter() {
-           const classFilter = document.getElementById('classFilter');
-           classFilter.innerHTML = '<option value="all">כל הכיתות</option>';
-           
-           const classes = Object.keys(processedData.classCounts).sort();
-           classes.forEach(className => {
-               const option = document.createElement('option');
-               option.value = className;
-               option.textContent = className;
-               classFilter.appendChild(option);
-           });
-       }
-       
-       // עדכון כרטיס הסיכום
-       function updateSummaryCard() {
-           // סה"כ תלמידות
-           document.getElementById('totalStudents').textContent = processedData.totalStudents;
-           
-           // סה"כ משפחות
-           document.getElementById('totalFamilies').textContent = processedData.totalFamilies;
-           
-           // אחוז השתתפות
-           document.getElementById('participationRate').textContent = `${processedData.overallParticipationRate}%`;
-           
-           // ספירת מלווים
-           document.getElementById('grandpaCount').textContent = processedData.attendeeTypes["סבא"];
-           document.getElementById('grandmaCount').textContent = processedData.attendeeTypes["סבתא"];
-           document.getElementById('otherCount').textContent = processedData.attendeeTypes["אחר"];
-       }
-       
-       // יצירת תרשים התפלגות כיתות
-function renderClassDistributionChart() {
-    const ctx = document.getElementById('classDistributionChart').getContext('2d');
-    
-    const labels = Object.keys(processedData.classCounts).sort();
-    
-    // חישוב נתונים מפורטים לכל כיתה
-    const chartData = labels.map(cls => {
-        const totalInClass = CONFIG.CLASS_SIZES[cls] || 0; // גודל כיתה מלא
-        const respondedCount = processedData.classCounts[cls]; // סך העונות
-        const attendingCount = respondedCount - (processedData.classesWithNoShow[cls] || 0); // מאשרות הגעה
-
-        const respondedRate = (respondedCount / totalInClass) * 100;
-        const attendingRate = (attendingCount / respondedCount) * 100;
-
-        return {
-            className: cls,
-            totalStudents: totalInClass,
-            respondedCount: respondedCount,
-            attendingCount: attendingCount,
-            respondedRate: respondedRate.toFixed(1),
-            attendingRate: attendingRate.toFixed(1)
-        };
-    });
-    
-    const existingChart = Chart.getChart(ctx);
-    if (existingChart) {
-        existingChart.destroy();
-    }
-    
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'אחוז תגובה מהכיתה',
-                data: chartData.map(item => item.respondedRate),
-                backgroundColor: function(context) {
-                    const item = chartData[context.dataIndex];
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                    gradient.addColorStop(0, '#4a2c82');  // צבע תגובות חיוביות
-                    gradient.addColorStop(item.attendingRate/100, '#4a2c82');  // צבע תגובות חיוביות
-                    gradient.addColorStop(item.attendingRate/100, '#dc3545');  // צבע לא מגיעים
-                    gradient.addColorStop(1, '#dc3545');
-                    return gradient;
-                },
-                barPercentage: 0.7,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const item = chartData[context.dataIndex];
-                            return [
-                                `סה"כ תלמידות: ${item.totalStudents}`,
-                                `אחוז תגובה: ${item.respondedRate}%`,
-                                `מגיעים: ${item.attendingCount}/${item.respondedCount} (${item.attendingRate}%)`
-                            ];
+                        if (!processedData.classCounts[studentClass]) {
+                            processedData.classCounts[studentClass] = 0;
                         }
+                        processedData.classCounts[studentClass]++;
+                       
+                        // ספירת לא מגיעים לפי כיתה
+                        if (notAttending) {
+                            if (!processedData.classesWithNoShow[studentClass]) {
+                                processedData.classesWithNoShow[studentClass] = 0;
+                            }
+                            processedData.classesWithNoShow[studentClass]++;
+                        }
+                       
+                        // הוספה לרשימת התלמידים
+                        processedData.studentList.push({
+                            name: studentName,
+                            className: studentClass,
+                            lastName: row["שם משפחה"] || "",
+                            attendees: attendeeInfo,
+                            status: notAttending ? "לא מגיעים" : "מגיעים",
+                            rowId: rowIndex,
+                            gender: gender
+                        });
                     }
                 }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: {
-                        callback: function(value) {
-                            return value + '%';
-                        }
+                
+                // הוספת המשפחה למיפוי
+                processedData.familyMapping[rowIndex] = familyInfo;
+            });
+           
+            // חישוב אחוזי השתתפות לפי כיתה
+            Object.keys(processedData.classCounts).forEach(className => {
+                const totalInClass = processedData.classCounts[className];
+                const notAttendingInClass = processedData.classesWithNoShow[className] || 0;
+                const attendingInClass = totalInClass - notAttendingInClass;
+                const rate = (attendingInClass / totalInClass) * 100;
+                processedData.participationRates[className] = parseFloat(rate.toFixed(1));
+               
+                // חישוב אחוז ההשתתפות מתוך הכיתה המלאה
+                const totalClassSize = CONFIG.CLASS_SIZES[className] || 0;
+                if (totalClassSize > 0) {
+                    const classParticipationRate = (totalInClass / totalClassSize) * 100;
+                    processedData.totalClassParticipation[className] = {
+                        registered: totalInClass,
+                        totalSize: totalClassSize,
+                        rate: parseFloat(classParticipationRate.toFixed(1))
+                    };
+                }
+            });
+           
+            // חישוב אחוז השתתפות כללי
+            const totalAttending = processedData.totalStudents - 
+                (Object.values(processedData.classesWithNoShow).reduce((a, b) => a + b, 0) || 0);
+            processedData.overallParticipationRate = parseFloat(
+                ((totalAttending / processedData.totalStudents) * 100).toFixed(1)
+            );
+            
+            // שמירת עותק של הנתונים המלאים לשימוש עם פילטרים
+            fullProcessedData = JSON.parse(JSON.stringify(processedData));
+        }
+        
+        // פונקציה להחלת פילטר ראשי (בנים/בנות/הכל)
+        function applyMainFilter(filter) {
+            // עדכון סטטוס כפתורי הפילטר
+            const filterButtons = document.querySelectorAll('.filter-button');
+            filterButtons.forEach(button => {
+                if (button.dataset.filter === filter) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            
+            // עדכון הפילטר הנוכחי
+            currentFilter = filter;
+            
+            // אם בחרו "הכל", השתמש בנתונים המלאים
+            if (filter === 'all') {
+                processedData = JSON.parse(JSON.stringify(fullProcessedData));
+                updateUIWithFilteredData();
+                return;
+            }
+            
+            // סינון נתונים לפי מגדר
+            processedData = {
+                totalStudents: 0,
+                totalFamilies: 0, // יחושב מחדש לפי הפילטר
+                classCounts: {},
+                classesWithNoShow: {},
+                attendeeTypes: {
+                    "סבא": 0,
+                    "סבתא": 0,
+                    "אחר": 0,
+                    "לא מגיעים": 0
+                },
+                participationRates: {},
+                studentList: [],
+                totalClassParticipation: {},
+                familyMapping: {}
+            };
+            
+            // פילטור רשימת התלמידים
+            processedData.studentList = fullProcessedData.studentList.filter(student => {
+                const isMatchingGender = filter === 'boys' ? 
+                    isBoysClass(student.className) : 
+                    !isBoysClass(student.className);
+                
+                return isMatchingGender;
+            });
+            
+            // חישוב מחדש של ספירות משפחות מסוננות לפי מגדר
+            const filteredFamilyIds = new Set();
+            
+            // עבור כל הסטודנטים המסוננים, אסוף את כל ה-IDs של המשפחות
+            processedData.studentList.forEach(student => {
+                filteredFamilyIds.add(student.rowId);
+            });
+            
+            // ספירת משפחות מסוננות
+            processedData.totalFamilies = filteredFamilyIds.size;
+            
+            // חישוב מחדש של ספירות וסטטיסטיקות אחרות
+            processedData.totalStudents = processedData.studentList.length;
+            
+            // סידור מחדש של מידע לפי כיתות
+            processedData.studentList.forEach(student => {
+                const className = student.className;
+                
+                // ספירה לפי כיתה
+                if (!processedData.classCounts[className]) {
+                    processedData.classCounts[className] = 0;
+                }
+                processedData.classCounts[className]++;
+                
+                // ספירת לא מגיעים לפי כיתה
+                if (student.status === "לא מגיעים") {
+                    if (!processedData.classesWithNoShow[className]) {
+                        processedData.classesWithNoShow[className] = 0;
                     }
+                    processedData.classesWithNoShow[className]++;
+                }
+            });
+            
+            // חישוב מחדש של מלווים לפי משפחות מסוננות
+            filteredFamilyIds.forEach(familyId => {
+                const row = rawData[familyId];
+                if (!row) return;
+                
+                const notAttending = row["לא מגיעים"] ? true : false;
+                const hasGrandpa = row["שם סבא מגיע"] ? true : false;
+                const hasGrandma = row["שם סבתא מגיעה"] ? true : false;
+                const hasOther = row["אחר - קרבה"] ? true : false;
+                
+                if (hasGrandpa) processedData.attendeeTypes["סבא"]++;
+                if (hasGrandma) processedData.attendeeTypes["סבתא"]++;
+                if (hasOther) processedData.attendeeTypes["אחר"]++;
+                if (notAttending) processedData.attendeeTypes["לא מגיעים"]++;
+            });
+            
+            // חישוב מחדש של אחוזי השתתפות
+            Object.keys(processedData.classCounts).forEach(className => {
+                const totalInClass = processedData.classCounts[className];
+                const notAttendingInClass = processedData.classesWithNoShow[className] || 0;
+                const attendingInClass = totalInClass - notAttendingInClass;
+                const rate = (attendingInClass / totalInClass) * 100;
+                processedData.participationRates[className] = parseFloat(rate.toFixed(1));
+                
+                // חישוב אחוז ההשתתפות מתוך הכיתה המלאה
+                const totalClassSize = CONFIG.CLASS_SIZES[className] || 0;
+                if (totalClassSize > 0) {
+                    const classParticipationRate = (totalInClass / totalClassSize) * 100;
+                    processedData.totalClassParticipation[className] = {
+                        registered: totalInClass,
+                        totalSize: totalClassSize,
+                        rate: parseFloat(classParticipationRate.toFixed(1))
+                    };
+                }
+            });
+            
+            // חישוב אחוז השתתפות כללי
+            const totalAttending = processedData.totalStudents - 
+                (Object.values(processedData.classesWithNoShow).reduce((a, b) => a + b, 0) || 0);
+            processedData.overallParticipationRate = parseFloat(
+                ((totalAttending / processedData.totalStudents) * 100).toFixed(1)
+            );
+            
+            // עדכון התצוגה עם הנתונים המסוננים
+            updateUIWithFilteredData();
+        }
+        
+        // עדכון התצוגה עם הנתונים המסוננים
+        function updateUIWithFilteredData() {
+            // עדכון כרטיס סיכום
+            updateSummaryCard();
+            
+            // עדכון תרשימים
+            renderClassDistributionChart();
+            renderAttendeeTypesChart();
+            
+            // עדכון אחוזי השתתפות
+            renderParticipationRates();
+            
+            // עדכון טבלת נתונים מפורטת
+            renderDetailedClassTable();
+            
+            // עדכון רשימת תלמידים (יכיל גם את הפילטרים הנוספים)
+            renderStudentList();
+            
+            // עדכון הפילטר לכיתות
+            populateClassFilter();
+            
+            // עדכון הפילטר למגדר לפי הפילטר הראשי
+            const genderFilter = document.getElementById('genderFilter');
+            if (genderFilter) {
+                if (currentFilter === 'boys') {
+                    genderFilter.value = 'boys';
+                } else if (currentFilter === 'girls') {
+                    genderFilter.value = 'girls';
+                } else {
+                    genderFilter.value = 'all';
                 }
             }
         }
-    });
-}
-       
-       // יצירת תרשים סוגי מלווים
-       function renderAttendeeTypesChart() {
-           const ctx = document.getElementById('attendeeTypesChart').getContext('2d');
-           
-           const data = [
-               processedData.attendeeTypes["סבא"],
-               processedData.attendeeTypes["סבתא"],
-               processedData.attendeeTypes["אחר"]
-           ];
-           
-           const totalAttendees = data.reduce((a, b) => a + b, 0);
-           
-           // קבל תרשים קיים אם יש ועדכן אותו
-           const existingChart = Chart.getChart(ctx);
-           if (existingChart) {
-               existingChart.destroy();
-           }
-           
-           new Chart(ctx, {
-               type: 'doughnut',
-               data: {
-                   labels: ['סבא', 'סבתא', 'אחר'],
-                   datasets: [{
-                       data: data,
-                       backgroundColor: ['#4a2c82', '#e83e8c', '#fd7e14'],
-                       borderWidth: 0
-                   }]
-               },
-               options: {
-                   responsive: true,
-                   maintainAspectRatio: false,
-                   cutout: '65%',
-                   plugins: {
-                       legend: {
-                           position: 'right',
-                           labels: {
-                               usePointStyle: true,
-                               generateLabels: function(chart) {
-                                   const data = chart.data;
-                                   if (data.labels.length && data.datasets.length) {
-                                       return data.labels.map((label, i) => {
-                                           const value = data.datasets[0].data[i];
-                                           const percentage = totalAttendees ? 
-                                               Math.round((value / totalAttendees) * 100) : 0;
-                                           
-                                           return {
-                                               text: `${label}: ${value} (${percentage}%)`,
-                                               fillStyle: data.datasets[0].backgroundColor[i],
-                                               strokeStyle: data.datasets[0].backgroundColor[i],
-                                               lineWidth: 0,
-                                               hidden: isNaN(data.datasets[0].data[i]) || data.datasets[0].data[i] === 0,
-                                               index: i
-                                           };
-                                       });
-                                   }
-                                   return [];
-                               }
-                           }
-                       },
-                       tooltip: {
-                           rtl: true,
-                           textDirection: 'rtl',
-                           callbacks: {
-                               label: function(context) {
-                                   const value = context.raw;
-                                   const percentage = totalAttendees ? 
-                                       Math.round((value / totalAttendees) * 100) : 0;
-                                   return `${context.label}: ${value} (${percentage}%)`;
-                               }
-                           }
-                       }
-                   }
-               }
-           });
-       }
-       
-       // הצגת אחוזי השתתפות לפי כיתה
-   function renderParticipationRates() {
-    const container = document.getElementById('participationRates');
-    container.innerHTML = '';
-    
-    const sortedClasses = Object.keys(processedData.classCounts).sort();
-    
-    sortedClasses.forEach(className => {
-        const totalInClass = CONFIG.CLASS_SIZES[className] || 0;
-        const respondedCount = processedData.classCounts[className];
-        const notAttendingInClass = processedData.classesWithNoShow[className] || 0;
-        const attendingCount = respondedCount - notAttendingInClass;
-
-        const respondedRate = (respondedCount / totalInClass) * 100;
-        const attendingRate = (attendingCount / respondedCount) * 100;
         
-        const rowDiv = document.createElement('div');
-        rowDiv.style.marginBottom = '20px';
+        // ===== הצגת הדשבורד =====
         
-        const headerDiv = document.createElement('div');
-        headerDiv.style.display = 'flex';
-        headerDiv.style.justifyContent = 'space-between';
-        headerDiv.style.marginBottom = '5px';
-        
-        const classNameSpan = document.createElement('span');
-        classNameSpan.textContent = className;
-        classNameSpan.style.fontWeight = '600';
-        
-        const countRateSpan = document.createElement('span');
-        countRateSpan.textContent = `${respondedCount}/${totalInClass} (${respondedRate.toFixed(1)}%)`;
-        
-        headerDiv.appendChild(classNameSpan);
-        headerDiv.appendChild(countRateSpan);
-        
-        const progressDiv = document.createElement('div');
-        progressDiv.className = 'progress-bar';
-        
-        const fillDiv = document.createElement('div');
-        fillDiv.className = 'progress-fill';
-        
-        // יצירת גרדיאנט עם שני צבעים
-        fillDiv.style.background = `linear-gradient(to right, 
-            #4a2c82 ${(attendingCount/respondedCount)*100}%, 
-            #dc3545 ${(attendingCount/respondedCount)*100}%)`;
-        
-        fillDiv.style.width = `${respondedRate}%`;
-        fillDiv.style.height = '25px';
-        
-        if (respondedCount / totalInClass > 0.15) {
-            fillDiv.textContent = `${respondedCount}/${totalInClass}`;
+        // הצגת הדשבורד
+        function renderDashboard() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'grid';
+            
+            updateSummaryCard();
+            renderClassDistributionChart();
+            renderAttendeeTypesChart();
+            renderParticipationRates();
+            renderDetailedClassTable();
+            renderStudentList();
+            
+            // אתחול רשימת הכיתות לסינון
+            populateClassFilter();
         }
         
-        progressDiv.appendChild(fillDiv);
-        rowDiv.appendChild(headerDiv);
-        rowDiv.appendChild(progressDiv);
+        // מילוי רשימת הכיתות לסינון
+        function populateClassFilter() {
+            const classFilter = document.getElementById('classFilter');
+            classFilter.innerHTML = '<option value="all">כל הכיתות</option>';
+            
+            const classes = Object.keys(processedData.classCounts).sort();
+            classes.forEach(className => {
+                const option = document.createElement('option');
+                option.value = className;
+                option.textContent = className;
+                classFilter.appendChild(option);
+            });
+        }
         
-        // הוספת פירוט על אחוז המאשרים
-        const detailDiv = document.createElement('div');
-        detailDiv.style.fontSize = '13px';
-        detailDiv.style.color = '#666';
-        detailDiv.style.marginTop = '5px';
-        detailDiv.textContent = `מאשרים: ${attendingCount}/${respondedCount} (${attendingRate.toFixed(1)}%)`;
+        // עדכון כרטיס הסיכום
+        function updateSummaryCard() {
+            // סה"כ תלמידים
+            document.getElementById('totalStudents').textContent = processedData.totalStudents;
+            
+            // סה"כ משפחות - לפי הפילטר הנוכחי
+            document.getElementById('totalFamilies').textContent = processedData.totalFamilies;
+            
+            // אחוז השתתפות
+            document.getElementById('participationRate').textContent = `${processedData.overallParticipationRate}%`;
+            
+            // ספירת מלווים
+            document.getElementById('grandpaCount').textContent = processedData.attendeeTypes["סבא"];
+            document.getElementById('grandmaCount').textContent = processedData.attendeeTypes["סבתא"];
+            document.getElementById('otherCount').textContent = processedData.attendeeTypes["אחר"];
+        }
         
-        rowDiv.appendChild(detailDiv);
+        // יצירת תרשים התפלגות כיתות
+        function renderClassDistributionChart() {
+            const ctx = document.getElementById('classDistributionChart').getContext('2d');
+            
+            const labels = Object.keys(processedData.classCounts).sort();
+            
+            // חישוב נתונים מפורטים לכל כיתה
+            const chartData = labels.map(cls => {
+                const totalInClass = CONFIG.CLASS_SIZES[cls] || 0; // גודל כיתה מלא
+                const respondedCount = processedData.classCounts[cls]; // סך העונות
+                const attendingCount = respondedCount - (processedData.classesWithNoShow[cls] || 0); // מאשרים הגעה
+
+                const respondedRate = (respondedCount / totalInClass) * 100;
+                const attendingRate = (attendingCount / respondedCount) * 100;
+
+                return {
+                    className: cls,
+                    totalStudents: totalInClass,
+                    respondedCount: respondedCount,
+                    attendingCount: attendingCount,
+                    respondedRate: respondedRate.toFixed(1),
+                    attendingRate: attendingRate.toFixed(1)
+                };
+            });
+            
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'אחוז תגובה מהכיתה',
+                        data: chartData.map(item => item.respondedRate),
+                        backgroundColor: function(context) {
+                            const item = chartData[context.dataIndex];
+                            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                            gradient.addColorStop(0, '#4a2c82');  // צבע תגובות חיוביות
+                            gradient.addColorStop(item.attendingRate/100, '#4a2c82');  // צבע תגובות חיוביות
+                            gradient.addColorStop(item.attendingRate/100, '#dc3545');  // צבע לא מגיעים
+                            gradient.addColorStop(1, '#dc3545');
+                            return gradient;
+                        },
+                        barPercentage: 0.7,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const item = chartData[context.dataIndex];
+                                    return [
+                                        `סה"כ תלמידים: ${item.totalStudents}`,
+                                        `אחוז תגובה: ${item.respondedRate}%`,
+                                        `מגיעים: ${item.attendingCount}/${item.respondedCount} (${item.attendingRate}%)`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
         
-        container.appendChild(rowDiv);
-    });
-}
-       
-       // הצגת טבלת נתונים מפורטת לפי כיתה
-       function renderDetailedClassTable() {
-           const tableBody = document.querySelector('#detailedClassTable tbody');
-           tableBody.innerHTML = '';
-           
-           // מיון הכיתות
-           const sortedClasses = Object.keys(processedData.classCounts).sort();
-           
-           sortedClasses.forEach(className => {
-               const totalInClass = processedData.classCounts[className];
-               const notAttendingInClass = processedData.classesWithNoShow[className] || 0;
-               const attendingInClass = totalInClass - notAttendingInClass;
-               const rate = processedData.participationRates[className];
-               
-               // מידע על גודל הכיתה המלא
-               const classTotalSize = CONFIG.CLASS_SIZES[className] || 0;
-               const classRegistrationRate = classTotalSize > 0 ? 
-                   parseFloat(((totalInClass / classTotalSize) * 100).toFixed(1)) : 0;
-               
-               const row = document.createElement('tr');
-               
-               const classCell = document.createElement('td');
-               classCell.textContent = className;
-               
-               const totalCell = document.createElement('td');
-               totalCell.textContent = totalInClass;
-               
-               const attendingCell = document.createElement('td');
-               attendingCell.textContent = attendingInClass;
-               
-               const notAttendingCell = document.createElement('td');
-               notAttendingCell.textContent = notAttendingInClass;
-               
-               const rateCell = document.createElement('td');
-               rateCell.textContent = `${rate}%`;
-               
-               // הדגשת אחוזים נמוכים
-               if (rate < 50) {
-                   rateCell.classList.add('highlight');
-               }
-               
-               // הוספת תאים חדשים עם מידע על גודל הכיתה המלא
-               const classSizeCell = document.createElement('td');
-               classSizeCell.textContent = classTotalSize > 0 ? classTotalSize : 'לא ידוע';
-               
-               const classRegistrationRateCell = document.createElement('td');
-               if (classTotalSize > 0) {
-                   classRegistrationRateCell.textContent = `${classRegistrationRate}%`;
-                   if (classRegistrationRate < 70) {
-                       classRegistrationRateCell.classList.add('highlight');
-                   }
-               } else {
-                   classRegistrationRateCell.textContent = 'לא ידוע';
-               }
-               
-               row.appendChild(classCell);
-               row.appendChild(totalCell);
-               row.appendChild(attendingCell);
-               row.appendChild(notAttendingCell);
-               row.appendChild(rateCell);
-               row.appendChild(classSizeCell);
-               row.appendChild(classRegistrationRateCell);
-               
-               tableBody.appendChild(row);
-           });
-           
-           // שורת סיכום
-           const totalRow = document.createElement('tr');
-           totalRow.style.fontWeight = 'bold';
-           totalRow.style.backgroundColor = '#f5f2ff';
-           
-           const totalLabelCell = document.createElement('td');
-           totalLabelCell.textContent = 'סה"כ';
-           
-           const totalStudentsCell = document.createElement('td');
-           totalStudentsCell.textContent = processedData.totalStudents;
-           
-           const totalAttending = processedData.totalStudents - 
-               (Object.values(processedData.classesWithNoShow).reduce((a, b) => a + b, 0) || 0);
-           
-           const totalAttendingCell = document.createElement('td');
-           totalAttendingCell.textContent = totalAttending;
-           
-           const totalNotAttendingCell = document.createElement('td');
-           totalNotAttendingCell.textContent = processedData.totalStudents - totalAttending;
-           
-           const totalRateCell = document.createElement('td');
-           totalRateCell.textContent = `${processedData.overallParticipationRate}%`;
-           
-           // חישוב סה"כ תלמידות בכל הכיתות
-           const totalClassSizes = Object.values(CONFIG.CLASS_SIZES).reduce((sum, size) => sum + size, 0);
-           const totalClassSizeCell = document.createElement('td');
-           totalClassSizeCell.textContent = totalClassSizes;
-           
-           // חישוב אחוז ההרשמה הכללי
-           const totalRegistrationRate = parseFloat(((processedData.totalStudents / totalClassSizes) * 100).toFixed(1));
-           const totalRegistrationRateCell = document.createElement('td');
-           totalRegistrationRateCell.textContent = `${totalRegistrationRate}%`;
-           
-           totalRow.appendChild(totalLabelCell);
-           totalRow.appendChild(totalStudentsCell);
-           totalRow.appendChild(totalAttendingCell);
-           totalRow.appendChild(totalNotAttendingCell);
-           totalRow.appendChild(totalRateCell);
-           totalRow.appendChild(totalClassSizeCell);
-           totalRow.appendChild(totalRegistrationRateCell);
-           
-           tableBody.appendChild(totalRow);
-       }
-       
-       // ===== רשימת תלמידות ופעולות =====
-       
-       // הצגת רשימת תלמידות
-       function renderStudentList() {
-           // סינון התלמידות
-           filterStudentList();
-       }
-       
-       // סינון רשימת התלמידות
-       function filterStudentList() {
-           const classFilter = document.getElementById('classFilter').value;
-           const attendanceFilter = document.getElementById('attendanceFilter').value;
-           const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
-           
-           // סינון לפי כיתה, סטטוס הגעה וחיפוש חופשי
-           filteredStudents = processedData.studentList.filter(student => {
-               const matchesClass = classFilter === 'all' || student.className === classFilter;
-               const matchesAttendance = attendanceFilter === 'all' || 
-                   (attendanceFilter === 'attending' && student.status === 'מגיעים') ||
-                   (attendanceFilter === 'notAttending' && student.status === 'לא מגיעים');
-               
-               // חיפוש בשם התלמידה, שם משפחה, או במלווים
-               const matchesSearch = searchInput === '' || 
-                   student.name.toLowerCase().includes(searchInput) ||
-                   student.lastName.toLowerCase().includes(searchInput) ||
-                   student.attendees.toLowerCase().includes(searchInput);
-               
-               return matchesClass && matchesAttendance && matchesSearch;
-           });
-           
-           // מיון הרשימה לפי העמודה הנוכחית
-           sortStudentList(currentSortColumn, true);
-           
-           // איפוס העמוד הנוכחי
-           currentPage = 1;
-           
-           // עדכון התצוגה
-           displayCurrentPage();
-       }
-       
-       // מיון רשימת התלמידות
-       function sortStudentList(column, keepDirection = false) {
-           if (!keepDirection && column === currentSortColumn) {
-               // החלף כיוון מיון אם לוחצים שוב על אותה עמודה
-               currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-           } else if (!keepDirection) {
-               currentSortColumn = column;
-               currentSortDirection = 'asc';
-           }
-           
-           // מיון הרשימה
-           filteredStudents.sort((a, b) => {
-               let valueA = a[column];
-               let valueB = b[column];
-               
-               if (column === 'className') {
-                   // מיון מיוחד לכיתות
-                   return sortClassNames(valueA, valueB, currentSortDirection);
-               }
-               
-               // מיון רגיל
-               if (typeof valueA === 'string') valueA = valueA.toLowerCase();
-               if (typeof valueB === 'string') valueB = valueB.toLowerCase();
-               
-               if (valueA < valueB) return currentSortDirection === 'asc' ? -1 : 1;
-               if (valueA > valueB) return currentSortDirection === 'asc' ? 1 : -1;
-               return 0;
-           });
-           
-           // עדכון התצוגה
-           displayCurrentPage();
-           
-           // עדכון סימון עמודת המיון
-           updateSortIndicators('studentList', column);
-       }
-       
-       // מיון שמות כיתות
-       function sortClassNames(a, b, direction) {
-           // פונקציה לחילוץ הכיתה (למשל, 'א', 'ב', 'ג')
-           function extractGrade(className) {
-               const match = className.match(/^([א-ת])/);
-               return match ? match[1] : className;
-           }
-           
-           const gradeA = extractGrade(a);
-           const gradeB = extractGrade(b);
-           
-           // סדר הכיתות לפי א-ב העברי
-           const gradeOrder = {'א': 1, 'ב': 2, 'ג': 3, 'ד': 4, 'ה': 5, 'ו': 6};
-           
-           const orderA = gradeOrder[gradeA] || 100; // אם לא מוכר, שים בסוף
-           const orderB = gradeOrder[gradeB] || 100;
-           
-           if (orderA !== orderB) {
-               return direction === 'asc' ? orderA - orderB : orderB - orderA;
-           }
-           
-           // אם אותה כיתה, מיין לפי הטקסט המלא
-           if (a < b) return direction === 'asc' ? -1 : 1;
-           if (a > b) return direction === 'asc' ? 1 : -1;
-           return 0;
-       }
-       
-       // עדכון סימוני מיון בטבלה
-       function updateSortIndicators(tableId, sortColumn) {
-           const tableHeaders = document.querySelectorAll(`#${tableId} th`);
-           tableHeaders.forEach(header => {
-               header.classList.remove('sorted', 'asc', 'desc');
-           });
-           
-           if (tableId === 'studentList') {
-               // מצא את העמודה המתאימה לפי הטקסט או המאפיינים
-               const headerIndex = {
-                   'name': 0,
-                   'className': 1,
-                   'lastName': 2,
-                   'attendees': 3,
-                   'status': 4
-               }[sortColumn];
-               
-               if (headerIndex !== undefined) {
-                   const header = tableHeaders[headerIndex];
-                   header.classList.add('sorted', currentSortDirection);
-               }
-           }
-       }
-       
-       // פונקציה לשינוי מספר השורות בעמוד
-       function changeRowsPerPage() {
-           const rowsPerPageSelect = document.getElementById('rowsPerPageSelect');
-           const selectedValue = rowsPerPageSelect.value;
-           
-           if (selectedValue === 'all') {
-               rowsPerPage = filteredStudents.length;
-           } else {
-               rowsPerPage = parseInt(selectedValue);
-           }
-           
-           // איפוס העמוד הנוכחי
-           currentPage = 1;
-           
-           // עדכון התצוגה
-           displayCurrentPage();
-       }
-       
-       // עדכון מידע על הצגת התלמידות
-       function updateStudentListInfo() {
-           const totalFilteredCount = filteredStudents.length;
-           const startIndex = (currentPage - 1) * rowsPerPage + 1;
-           const endIndex = Math.min(startIndex + rowsPerPage - 1, totalFilteredCount);
-           
-           document.getElementById('startDisplayIndex').textContent = totalFilteredCount > 0 ? startIndex : 0;
-           document.getElementById('endDisplayIndex').textContent = endIndex;
-           document.getElementById('totalFilteredCount').textContent = totalFilteredCount;
-       }
-       
-       // הצגת העמוד הנוכחי
-       function displayCurrentPage() {
-           const startIndex = (currentPage - 1) * rowsPerPage;
-           const endIndex = Math.min(startIndex + rowsPerPage, filteredStudents.length);
-           const displayedStudents = filteredStudents.slice(startIndex, endIndex);
-           
-           const tableBody = document.querySelector('#studentList tbody');
-           tableBody.innerHTML = '';
-           
-           if (displayedStudents.length === 0) {
-               const emptyRow = document.createElement('tr');
-               const emptyCell = document.createElement('td');
-               emptyCell.colSpan = 5;
-               emptyCell.textContent = 'לא נמצאו תלמידות';
-               emptyCell.style.textAlign = 'center';
-               emptyCell.style.padding = '20px';
-               emptyRow.appendChild(emptyCell);
-               tableBody.appendChild(emptyRow);
-               
-               // עדכון מידע על הצגת תלמידות
-               updateStudentListInfo();
-               
-               // עדכון כפתורי עמודים
-               updatePagination();
-               return;
-           }
-           
-           displayedStudents.forEach(student => {
-               const row = document.createElement('tr');
-               
-               if (student.status === 'לא מגיעים') {
-                   row.style.backgroundColor = '#ffeded';
-               }
-               
-               const nameCell = document.createElement('td');
-               nameCell.textContent = student.name;
-               
-               const classCell = document.createElement('td');
-               classCell.textContent = student.className;
-               
-               const lastNameCell = document.createElement('td');
-               lastNameCell.textContent = student.lastName;
-               
-               const attendeesCell = document.createElement('td');
-               attendeesCell.textContent = student.attendees;
-               
-               const statusCell = document.createElement('td');
-               statusCell.textContent = student.status;
-               
-               if (student.status === 'לא מגיעים') {
-                   statusCell.style.color = '#dc3545';
-                   statusCell.style.fontWeight = 'bold';
-               } else {
-                   statusCell.style.color = '#28a745';
-               }
-               
-               row.appendChild(nameCell);
-               row.appendChild(classCell);
-               row.appendChild(lastNameCell);
-               row.appendChild(attendeesCell);
-               row.appendChild(statusCell);
-               
-               tableBody.appendChild(row);
-           });
-           
-           // עדכון מידע על הצגת תלמידות
-           updateStudentListInfo();
-           
-           // עדכון כפתורי עמודים
-           updatePagination();
-       }
+        // יצירת תרשים סוגי מלווים
+        function renderAttendeeTypesChart() {
+            const ctx = document.getElementById('attendeeTypesChart').getContext('2d');
+            
+            const data = [
+                processedData.attendeeTypes["סבא"],
+                processedData.attendeeTypes["סבתא"],
+                processedData.attendeeTypes["אחר"]
+            ];
+            
+            const totalAttendees = data.reduce((a, b) => a + b, 0);
+            
+            // קבל תרשים קיים אם יש ועדכן אותו
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['סבא', 'סבתא', 'אחר'],
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#4a2c82', '#e83e8c', '#fd7e14'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                usePointStyle: true,
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            const percentage = totalAttendees ? 
+                                                Math.round((value / totalAttendees) * 100) : 0;
+                                            
+                                            return {
+                                                text: `${label}: ${value} (${percentage}%)`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                strokeStyle: data.datasets[0].backgroundColor[i],
+                                                lineWidth: 0,
+                                                hidden: isNaN(data.datasets[0].data[i]) || data.datasets[0].data[i] === 0,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        tooltip: {
+                            rtl: true,
+                            textDirection: 'rtl',
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const percentage = totalAttendees ? 
+                                        Math.round((value / totalAttendees) * 100) : 0;
+                                    return `${context.label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+       // הצגת אחוזי השתתפות לפי כיתה
+        function renderParticipationRates() {
+            const container = document.getElementById('participationRates');
+            container.innerHTML = '';
+            
+            const sortedClasses = Object.keys(processedData.classCounts).sort();
+            
+            sortedClasses.forEach(className => {
+                const totalInClass = CONFIG.CLASS_SIZES[className] || 0;
+                const respondedCount = processedData.classCounts[className];
+                const notAttendingInClass = processedData.classesWithNoShow[className] || 0;
+                const attendingCount = respondedCount - notAttendingInClass;
+
+                const respondedRate = (respondedCount / totalInClass) * 100;
+                const attendingRate = (attendingCount / respondedCount) * 100;
+                
+                const rowDiv = document.createElement('div');
+                rowDiv.style.marginBottom = '20px';
+                
+                const headerDiv = document.createElement('div');
+                headerDiv.style.display = 'flex';
+                headerDiv.style.justifyContent = 'space-between';
+                headerDiv.style.marginBottom = '5px';
+                
+                const classNameSpan = document.createElement('span');
+                classNameSpan.textContent = className;
+                classNameSpan.style.fontWeight = '600';
+                
+                const countRateSpan = document.createElement('span');
+                countRateSpan.textContent = `${respondedCount}/${totalInClass} (${respondedRate.toFixed(1)}%)`;
+                
+                headerDiv.appendChild(classNameSpan);
+                headerDiv.appendChild(countRateSpan);
+                
+                const progressDiv = document.createElement('div');
+                progressDiv.className = 'progress-bar';
+                
+                const fillDiv = document.createElement('div');
+                fillDiv.className = 'progress-fill';
+                
+                // יצירת גרדיאנט עם שני צבעים
+                fillDiv.style.background = `linear-gradient(to right, 
+                    #4a2c82 ${(attendingCount/respondedCount)*100}%, 
+                    #dc3545 ${(attendingCount/respondedCount)*100}%)`;
+                
+                fillDiv.style.width = `${respondedRate}%`;
+                fillDiv.style.height = '25px';
+                
+                if (respondedCount / totalInClass > 0.15) {
+                    fillDiv.textContent = `${respondedCount}/${totalInClass}`;
+                }
+                
+                progressDiv.appendChild(fillDiv);
+                rowDiv.appendChild(headerDiv);
+                rowDiv.appendChild(progressDiv);
+                
+                // הוספת פירוט על אחוז המאשרים
+                const detailDiv = document.createElement('div');
+                detailDiv.style.fontSize = '13px';
+                detailDiv.style.color = '#666';
+                detailDiv.style.marginTop = '5px';
+                detailDiv.textContent = `מאשרים: ${attendingCount}/${respondedCount} (${attendingRate.toFixed(1)}%)`;
+                
+                rowDiv.appendChild(detailDiv);
+                
+                container.appendChild(rowDiv);
+            });
+        }
+        
+        // הצגת טבלת נתונים מפורטת לפי כיתה
+        function renderDetailedClassTable() {
+            const tableBody = document.querySelector('#detailedClassTable tbody');
+            tableBody.innerHTML = '';
+            
+            // מיון הכיתות
+            const sortedClasses = Object.keys(processedData.classCounts).sort();
+            
+            sortedClasses.forEach(className => {
+                const totalInClass = processedData.classCounts[className];
+                const notAttendingInClass = processedData.classesWithNoShow[className] || 0;
+                const attendingInClass = totalInClass - notAttendingInClass;
+                const rate = processedData.participationRates[className];
+                
+                // מידע על גודל הכיתה המלא
+                const classTotalSize = CONFIG.CLASS_SIZES[className] || 0;
+                const classRegistrationRate = classTotalSize > 0 ? 
+                    parseFloat(((totalInClass / classTotalSize) * 100).toFixed(1)) : 0;
+                
+                const row = document.createElement('tr');
+                
+                const classCell = document.createElement('td');
+                classCell.textContent = className;
+                
+                const totalCell = document.createElement('td');
+                totalCell.textContent = totalInClass;
+                
+                const attendingCell = document.createElement('td');
+                attendingCell.textContent = attendingInClass;
+                
+                const notAttendingCell = document.createElement('td');
+                notAttendingCell.textContent = notAttendingInClass;
+                
+                const rateCell = document.createElement('td');
+                rateCell.textContent = `${rate}%`;
+                
+                // הדגשת אחוזים נמוכים
+                if (rate < 50) {
+                    rateCell.classList.add('highlight');
+                }
+                
+                // הוספת תאים חדשים עם מידע על גודל הכיתה המלא
+                const classSizeCell = document.createElement('td');
+                classSizeCell.textContent = classTotalSize > 0 ? classTotalSize : 'לא ידוע';
+                
+                const classRegistrationRateCell = document.createElement('td');
+                if (classTotalSize > 0) {
+                    classRegistrationRateCell.textContent = `${classRegistrationRate}%`;
+                    if (classRegistrationRate < 70) {
+                        classRegistrationRateCell.classList.add('highlight');
+                    }
+                } else {
+                    classRegistrationRateCell.textContent = 'לא ידוע';
+                }
+                
+                row.appendChild(classCell);
+                row.appendChild(totalCell);
+                row.appendChild(attendingCell);
+                row.appendChild(notAttendingCell);
+                row.appendChild(rateCell);
+                row.appendChild(classSizeCell);
+                row.appendChild(classRegistrationRateCell);
+                
+                tableBody.appendChild(row);
+            });
+            
+            // שורת סיכום
+            const totalRow = document.createElement('tr');
+            totalRow.style.fontWeight = 'bold';
+            totalRow.style.backgroundColor = '#f5f2ff';
+            
+            const totalLabelCell = document.createElement('td');
+            totalLabelCell.textContent = 'סה"כ';
+            
+            const totalStudentsCell = document.createElement('td');
+            totalStudentsCell.textContent = processedData.totalStudents;
+            
+            const totalAttending = processedData.totalStudents - 
+                (Object.values(processedData.classesWithNoShow).reduce((a, b) => a + b, 0) || 0);
+            
+            const totalAttendingCell = document.createElement('td');
+            totalAttendingCell.textContent = totalAttending;
+            
+            const totalNotAttendingCell = document.createElement('td');
+            totalNotAttendingCell.textContent = processedData.totalStudents - totalAttending;
+            
+            const totalRateCell = document.createElement('td');
+            totalRateCell.textContent = `${processedData.overallParticipationRate}%`;
+            
+            // חישוב סה"כ תלמידים בכל הכיתות
+            // פילטור לפי הפילטר הנוכחי
+            let totalClassSizes = 0;
+            if (currentFilter === 'all') {
+                totalClassSizes = Object.keys(CONFIG.CLASS_SIZES).reduce((sum, className) => sum + CONFIG.CLASS_SIZES[className], 0);
+            } else if (currentFilter === 'boys') {
+                totalClassSizes = CONFIG.BOYS_CLASSES.reduce((sum, className) => sum + (CONFIG.CLASS_SIZES[className] || 0), 0);
+            } else { // girls
+                totalClassSizes = Object.keys(CONFIG.CLASS_SIZES)
+                    .filter(className => !CONFIG.BOYS_CLASSES.includes(className))
+                    .reduce((sum, className) => sum + CONFIG.CLASS_SIZES[className], 0);
+            }
+            
+            const totalClassSizeCell = document.createElement('td');
+            totalClassSizeCell.textContent = totalClassSizes;
+            
+            // חישוב אחוז ההרשמה הכללי
+            const totalRegistrationRate = parseFloat(((processedData.totalStudents / totalClassSizes) * 100).toFixed(1));
+            const totalRegistrationRateCell = document.createElement('td');
+            totalRegistrationRateCell.textContent = `${totalRegistrationRate}%`;
+            
+            totalRow.appendChild(totalLabelCell);
+            totalRow.appendChild(totalStudentsCell);
+            totalRow.appendChild(totalAttendingCell);
+            totalRow.appendChild(totalNotAttendingCell);
+            totalRow.appendChild(totalRateCell);
+            totalRow.appendChild(totalClassSizeCell);
+            totalRow.appendChild(totalRegistrationRateCell);
+            
+            tableBody.appendChild(totalRow);
+        }
+        
+        // ===== רשימת תלמידים ופעולות =====
+        
+        // הצגת רשימת תלמידים
+        function renderStudentList() {
+            // סינון התלמידים
+            filterStudentList();
+        }
+        
+        // סינון רשימת התלמידים
+        function filterStudentList() {
+            const classFilter = document.getElementById('classFilter').value;
+            const attendanceFilter = document.getElementById('attendanceFilter').value;
+            const genderFilter = document.getElementById('genderFilter').value;
+            const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+            
+            // סינון לפי כיתה, סטטוס הגעה, מגדר וחיפוש חופשי
+            filteredStudents = processedData.studentList.filter(student => {
+                const matchesClass = classFilter === 'all' || student.className === classFilter;
+                const matchesAttendance = attendanceFilter === 'all' || 
+                    (attendanceFilter === 'attending' && student.status === 'מגיעים') ||
+                    (attendanceFilter === 'notAttending' && student.status === 'לא מגיעים');
+                
+                // הוספת סינון לפי מגדר
+                const matchesGender = genderFilter === 'all' ||
+                    (genderFilter === 'boys' && student.gender === 'boys') ||
+                    (genderFilter === 'girls' && student.gender === 'girls');
+                
+                // חיפוש בשם התלמיד/ה, שם משפחה, או במלווים
+                const matchesSearch = searchInput === '' || 
+                    student.name.toLowerCase().includes(searchInput) ||
+                    student.lastName.toLowerCase().includes(searchInput) ||
+                    student.attendees.toLowerCase().includes(searchInput);
+                
+                return matchesClass && matchesAttendance && matchesGender && matchesSearch;
+            });
+            
+            // מיון הרשימה לפי העמודה הנוכחית
+            sortStudentList(currentSortColumn, true);
+            
+            // איפוס העמוד הנוכחי
+            currentPage = 1;
+            
+            // עדכון התצוגה
+            displayCurrentPage();
+        }
+        
+        // מיון רשימת התלמידים
+        function sortStudentList(column, keepDirection = false) {
+            if (!keepDirection && column === currentSortColumn) {
+                // החלף כיוון מיון אם לוחצים שוב על אותה עמודה
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else if (!keepDirection) {
+                currentSortColumn = column;
+                currentSortDirection = 'asc';
+            }
+            
+            // מיון הרשימה
+            filteredStudents.sort((a, b) => {
+                let valueA = a[column];
+                let valueB = b[column];
+                
+                if (column === 'className') {
+                    // מיון מיוחד לכיתות
+                    return sortClassNames(valueA, valueB, currentSortDirection);
+                }
+                
+                // מיון רגיל
+                if (typeof valueA === 'string') valueA = valueA.toLowerCase();
+                if (typeof valueB === 'string') valueB = valueB.toLowerCase();
+                
+                if (valueA < valueB) return currentSortDirection === 'asc' ? -1 : 1;
+                if (valueA > valueB) return currentSortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            // עדכון התצוגה
+            displayCurrentPage();
+            
+            // עדכון סימון עמודת המיון
+            updateSortIndicators('studentList', column);
+        }
+        
+        // מיון שמות כיתות
+        function sortClassNames(a, b, direction) {
+            // פונקציה לחילוץ הכיתה (למשל, 'א', 'ב', 'ג')
+            function extractGrade(className) {
+                const match = className.match(/^([א-ת])/);
+                return match ? match[1] : className;
+            }
+            
+            const gradeA = extractGrade(a);
+            const gradeB = extractGrade(b);
+            
+            // סדר הכיתות לפי א-ב העברי
+            const gradeOrder = {'א': 1, 'ב': 2, 'ג': 3, 'ד': 4, 'ה': 5, 'ו': 6};
+            
+            const orderA = gradeOrder[gradeA] || 100; // אם לא מוכר, שים בסוף
+            const orderB = gradeOrder[gradeB] || 100;
+            
+            if (orderA !== orderB) {
+                return direction === 'asc' ? orderA - orderB : orderB - orderA;
+            }
+            
+            // אם אותה כיתה, מיין לפי הטקסט המלא
+            if (a < b) return direction === 'asc' ? -1 : 1;
+            if (a > b) return direction === 'asc' ? 1 : -1;
+            return 0;
+        }
+        
+        // עדכון סימוני מיון בטבלה
+        function updateSortIndicators(tableId, sortColumn) {
+            const tableHeaders = document.querySelectorAll(`#${tableId} th`);
+            tableHeaders.forEach(header => {
+                header.classList.remove('sorted', 'asc', 'desc');
+            });
+            
+            if (tableId === 'studentList') {
+                // מצא את העמודה המתאימה לפי הטקסט או המאפיינים
+                const headerIndex = {
+                    'name': 0,
+                    'className': 1,
+                    'lastName': 2,
+                    'attendees': 3,
+                    'status': 4
+                }[sortColumn];
+                
+                if (headerIndex !== undefined) {
+                    const header = tableHeaders[headerIndex];
+                    header.classList.add('sorted', currentSortDirection);
+                }
+            }
+        }
+        
+        // פונקציה לשינוי מספר השורות בעמוד
+        function changeRowsPerPage() {
+            const rowsPerPageSelect = document.getElementById('rowsPerPageSelect');
+            const selectedValue = rowsPerPageSelect.value;
+            
+            if (selectedValue === 'all') {
+                rowsPerPage = filteredStudents.length;
+            } else {
+                rowsPerPage = parseInt(selectedValue);
+            }
+            
+            // איפוס העמוד הנוכחי
+            currentPage = 1;
+            
+            // עדכון התצוגה
+            displayCurrentPage();
+        }
+        
+        // עדכון מידע על הצגת התלמידים
+        function updateStudentListInfo() {
+            const totalFilteredCount = filteredStudents.length;
+            const startIndex = (currentPage - 1) * rowsPerPage + 1;
+            const endIndex = Math.min(startIndex + rowsPerPage - 1, totalFilteredCount);
+            
+            document.getElementById('startDisplayIndex').textContent = totalFilteredCount > 0 ? startIndex : 0;
+            document.getElementById('endDisplayIndex').textContent = endIndex;
+            document.getElementById('totalFilteredCount').textContent = totalFilteredCount;
+        }
+        
+        // הצגת העמוד הנוכחי
+        function displayCurrentPage() {
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = Math.min(startIndex + rowsPerPage, filteredStudents.length);
+            const displayedStudents = filteredStudents.slice(startIndex, endIndex);
+            
+            const tableBody = document.querySelector('#studentList tbody');
+            tableBody.innerHTML = '';
+            
+            if (displayedStudents.length === 0) {
+                const emptyRow = document.createElement('tr');
+                const emptyCell = document.createElement('td');
+                emptyCell.colSpan = 5;
+                emptyCell.textContent = 'לא נמצאו תלמידים';
+                emptyCell.style.textAlign = 'center';
+                emptyCell.style.padding = '20px';
+                emptyRow.appendChild(emptyCell);
+                tableBody.appendChild(emptyRow);
+                
+                // עדכון מידע על הצגת תלמידים
+                updateStudentListInfo();
+                
+                // עדכון כפתורי עמודים
+                updatePagination();
+                return;
+            }
+            
+            displayedStudents.forEach(student => {
+                const row = document.createElement('tr');
+                
+                if (student.status === 'לא מגיעים') {
+                    row.style.backgroundColor = '#ffeded';
+                }
+                
+                const nameCell = document.createElement('td');
+                nameCell.textContent = student.name;
+                
+                const classCell = document.createElement('td');
+                classCell.textContent = student.className;
+                
+                const lastNameCell = document.createElement('td');
+                lastNameCell.textContent = student.lastName;
+                
+                const attendeesCell = document.createElement('td');
+                attendeesCell.textContent = student.attendees;
+                
+                const statusCell = document.createElement('td');
+                statusCell.textContent = student.status;
+                
+                if (student.status === 'לא מגיעים') {
+                    statusCell.style.color = '#dc3545';
+                    statusCell.style.fontWeight = 'bold';
+                } else {
+                    statusCell.style.color = '#28a745';
+                }
+                
+                row.appendChild(nameCell);
+                row.appendChild(classCell);
+                row.appendChild(lastNameCell);
+                row.appendChild(attendeesCell);
+                row.appendChild(statusCell);
+                
+                tableBody.appendChild(row);
+            });
+            
+            // עדכון מידע על הצגת תלמידים
+            updateStudentListInfo();
+            
+            // עדכון כפתורי עמודים
+            updatePagination();
+        }
+        
         // עדכון כפתורי עמודים
-       // עדכון כפתורי עמודים
         function updatePagination() {
             const totalPages = Math.ceil(filteredStudents.length / rowsPerPage);
             const paginationContainer = document.getElementById('studentListPagination');
@@ -1635,8 +1911,8 @@ function renderClassDistributionChart() {
         // הדפסת טבלה ספציפית
         function printTable(tableId) {
             const originalTitle = document.title;
-            const tableName = tableId === 'detailedClassTable' ? 'נתוני השתתפות לפי כיתות' : 'רשימת תלמידות';
-            document.title = tableName + ' - יום סבבא אגף בנות';
+            const tableName = tableId === 'detailedClassTable' ? 'נתוני השתתפות לפי כיתות' : 'רשימת תלמידים';
+            document.title = tableName + ' - יום סבבא';
             
             // יצירת גיליון סגנון לדף להדפסה
             const style = document.createElement('style');
