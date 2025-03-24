@@ -415,6 +415,8 @@
           border-radius: 15px 15px 0 0;
           box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
           margin: 0 10px;
+          position: relative;
+          z-index: 10;
       }
       
       /* אזור חדש לחלק התחתון של המסך */
@@ -725,6 +727,10 @@
               flex-direction: column;
               justify-content: flex-start;
               border-radius: 10px;
+              position: relative;
+              z-index: 10;
+              margin-bottom: 20px;
+              padding-bottom: 15px;
           }
 
           #message {
@@ -738,12 +744,19 @@
               align-items: center;
               margin-top: 4px;
               gap: 8px;
+              position: relative;
+              z-index: 20;
+              margin-bottom: 10px;
           }
 
           .button-container button {
               font-size: 0.8em;
-              padding: 6px 12px;
-              margin: 2px;
+              padding: 10px 15px;
+              margin: 5px;
+              position: relative;
+              z-index: 30;
+              pointer-events: auto;
+              touch-action: auto;
           }
 
           .word, .placeholder {
@@ -861,8 +874,8 @@
         <div class="footer" id="footer">
             <div id="message"></div>
             <div class="button-container">
-                <button onclick="checkOrder()"><i class="fas fa-check-circle"></i> בדוק סדר</button>
-                <button id="hintButton" onclick="getHint()"><i class="fas fa-lightbulb"></i> רוצה רמז</button>
+                <button id="checkOrderButton"><i class="fas fa-check-circle"></i> בדוק סדר</button>
+                <button id="hintButton"><i class="fas fa-lightbulb"></i> רוצה רמז</button>
             </div>
         </div>
     </div>
@@ -1190,6 +1203,51 @@
         console.log('Game started. Colors updated.');
         document.querySelector('.container').classList.add('game-active');
         optimizeWordSize();
+        setupMobileButtons();
+    }
+
+    // פונקציה חדשה לתיקון כפתורים במובייל
+    function setupMobileButtons() {
+        const checkOrderButton = document.getElementById('checkOrderButton');
+        const hintButton = document.getElementById('hintButton');
+
+        // ניקוי ההאזנות הקיימות
+        checkOrderButton.removeEventListener('click', checkOrder);
+        hintButton.removeEventListener('click', getHint);
+
+        // הוספת האזנות חדשות
+        checkOrderButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            checkOrder();
+        });
+
+        hintButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            getHint();
+        });
+
+        // הוספת האזנות למגע
+        checkOrderButton.addEventListener('touchstart', function(e) {
+            e.stopPropagation();
+        });
+
+        checkOrderButton.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            checkOrder();
+        });
+
+        hintButton.addEventListener('touchstart', function(e) {
+            e.stopPropagation();
+        });
+
+        hintButton.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            getHint();
+        });
     }
 
     function startGameTimer() {
@@ -1446,6 +1504,11 @@
         
         // התאמת גודל אופטימלי
         setTimeout(optimizeWordSize, 100);
+        
+        // התקנת כפתורים למובייל
+        if (window.innerWidth <= 768) {
+            setupMobileButtons();
+        }
     }
 
     function createWordElement(word, index) {
@@ -2059,6 +2122,10 @@
         document.head.appendChild(confettiScript);
 
         document.getElementById('contactForm').addEventListener('submit', submitContactForm);
+        
+        // קישור כפתורים לפונקציות
+        document.getElementById('checkOrderButton').addEventListener('click', checkOrder);
+        document.getElementById('hintButton').addEventListener('click', getHint);
 
         window.addEventListener('resize', handleResize);
     });
