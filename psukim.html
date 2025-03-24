@@ -465,10 +465,7 @@
                     <select id="masechet" onchange="updatePrakim()">
                         <option value="">בחר פרק</option>
                     </select>
-                    <select id="perek" onchange="updateMishnayot()" disabled>
-                        <option value="">בחר פסוק</option>
-                    </select>
-                    <select id="mishna" disabled>
+                    <select id="perek" disabled>
                         <option value="">בחר פסוק</option>
                     </select>
                     <button onclick="loadGame()">טען משחק</button>
@@ -567,7 +564,6 @@
     let endGameMessage = '';
     let currentMasechet = '';
     let currentPerek = '';
-    let currentMishna = '';
     let gameInProgress = false;
     let hintsLeft = 6;
     let hintsUsed = 0;
@@ -579,6 +575,8 @@
     let gameStartTime;
     let gameTimer;
     let isReadingMode = false;
+    let clickCount = 0;
+    let clickTimer;
 
     document.getElementById('settingsIcon').addEventListener('click', function() {
         clickCount++;
@@ -710,7 +708,6 @@
     function updatePrakim() {
         currentMasechet = document.getElementById('masechet').value;
         const perekSelect = document.getElementById('perek');
-        const mishnaSelect = document.getElementById('mishna');
 
         if (currentMasechet) {
             const prakim = [...new Set(allData.slice(1)
@@ -720,55 +717,41 @@
             perekSelect.innerHTML = '<option value="">בחר פסוק</option>' +
                 prakim.map(perek => `<option value="${perek}">${perek}</option>`).join('');
             perekSelect.disabled = false;
-
-            mishnaSelect.innerHTML = '<option value="">בחר פסוק</option>';
-            mishnaSelect.disabled = true;
         } else {
             perekSelect.innerHTML = '<option value="">בחר פסוק</option>';
             perekSelect.disabled = true;
-            mishnaSelect.innerHTML = '<option value="">בחר פסוק</option>';
-            mishnaSelect.disabled = true;
-        }
-    }
-
-    function updateMishnayot() {
-        currentPerek = document.getElementById('perek').value;
-        const mishnaSelect = document.getElementById('mishna');
-
-        if (currentPerek) {
-            const mishnayot = [...new Set(allData.slice(1)
-                .filter(row => row[0] === currentMasechet && row[1] === currentPerek)
-                .map(row => row[2]))];
-
-            mishnaSelect.innerHTML = '<option value="">בחר פסוק</option>' +
-                mishnayot.map(mishna => `<option value="${mishna}">${mishna}</option>`).join('');
-            mishnaSelect.disabled = false;
-        } else {
-            mishnaSelect.innerHTML = '<option value="">בחר פסוק</option>';
-            mishnaSelect.disabled = true;
         }
     }
 
     function loadGame() {
-        currentMishna = document.getElementById('mishna').value;
-        if (!currentMasechet || !currentPerek || !currentMishna) {
+        currentPerek = document.getElementById('perek').value;
+        if (!currentMasechet || !currentPerek) {
             alert('נא לבחור פרק ופסוק');
             return;
         }
 
         const gameData = allData.find(row =>
             row[0] === currentMasechet &&
-            row[1] === currentPerek &&
-            row[2] === currentMishna
+            row[1] === currentPerek
         );
 
         if (gameData) {
-            gameTitle = gameData[3] || 'משחק סידור פסוקים';
-            endGameMessage = gameData[4] || 'כל הכבוד! סיימת את המשחק.';
+            gameTitle = `${currentMasechet} ${currentPerek}`;
+            endGameMessage = 'כל הכבוד! סיימת את המשחק.';
 
-            correctOrder = gameData[5].split('\n').map(row => row.trim().split(/\s+/));
-            words = correctOrder.flat();
-            maxScore = words.length * 10;
+            // התוכן עכשיו בעמודה השלישית
+            const content = gameData[2];
+            
+            if (content) {
+                // מפצלים את התוכן למילים בודדות
+                const words_array = content.trim().split(/\s+/);
+                correctOrder = [words_array]; // מערך של מערך אחד עם כל המילים
+                words = words_array; // כל המילים ברצף
+                maxScore = words.length * 10;
+            } else {
+                alert('הפסוק לא מוגדר כראוי בקובץ הנתונים');
+                return;
+            }
 
             document.getElementById('gameTitle').textContent = gameTitle;
             document.getElementById('gameModeButtons').style.display = 'block';
@@ -785,7 +768,7 @@
         document.querySelector('.container').classList.add('reading-mode');
         document.querySelector('.game-info').style.display = 'none';
         document.querySelector('.footer').style.display = 'none';
-        }
+    }
 
     function startMemorizationMode() {
         isReadingMode = false;
@@ -847,7 +830,7 @@
         document.getElementById('hintButton').disabled = hintsLeft === 0 || (Date.now() - lastHintTime < hintCooldown);
     }
 
-    function updateHintTimer() {
+   function updateHintTimer() {
         const hintTimerElement = document.getElementById('hintTimer');
         if (Date.now() - lastHintTime < hintCooldown) {
             const remainingTime = Math.ceil((hintCooldown - (Date.now() - lastHintTime)) / 1000);
@@ -1306,7 +1289,7 @@
 
         const successPercentage = Math.round((score / maxScore) * 100);
         const formData = new URLSearchParams();
-        const gameLocation = `${currentMasechet} ${currentPerek} ${currentMishna}`;
+        const gameLocation = `${currentMasechet} ${currentPerek}`;
         const gameTime = document.getElementById('finalGameTime').textContent;
 
         if (FORM_CODE) {
@@ -1360,7 +1343,6 @@
         document.getElementById('endGameModal').style.display = 'none';
         document.getElementById('masechet').value = '';
         document.getElementById('perek').value = '';
-        document.getElementById('mishna').value = '';
         document.getElementById('gameTitle').textContent = '';
         document.getElementById('targetArea').innerHTML = '';
         document.getElementById('sourceAreaLeft').innerHTML = '';
@@ -1546,10 +1528,6 @@
             renderWords();
         }
     }
-
-    let clickCount = 0;
-    let clickTimer;
-
     </script>
 </body>
 </html>
