@@ -271,71 +271,71 @@
           transform: scale(1.05);
       }
 
-    button, select {
-    background: linear-gradient(145deg, var(--secondary-color), #78ab40);
-    color: #ffffff; /* צבע לבן */
-    border: none;
-    padding: 8px 15px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 0.95em;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    font-family: 'Frank Ruhl Libre', serif;
-    font-weight: 500;
-}
-        select option {
-    padding: 10px;
-    font-size: 0.95em;
-}
-        button:hover {
-    background: linear-gradient(145deg, var(--primary-color), #303f9f);
-    color: #ffffff; /* מוודא שהצבע נשאר לבן בעת מעבר עכבר */
-}
-        /* תיקון ספציפי לקבוצת התיבות */
-.input-group select {
-    margin: 4px 0;
-    width: auto;
-    min-width: 150px;
-    max-width: 100%;
-}
+      button {
+          background: linear-gradient(145deg, var(--secondary-color), #78ab40);
+          color: white;
+          border: none;
+          padding: 8px 15px;
+          border-radius: 10px;
+          cursor: pointer;
+          font-size: 0.95em;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          font-family: 'Frank Ruhl Libre', serif;
+          font-weight: 500;
+      }
 
-@media (max-width: 768px) {
-    .input-group select {
-        width: 90%;
-        min-width: unset;
-        font-size: 0.9em; /* מקטין טקסט במובייל */
-        padding: 6px 12px;
-        padding-right: 30px; /* מרווח לאייקון החץ */
-    }
-}
-
-select {
-    background-color: #ffffff; /* רקע לבן לתיבות בחירה */
-    color: var(--text-color); /* צבע טקסט כהה */
-    appearance: none; /* מבטל את המראה הדיפולטיבי של דפדפנים */
-    background-image: url('data:image/svg+xml;utf8,<svg fill="%2334495e" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 16px;
-    padding-right: 30px; /* מרווח לאייקון החץ */
-    overflow: hidden;
-    text-overflow: ellipsis; /* מוסיף נקודות אם הטקסט חורג */
-    white-space: nowrap; /* מונע שבירת שורות */
-    height: auto; /* מאפשר גובה דינמי */
-    min-height: 38px; /* גובה מינימלי */
-}
-      button:hover, select:hover {
+      button:hover {
           background: linear-gradient(145deg, var(--primary-color), #303f9f);
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
       }
 
-      button:disabled, select:disabled {
+      button:disabled {
           background: linear-gradient(145deg, #cccccc, #999999);
           cursor: not-allowed;
           transform: none;
           box-shadow: none;
+      }
+
+      select {
+          background-color: white;
+          color: var(--text-color);
+          border: none;
+          padding: 8px 15px;
+          border-radius: 10px;
+          cursor: pointer;
+          font-size: 0.95em;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          font-family: 'Frank Ruhl Libre', serif;
+          font-weight: 500;
+          appearance: none;
+          background-image: url('data:image/svg+xml;utf8,<svg fill="%2334495e" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+          background-repeat: no-repeat;
+          background-position: left 8px center;
+          padding-left: 30px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+          height: auto;
+          min-height: 38px;
+      }
+
+      select:hover {
+          background-color: #f5f5f5;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      select:disabled {
+          background-color: #f0f0f0;
+          color: #aaa;
+          cursor: not-allowed;
+      }
+
+      select option {
+          padding: 10px;
+          font-size: 0.95em;
       }
 
       .input-group {
@@ -344,6 +344,13 @@ select {
           margin: 8px 0;
           flex-wrap: wrap;
           justify-content: center;
+      }
+
+      .input-group select {
+          margin: 4px 0;
+          width: auto;
+          min-width: 150px;
+          max-width: 100%;
       }
 
       #message {
@@ -627,6 +634,13 @@ select {
           .input-group select, .input-group button {
               margin: 4px 0;
               width: 90%;
+              min-width: unset;
+              font-size: 0.9em;
+          }
+
+          select {
+              padding: 6px 12px;
+              padding-left: 30px;
           }
 
           /* כאשר המשחק פעיל */
@@ -742,7 +756,7 @@ select {
                     <select id="masechet" onchange="updatePrakim()">
                         <option value="">בחר פרק</option>
                     </select>
-                    <select id="perek" disabled>
+                    <select id="perek" onchange="loadGameOnSelect()" disabled>
                         <option value="">בחר פסוק</option>
                     </select>
                     <button onclick="loadGame()"><i class="fas fa-play"></i> טען משחק</button>
@@ -797,7 +811,7 @@ select {
             <label for="sheetUrl">קישור לגיליון Google Sheets:</label>
             <input type="text" id="sheetUrl"><br><br>
             <button onclick="updateGoogleSheetsLink()"><i class="fas fa-link"></i> עדכן קישור Google Sheets</button><br><br>
-            <label for="excelFile">או טען קובץ אקסל:</label>
+         <label for="excelFile">או טען קובץ אקסל:</label>
             <input type="file" id="excelFile" accept=".xlsx, .xls"><br><br>
             <button onclick="loadExcelFile()"><i class="fas fa-file-excel"></i> טען קובץ אקסל</button><br><br>
             <label for="formUrl">קישור לטופס Google Forms:</label>
@@ -1003,6 +1017,14 @@ select {
         }
     }
 
+    // פונקציה חדשה שמטעינה את המשחק אוטומטית בעת בחירת פסוק
+    function loadGameOnSelect() {
+        const perekValue = document.getElementById('perek').value;
+        if (perekValue) {
+            loadGame();
+        }
+    }
+
     function loadGame() {
         currentPerek = document.getElementById('perek').value;
         if (!currentMasechet || !currentPerek) {
@@ -1028,15 +1050,18 @@ select {
                 correctOrder = [words_array]; // מערך של מערך אחד עם כל המילים
                 words = [...words_array]; // שמירה על עותק של המילים בסדר המקורי
                 maxScore = words.length * 10;
+                
+                document.getElementById('gameTitle').textContent = gameTitle;
+                document.getElementById('gameModeButtons').style.display = 'block';
+                minimizeHeader();
+                gameInProgress = true;
+                
+                // הפעלת מצב קריאה אוטומטית בטעינת פסוק חדש
+                startReadingMode();
             } else {
                 alert('הפסוק לא מוגדר כראוי בקובץ הנתונים');
                 return;
             }
-
-            document.getElementById('gameTitle').textContent = gameTitle;
-            document.getElementById('gameModeButtons').style.display = 'block';
-            minimizeHeader();
-            gameInProgress = true;
         } else {
             alert('לא נמצא משחק מתאים');
         }
@@ -1502,7 +1527,7 @@ select {
             const words = row.children;
             Array.from(words).forEach((word, columnIndex) => {
                 const correctWord = word.dataset.correctWord;
-                if (word.classList.contains('placeholder')) {
+              if (word.classList.contains('placeholder')) {
                     positions.push({ row: rowIndex, column: columnIndex, correctWord: correctWord });
                 }
             });
@@ -1573,7 +1598,8 @@ select {
         const header = document.getElementById('header');
         header.classList.remove('minimized');
     }
-function endGame() {
+
+    function endGame() {
         clearInterval(gameTimer);
         const currentTime = new Date();
         const elapsedTime = new Date(currentTime - gameStartTime);
