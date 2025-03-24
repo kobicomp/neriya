@@ -163,8 +163,10 @@
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
           margin: 0 5px 5px 5px;
           display: flex;
-          flex-direction: column;
-          align-items: center;
+          flex-direction: row; /* שינוי לשורה כדי לאפשר טורים */
+          flex-wrap: wrap; /* מאפשר לאלמנטים לגלוש לשורה הבאה */
+          justify-content: space-between; /* מרווח בין הטורים */
+          align-items: flex-start;
       }
 
       #targetArea {
@@ -215,7 +217,7 @@
       }
       
       .side-column .word {
-          width: 90%;
+          width: 45%; /* רוחב לכל מילה כדי ליצור 2 טורים */
           box-sizing: border-box;
           word-break: break-word;
           overflow-wrap: break-word;
@@ -224,6 +226,8 @@
           text-align: center;
           margin-bottom: 8px;
           font-size: 0.9em;
+          margin-left: 2.5%;
+          margin-right: 2.5%;
       }
 
       .word {
@@ -851,6 +855,9 @@
         <div class="bottom-words-area" id="bottomArea1"></div>
         <div class="bottom-words-area" id="bottomArea2"></div>
         
+        <!-- אזור חדש למטה לפסוקים ארוכים במחשב -->
+        <div class="bottom-words-area" id="bottomWordsArea" style="display: none;"></div>
+        
         <div class="footer" id="footer">
             <div id="message"></div>
             <div class="button-container">
@@ -1144,6 +1151,7 @@
         document.querySelector('.footer').style.display = 'none';
         document.getElementById('bottomArea1').style.display = 'none';
         document.getElementById('bottomArea2').style.display = 'none';
+        document.getElementById('bottomWordsArea').style.display = 'none';
     }
 
     function startMemorizationMode() {
@@ -1159,6 +1167,7 @@
             document.getElementById('bottomArea1').style.display = 'flex';
             document.getElementById('bottomArea2').style.display = 'flex';
         }
+        // האזור התחתון החדש יוצג דינמית בפונקציית renderWords
     }
 
     function startGame() {
@@ -1237,10 +1246,11 @@
             ...document.querySelectorAll('#columnTopRight .word'),
             ...document.querySelectorAll('#columnBottomRight .word')
         ];
-        const bottomWords = [
+        const bottomAreaWords = [
             ...document.querySelectorAll('#bottomArea1 .word'),
             ...document.querySelectorAll('#bottomArea2 .word')
         ];
+        const bottomWordsAreaWords = document.querySelectorAll('#bottomWordsArea .word');
         
         if (targetWords.length === 0) return;
         
@@ -1263,28 +1273,42 @@
         
         // התאמת מילים בעמודות הצד
         if (sideColumnWords.length > 0) {
-            if (sideColumnWords.length <= 20) fontSize = '0.9rem';
-            else if (sideColumnWords.length <= 40) fontSize = '0.85rem';
+            if (totalWords <= 20) fontSize = '0.9rem';
+            else if (totalWords <= 40) fontSize = '0.85rem';
             else fontSize = '0.75rem';
             
             sideColumnWords.forEach(word => {
                 word.style.fontSize = fontSize;
                 word.style.padding = '5px 8px';
-                word.style.margin = '3px 0';
+                word.style.margin = '3px';
                 word.style.maxWidth = '90%';
             });
         }
         
         // התאמת מילים באזורים התחתונים (למובייל)
-        if (bottomWords.length > 0) {
-            if (bottomWords.length <= 15) fontSize = '0.9rem';
-            else if (bottomWords.length <= 30) fontSize = '0.8rem';
+        if (bottomAreaWords.length > 0) {
+            if (bottomAreaWords.length <= 15) fontSize = '0.9rem';
+            else if (bottomAreaWords.length <= 30) fontSize = '0.8rem';
             else fontSize = '0.7rem';
             
-            bottomWords.forEach(word => {
+            bottomAreaWords.forEach(word => {
                 word.style.fontSize = fontSize;
                 word.style.padding = '4px 6px';
                 word.style.margin = '2px';
+            });
+        }
+        
+        // התאמת מילים בשורה התחתונה הנוספת
+        if (bottomWordsAreaWords.length > 0) {
+            if (bottomWordsAreaWords.length <= 10) fontSize = '0.95rem';
+            else if (bottomWordsAreaWords.length <= 20) fontSize = '0.85rem';
+            else fontSize = '0.75rem';
+            
+            bottomWordsAreaWords.forEach(word => {
+                word.style.fontSize = fontSize;
+                word.style.padding = '6px 10px';
+                word.style.margin = '3px 5px';
+                word.style.maxWidth = 'calc(90% / ' + Math.min(bottomWordsAreaWords.length, 8) + ')';
             });
         }
     }
@@ -1299,12 +1323,16 @@
         const bottomArea2 = document.getElementById('bottomArea2');
         const targetArea = document.getElementById('targetArea');
         
+        // אזור חדש למטה לפסוקים ארוכים
+        const bottomWordsArea = document.getElementById('bottomWordsArea');
+        
         columnTopLeft.innerHTML = '';
         columnBottomLeft.innerHTML = '';
         columnTopRight.innerHTML = '';
         columnBottomRight.innerHTML = '';
         bottomArea1.innerHTML = '';
         bottomArea2.innerHTML = '';
+        bottomWordsArea.innerHTML = '';
         targetArea.innerHTML = '';
 
         // יצירת אזור המטרה
@@ -1347,32 +1375,70 @@
                     bottomArea2.appendChild(wordElement);
                 });
             } else {
-                // חלוקה לארבע עמודות במחשב
-                const quarter = Math.ceil(words.length / 4);
-                const firstQuarter = words.slice(0, quarter);
-                const secondQuarter = words.slice(quarter, 2 * quarter);
-                const thirdQuarter = words.slice(2 * quarter, 3 * quarter);
-                const fourthQuarter = words.slice(3 * quarter);
+                // בדיקה האם הפסוק ארוך ודורש שורה נוספת
+                const isLongVerse = words.length > 24;
                 
-                firstQuarter.forEach((word, index) => {
+                // מספר המילים בכל אזור בהתאם לאורך הפסוק
+                let wordsPerColumn;
+                let bottomWordsCount = 0;
+                
+                if (isLongVerse) {
+                    // חישוב כמה מילים להעביר לשורה התחתונה
+                    bottomWordsCount = Math.ceil(words.length / 5); // חמישית מהמילים ילכו למטה
+                    wordsPerColumn = Math.ceil((words.length - bottomWordsCount) / 4);
+                } else {
+                    wordsPerColumn = Math.ceil(words.length / 4);
+                }
+                
+                // חלוקת המילים לאזורים
+                const rightTopWords = words.slice(0, wordsPerColumn);
+                const rightBottomWords = words.slice(wordsPerColumn, 2 * wordsPerColumn);
+                const leftTopWords = words.slice(2 * wordsPerColumn, 3 * wordsPerColumn);
+                const leftBottomWords = words.slice(3 * wordsPerColumn, words.length - bottomWordsCount);
+                
+                // מילים לשורה התחתונה (רק אם הפסוק ארוך)
+                const bottomWords = isLongVerse ? words.slice(words.length - bottomWordsCount) : [];
+                
+                // מילוי האזורים
+                rightTopWords.forEach((word, index) => {
                     const wordElement = createWordElement(word, index);
+                    // חלוקה לשני טורים בתוך כל אזור
+                    wordElement.style.width = '45%';
+                    wordElement.style.display = 'inline-block';
                     columnTopRight.appendChild(wordElement);
                 });
                 
-                secondQuarter.forEach((word, index) => {
-                    const wordElement = createWordElement(word, index + quarter);
+                rightBottomWords.forEach((word, index) => {
+                    const wordElement = createWordElement(word, index + wordsPerColumn);
+                    wordElement.style.width = '45%';
+                    wordElement.style.display = 'inline-block';
                     columnBottomRight.appendChild(wordElement);
                 });
                 
-                thirdQuarter.forEach((word, index) => {
-                    const wordElement = createWordElement(word, index + 2 * quarter);
+                leftTopWords.forEach((word, index) => {
+                    const wordElement = createWordElement(word, index + 2 * wordsPerColumn);
+                    wordElement.style.width = '45%';
+                    wordElement.style.display = 'inline-block';
                     columnTopLeft.appendChild(wordElement);
                 });
                 
-                fourthQuarter.forEach((word, index) => {
-                    const wordElement = createWordElement(word, index + 3 * quarter);
+                leftBottomWords.forEach((word, index) => {
+                    const wordElement = createWordElement(word, index + 3 * wordsPerColumn);
+                    wordElement.style.width = '45%';
+                    wordElement.style.display = 'inline-block';
                     columnBottomLeft.appendChild(wordElement);
                 });
+                
+                // מילוי השורה התחתונה אם יש צורך
+                if (isLongVerse) {
+                    document.getElementById('bottomWordsArea').style.display = 'flex';
+                    bottomWords.forEach((word, index) => {
+                        const wordElement = createWordElement(word, index + 4 * wordsPerColumn);
+                        bottomWordsArea.appendChild(wordElement);
+                    });
+                } else {
+                    document.getElementById('bottomWordsArea').style.display = 'none';
+                }
             }
 
             addDragEffects();
@@ -1598,17 +1664,29 @@
                         document.getElementById('bottomArea1') : 
                         document.getElementById('bottomArea2');
                 } else {
-                    // במחשב - בחירה בין ארבע עמודות
-                    const columns = [
+                    // במחשב - בחירה בין חמישה אזורים
+                    const isLongVerse = words.length > 24;
+                    let areas = [
                         document.getElementById('columnTopRight'),
                         document.getElementById('columnBottomRight'),
                         document.getElementById('columnTopLeft'),
                         document.getElementById('columnBottomLeft')
                     ];
-                    sourceArea = columns[Math.floor(Math.random() * columns.length)];
+                    
+                    // אם זה פסוק ארוך, נוסיף את האזור התחתון לרשימה
+                    if (isLongVerse) {
+                        areas.push(document.getElementById('bottomWordsArea'));
+                    }
+                    
+                    sourceArea = areas[Math.floor(Math.random() * areas.length)];
                 }
                 
                 const newWordElement = createWordElement(word, wordElement.dataset.index);
+
+                if (sourceArea.id !== 'bottomWordsArea') {
+                    newWordElement.style.width = '45%';
+                    newWordElement.style.display = 'inline-block';
+                }
 
                 const insertIndex = Array.from(sourceArea.children).findIndex(child => child.textContent.localeCompare(word, 'he') > 0);
 
@@ -1673,7 +1751,7 @@
     function getSideWords() {
         const sideContainers = [
             'columnTopRight', 'columnBottomRight', 'columnTopLeft', 'columnBottomLeft',
-            'bottomArea1', 'bottomArea2'
+            'bottomArea1', 'bottomArea2', 'bottomWordsArea'
         ];
         
         const words = [];
@@ -1728,7 +1806,7 @@
         targetPlace.classList.add('word', 'correct', 'hint', 'fixed');
         targetPlace.draggable = false;
         targetPlace.dataset.word = word;
-        targetPlace.dataset.correctWord = word;
+        targetPlace.dataset.correctWord = position.correctWord;
 
         updateWordColors();
         console.log('המילה הוצבה במקום הנכון. הצבעים עודכנו.');
@@ -1744,7 +1822,7 @@
         
         const columnsEmpty = [
             'columnTopRight', 'columnBottomRight', 'columnTopLeft', 'columnBottomLeft',
-            'bottomArea1', 'bottomArea2'
+            'bottomArea1', 'bottomArea2', 'bottomWordsArea'
         ].every(id => {
             const container = document.getElementById(id);
             return !container || container.children.length === 0;
@@ -1892,6 +1970,7 @@
         document.getElementById('columnBottomRight').innerHTML = '';
         document.getElementById('bottomArea1').innerHTML = '';
         document.getElementById('bottomArea2').innerHTML = '';
+        document.getElementById('bottomWordsArea').innerHTML = '';
         document.getElementById('message').innerHTML = '';
         document.getElementById('progressBar').style.width = '0%';
         score = 0;
@@ -1916,6 +1995,7 @@
         document.querySelector('.footer').style.display = 'block';
         document.getElementById('bottomArea1').style.display = 'none';
         document.getElementById('bottomArea2').style.display = 'none';
+        document.getElementById('bottomWordsArea').style.display = 'none';
     }
 
     function toggleGameSelection() {
@@ -1964,7 +2044,7 @@
         // הוספת מאזיני גרירה לכל האזורים
         const allAreas = [
             'targetArea', 'columnTopLeft', 'columnBottomLeft', 'columnTopRight', 
-            'columnBottomRight', 'bottomArea1', 'bottomArea2'
+            'columnBottomRight', 'bottomArea1', 'bottomArea2', 'bottomWordsArea'
         ];
         
         allAreas.forEach(areaId => {
