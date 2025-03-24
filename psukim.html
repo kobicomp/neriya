@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק סידור מילים מרהיב</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap');
+
+      :root {
+          --primary-color: #4a90e2;
+          --secondary-color: #50e3c2;
+          --accent-color: #f5a623;
+          --background-color: #f0f4f8;
+          --text-color: #333;
+      }
+
+      body, html {
+          font-family: 'Rubik', sans-serif;
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          color: var(--text-color);
+          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      }
+
+      .container {
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+      }
+
+      .header {
+          background-color: rgba(255, 255, 255, 0.9);
+          padding: 5px;
+          text-align: center;
+          transition: all 0.3s ease;
+      }
+
+      .header h1 {
+          margin: 0;
+          font-size: 1.3em;
+      }
+
+      .header h2 {
+          margin: 5px 0;
+          font-size: 1.1em;
+      }
+
+      .header.minimized .game-selection {
+          display: none;
+      }
+
+      .game-info {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 5px;
+          background-color: rgba(255, 255, 255, 0.9);
+      }
+
+      .game-info > div {
+          flex: 1;
+          text-align: center;
+          font-size: 0.9em;
+      }
+
+      #score, #hintsLeft, #gameTimer, #hintTimer {
+          margin: 0;
+          color: var(--primary-color);
+          font-weight: bold;
+      }
+
+      .game-area {
+          display: flex;
+          flex: 1;
+          overflow: hidden;
+          height: calc(100vh - 150px);
+      }
+
+      #sourceAreaRight, #sourceAreaLeft {
+          width: 15%;
+          padding: 10px;
+          background-color: rgba(255, 255, 255, 0.8);
+          overflow-y: auto;
+      }
+
+      #targetArea {
+          flex: 1;
+          padding: 10px;
+          background-color: rgba(255, 255, 255, 0.9);
+          overflow-y: auto;
+      }
+
+      .target-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5px;
+          min-height: 40px;
+          padding: 3px;
+          border: 1px dashed var(--secondary-color);
+          border-radius: 5px;
+          margin-bottom: 3px;
+      }
+
+      .word, .placeholder {
+          padding: 6px 12px;
+          border-radius: 15px;
+          font-size: 0.9em;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+          margin: 2px;
+      }
+
+      .word {
+          background-color: var(--accent-color);
+          color: white;
+          cursor: move;
+          user-select: none;
+      }
+
+      .word:hover {
+          transform: translateY(-2px) rotate(2deg);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+      }
+
+      .word.correct {
+          background-color: #2ecc71;
+      }
+
+      .word.incorrect {
+          background-color: #e74c3c;
+      }
+
+      .word.hint {
+          background-color: #3498db;
+      }
+
+      .word.fixed {
+          cursor: not-allowed;
+          opacity: 0.8;
+      }
+
+      .word.unchecked {
+          background-color: #8e44ad;
+      }
+
+      .placeholder {
+          background-color: rgba(255, 255, 255, 0.5);
+          color: var(--text-color);
+      }
+
+      .placeholder:hover {
+          background-color: rgba(255, 255, 255, 0.7);
+      }
+
+      button, select {
+          background-color: var(--secondary-color);
+          color: white;
+          border: none;
+          padding: 6px 12px;
+          border-radius: 15px;
+          cursor: pointer;
+          font-size: 0.9em;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      button:hover, select:hover {
+          background-color: var(--primary-color);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+      }
+
+      button:disabled, select:disabled {
+          background-color: #cccccc;
+          cursor: not-allowed;
+      }
+
+      .input-group {
+          display: flex;
+          gap: 5px;
+          margin: 5px 0;
+          flex-wrap: wrap;
+          justify-content: center;
+      }
+
+      #message {
+          margin-top: 5px;
+          padding: 5px;
+          border-radius: 5px;
+          text-align: center;
+          font-weight: bold;
+          font-size: 0.9em;
+      }
+
+      .success {
+          background-color: #d4edda;
+          color: #155724;
+      }
+
+      .error {
+          background-color: #f8d7da;
+          color: #721c24;
+      }
+
+      .footer {
+          background-color: rgba(255, 255, 255, 0.9);
+          padding: 5px;
+          text-align: center;
+      }
+
+      #endGameModal, #adminModal, #passwordModal, #contactModal {
+          display: none;
+          position: fixed;
+          z-index: 1000;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0,0,0,0.5);
+      }
+
+      .modal-content, .admin-content, .password-content, .contact-modal-content {
+          background-color: #fefefe;
+          margin: 15% auto;
+          padding: 20px;
+          border: 1px solid #888;
+          width: 80%;
+          max-width: 500px;
+          border-radius: 10px;
+      }
+
+      .password-content {
+          width: 300px;
+          text-align: center;
+      }
+
+      #toggleSelectionButton {
+          position: absolute;
+          top: 5px;
+          left: 5px;
+          z-index: 1000;
+          font-size: 0.8em;
+          padding: 3px 8px;
+      }
+
+      #settingsIcon {
+          position: fixed;
+          top: 10px;
+          right: 10px;
+          cursor: pointer;
+          font-size: 20px;
+      }
+
+      #dataSource {
+          margin-top: 10px;
+          font-style: italic;
+      }
+
+      .highlight-drop {
+          background-color: rgba(0, 0, 0, 0.2) !important;
+          transition: background-color 0.3s ease;
+      }
+
+      #contactButton {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 1000;
+          background-color: var(--primary-color);
+          color: white;
+          border: none;
+          padding: 8px 15px;
+          border-radius: 5px;
+          cursor: pointer;
+      }
+
+      .contact-form input, .contact-form textarea {
+          width: 100%;
+          padding: 10px;
+          margin: 10px 0;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+      }
+
+      .contact-form button {
+          background-color: var(--primary-color);
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 5px;
+          cursor: pointer;
+      }
+
+      /* מדיה קוורי למסכים קטנים */
+      @media (max-width: 768px) {
+          body, html {
+              height: 100%;
+              overflow: auto;
+          }
+
+          .container {
+              display: flex;
+              flex-direction: column;
+              min-height: 100%;
+          }
+
+          .header {
+              padding: 5px;
+              position: relative;
+          }
+
+          .header h1 {
+              font-size: 1.1em;
+              margin: 15px 0 5px 0;
+          }
+
+          #toggleSelectionButton,
+          #contactButton {
+              position: absolute;
+              top: 3px;
+              font-size: 0.7em;
+              padding: 3px 8px;
+              z-index: 1000;
+              height: 25px;
+          }
+
+          #toggleSelectionButton {
+              left: 3px;
+          }
+
+          #contactButton {
+              right: 30px;
+              width: auto;
+          }
+
+          #settingsIcon {
+              position: absolute;
+              top: 3px;
+              right: 3px;
+              font-size: 1em;
+              cursor: pointer;
+          }
+
+          .game-selection {
+              margin-top: 5px;
+          }
+
+          .input-group {
+              flex-direction: column;
+              align-items: center;
+          }
+
+          .input-group select, .input-group button {
+              margin: 3px 0;
+              width: 80%;
+          }
+
+          /* כאשר המשחק פעיל */
+          .game-active .game-area {
+              height: 90vh;
+              display: flex;
+              flex-direction: column;
+          }
+
+          .game-active #targetArea {
+              flex: 3.5;
+              overflow-y: auto;
+          }
+
+          .game-active #sourceAreaBottom {
+              flex: 2;
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: center;
+              align-items: center;
+              padding: 3px;
+              background-color: rgba(255, 255, 255, 0.8);
+              overflow-y: auto;
+              margin-bottom: 2px;
+          }
+
+          .game-active .footer {
+              height: 7vh;
+              padding: 3px 0;
+              background-color: rgba(255, 255, 255, 0.9);
+              display: flex;
+              flex-direction: column;
+              justify-content: flex-start;
+          }
+
+          #message {
+              font-size: 0.6em;
+              margin-bottom: 2px;
+          }
+
+          .button-container {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin-top: 3px;
+          }
+
+          .button-container button {
+              font-size: 0.75em;
+              padding: 4px 10px;
+              margin: 1px;
+          }
+
+          .word, .placeholder {
+              padding: 4px 8px;
+              font-size: 0.8em;
+              margin: 1px;
+          }
+
+          .target-row {
+              min-height: 35px;
+              padding: 2px;
+              gap: 3px;
+          }
+
+          #sourceAreaRight, #sourceAreaLeft {
+              display: none;
+          }
+
+          .game-info {
+              flex-wrap: wrap;
+          }
+
+          .game-info > div {
+              flex-basis: 50%;
+              margin-bottom: 3px;
+              font-size: 0.8em;
+          }
+      }
+
+      /* סגנונות חדשים למצב קריאה */
+      .reading-mode .word {
+          cursor: default;
+          background-color: var(--primary-color);
+      }
+
+      .reading-mode .word:hover {
+          transform: none;
+          box-shadow: none;
+      }
+
+      #readingButton, #memorizationButton {
+          margin-right: 5px;
+      }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header" id="header">
+            <button id="toggleSelectionButton" onclick="toggleGameSelection()">הצג/הסתר בחירת משחק</button>
+            <button id="contactButton" onclick="openContactModal()">יצירת קשר</button>
+            <h1>משחק סידור מילים</h1>
+            <div id="settingsIcon" onclick="openAdminPanel()">⚙️</div>
+            <div class="game-selection">
+                <div class="input-group">
+                    <select id="masechet" onchange="updatePrakim()">
+                        <option value="">בחר מסכת</option>
+                    </select>
+                    <select id="perek" onchange="updateMishnayot()" disabled>
+                        <option value="">בחר פרק</option>
+                    </select>
+                    <select id="mishna" disabled>
+                        <option value="">בחר משנה</option>
+                    </select>
+                    <button onclick="loadGame()">טען משחק</button>
+                </div>
+            </div>
+            <h2 id="gameTitle"></h2>
+            <div id="gameModeButtons" style="display: none;">
+                <button id="readingButton" onclick="startReadingMode()">קריאה</button>
+                <button id="memorizationButton" onclick="startMemorizationMode()">שינון</button>
+            </div>
+        </div>
+        <div class="game-info">
+            <div id="score">ניקוד: <span id="scoreValue">0</span></div>
+            <div id="hintsLeft">רמזים נותרו: <span id="hintsLeftValue">6</span></div>
+            <div id="hintTimer"></div>
+            <div id="gameTimer">זמן משחק: 00:00</div>
+        </div>
+        <div class="game-area">
+            <div id="sourceAreaRight"></div>
+            <div id="targetArea"></div>
+            <div id="sourceAreaLeft"></div>
+            <div id="sourceAreaBottom"></div>
+        </div>
+        <div class="footer" id="footer">
+            <div id="message"></div>
+            <div class="button-container">
+                <button onclick="checkOrder()">בדוק סדר</button>
+                <button id="hintButton" onclick="getHint()">רוצה רמז</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="endGameModal">
+        <div class="modal-content">
+            <h2>המשחק הסתיים!</h2>
+            <p id="endGameMessage"></p>
+            <p>הניקוד הסופי שלך: <span id="finalScore"></span></p>
+            <p>אחוז ההצלחה: <span id="successPercentage"></span>%</p>
+            <p>זמן המשחק: <span id="finalGameTime"></span></p>
+            <input type="text" id="playerName" placeholder="הכנס את שמך">
+            <button onclick="submitScore()">שלח ציון</button>
+            <button onclick="startNewGame()">משחק חדש</button>
+        </div>
+    </div>
+
+    <div id="adminModal">
+        <div class="admin-content">
+            <h2>הגדרות מנהל</h2>
+            <label for="sheetUrl">קישור לגיליון Google Sheets:</label>
+            <input type="text" id="sheetUrl"><br><br>
+            <button onclick="updateGoogleSheetsLink()">עדכן קישור Google Sheets</button><br><br>
+            <label for="excelFile">או טען קובץ אקסל:</label>
+            <input type="file" id="excelFile" accept=".xlsx, .xls"><br><br>
+            <button onclick="loadExcelFile()">טען קובץ אקסל</button><br><br>
+            <label for="formUrl">קישור לטופס Google Forms:</label>
+            <input type="text" id="formUrl"><br><br>
+            <label for="formCode">קוד הטופס:</label>
+            <input type="text" id="formCode"><br><br>
+            <button onclick="saveAdminSettings()">שמור הגדרות</button>
+            <button onclick="closeAdminModal()">סגור</button>
+            <div id="dataSource"></div>
+        </div>
+    </div>
+
+    <div id="passwordModal">
+        <div class="password-content">
+            <h3>הכנס סיסמה</h3>
+            <input type="password" id="adminPassword">
+            <button onclick="checkPassword()">אישור</button>
+        </div>
+    </div>
+
+    <div id="contactModal">
+        <div class="contact-modal-content">
+            <h2>יצירת קשר</h2>
+            <form id="contactForm" class="contact-form">
+                <input type="text" id="contactName" placeholder="שם מלא" required>
+                <input type="email" id="contactEmail" placeholder="כתובת אימייל" required>
+                <textarea id="contactMessage" placeholder="הודעה" required></textarea>
+                <button type="submit">שלח</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    let SHEET_URL = localStorage.getItem('sheetUrl') || 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMIK4rAliF1d3uqidPynJeN3mtsUbQWMMNX157X-ME_lVmpJTnjp8SPVC7WqD2e4-MWOfU3JhOshdW/pub?output=csv';
+    let FORM_URL = localStorage.getItem('formUrl') || 'https://docs.google.com/forms/d/e/1FAIpQLSc0lbXF8zZi8ZMlIj7_GyhQcc3ZktSUe-QnFNn1s_VegImVFg/formResponse';
+    let FORM_CODE = localStorage.getItem('formCode') || '';
+    let DATA_SOURCE = localStorage.getItem('dataSource') || 'Google Sheets';
+
+    let allData = JSON.parse(localStorage.getItem('gameData')) || [];
+    let words = [];
+    let correctOrder = [];
+    let score = 0;
+    let gameTitle = '';
+    let endGameMessage = '';
+    let currentMasechet = '';
+    let currentPerek = '';
+    let currentMishna = '';
+    let gameInProgress = false;
+    let hintsLeft = 6;
+    let hintsUsed = 0;
+    let wordStates = new Map();
+    let maxScore = 0;
+    let sideWords = [];
+    let lastHintTime = 0;
+    let hintCooldown = 30000; // 30 seconds
+    let gameStartTime;
+    let gameTimer;
+    let isReadingMode = false;
+
+    document.getElementById('settingsIcon').addEventListener('click', function() {
+        clickCount++;
+        clearTimeout(clickTimer);
+
+        if (clickCount === 3) {
+            document.getElementById('passwordModal').style.display = 'block';
+            clickCount = 0;
+        } else {
+            clickTimer = setTimeout(() => {
+                clickCount = 0;
+            }, 1000);
+        }
+    });
+
+    function checkPassword() {
+        const password = document.getElementById('adminPassword').value;
+        if (password === '1234') {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('adminModal').style.display = 'block';
+            document.getElementById('sheetUrl').value = SHEET_URL;
+            document.getElementById('formUrl').value = FORM_URL;
+            document.getElementById('formCode').value = FORM_CODE;
+            document.getElementById('dataSource').textContent = `מקור הנתונים הנוכחי: ${DATA_SOURCE}`;
+        } else {
+            alert('סיסמה שגויה');
+        }
+        document.getElementById('adminPassword').value = '';
+    }
+
+    function saveAdminSettings() {
+        FORM_URL = document.getElementById('formUrl').value;
+        FORM_CODE = document.getElementById('formCode').value;
+        localStorage.setItem('formUrl', FORM_URL);
+        localStorage.setItem('formCode', FORM_CODE);
+        alert('ההגדרות נשמרו בהצלחה');
+    }
+
+    function updateGoogleSheetsLink() {
+        const newUrl = document.getElementById('sheetUrl').value;
+        if (newUrl && newUrl !== SHEET_URL) {
+            SHEET_URL = newUrl;
+            localStorage.setItem('sheetUrl', SHEET_URL);
+            DATA_SOURCE = 'Google Sheets';
+            localStorage.setItem('dataSource', DATA_SOURCE);
+            loadData();
+            alert('קישור ה-Google Sheets עודכן בהצלחה');
+        } else {
+            alert('אנא הזן קישור חדש ותקין ל-Google Sheets');
+        }
+    }
+
+    function closeAdminModal() {
+        document.getElementById('adminModal').style.display = 'none';
+    }
+
+    function loadExcelFile() {
+        const fileInput = document.getElementById('excelFile');
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                allData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                localStorage.setItem('gameData', JSON.stringify(allData));
+                DATA_SOURCE = `קובץ אקסל: ${file.name}`;
+                localStorage.setItem('dataSource', DATA_SOURCE);
+                document.getElementById('dataSource').textContent = `מקור הנתונים הנוכחי: ${DATA_SOURCE}`;
+                updateMasechtot();
+                alert('קובץ האקסל נטען בהצלחה');
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    }
+
+    function loadData() {
+        fetch(SHEET_URL)
+            .then(response => response.text())
+            .then(data => {
+                allData = parseCSV(data);
+                localStorage.setItem('gameData', JSON.stringify(allData));
+                DATA_SOURCE = 'Google Sheets';
+                localStorage.setItem('dataSource', DATA_SOURCE);
+                updateMasechtot();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const cachedData = localStorage.getItem('gameData');
+                if (cachedData) {
+                    allData = JSON.parse(cachedData);
+                    updateMasechtot();
+                    alert('לא ניתן היה לטעון נתונים חדשים. משתמש בנתונים מהמטמון.');
+                } else {
+                    alert('אירעה שגיאה בטעינת הנתונים ואין נתונים במטמון.');
+                }
+            });
+    }
+
+    function parseCSV(str) {
+        const arr = [];
+        let quote = false;
+        for (let row = 0, col = 0, c = 0; c < str.length; c++) {
+            let cc = str[c], nc = str[c+1];
+            arr[row] = arr[row] || [];
+            arr[row][col] = arr[row][col] || '';
+
+            if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+            if (cc == '"') { quote = !quote; continue; }
+            if (cc == ',' && !quote) { ++col; continue; }
+            if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
+            if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+            if (cc == '\r' && !quote) { ++row; col = 0; continue; }
+
+            arr[row][col] += cc;
+        }
+        return arr;
+    }
+
+    function updateMasechtot() {
+        const masechetSelect = document.getElementById('masechet');
+        const masechtot = [...new Set(allData.slice(1).map(row => row[0]))];
+        masechetSelect.innerHTML = '<option value="">בחר מסכת</option>' +
+            masechtot.map(masechet => `<option value="${masechet}">${masechet}</option>`).join('');
+    }
+
+    function updatePrakim() {
+        currentMasechet = document.getElementById('masechet').value;
+        const perekSelect = document.getElementById('perek');
+        const mishnaSelect = document.getElementById('mishna');
+
+        if (currentMasechet) {
+            const prakim = [...new Set(allData.slice(1)
+                .filter(row => row[0] === currentMasechet)
+                .map(row => row[1]))];
+
+            perekSelect.innerHTML = '<option value="">בחר פרק</option>' +
+                prakim.map(perek => `<option value="${perek}">${perek}</option>`).join('');
+            perekSelect.disabled = false;
+
+            mishnaSelect.innerHTML = '<option value="">בחר משנה</option>';
+            mishnaSelect.disabled = true;
+        } else {
+            perekSelect.innerHTML = '<option value="">בחר פרק</option>';
+            perekSelect.disabled = true;
+            mishnaSelect.innerHTML = '<option value="">בחר משנה</option>';
+            mishnaSelect.disabled = true;
+        }
+    }
+
+    function updateMishnayot() {
+        currentPerek = document.getElementById('perek').value;
+        const mishnaSelect = document.getElementById('mishna');
+
+        if (currentPerek) {
+            const mishnayot = [...new Set(allData.slice(1)
+                .filter(row => row[0] === currentMasechet && row[1] === currentPerek)
+                .map(row => row[2]))];
+
+            mishnaSelect.innerHTML = '<option value="">בחר משנה</option>' +
+                mishnayot.map(mishna => `<option value="${mishna}">${mishna}</option>`).join('');
+            mishnaSelect.disabled = false;
+        } else {
+            mishnaSelect.innerHTML = '<option value="">בחר משנה</option>';
+            mishnaSelect.disabled = true;
+        }
+    }
+
+    function loadGame() {
+        currentMishna = document.getElementById('mishna').value;
+        if (!currentMasechet || !currentPerek || !currentMishna) {
+            alert('נא לבחור מסכת, פרק ומשנה');
+            return;
+        }
+
+        const gameData = allData.find(row =>
+            row[0] === currentMasechet &&
+            row[1] === currentPerek &&
+            row[2] === currentMishna
+        );
+
+        if (gameData) {
+            gameTitle = gameData[3] || 'משחק סידור מילים';
+            endGameMessage = gameData[4] || 'כל הכבוד! סיימת את המשחק.';
+
+            correctOrder = gameData[5].split('\n').map(row => row.trim().split(/\s+/));
+            words = correctOrder.flat();
+            maxScore = words.length * 10;
+
+            document.getElementById('gameTitle').textContent = gameTitle;
+            document.getElementById('gameModeButtons').style.display = 'block';
+            minimizeHeader();
+            gameInProgress = true;
+        } else {
+            alert('לא נמצא משחק מתאים');
+        }
+    }
+
+    function startReadingMode() {
+        isReadingMode = true;
+        renderWords();
+        document.querySelector('.container').classList.add('reading-mode');
+        document.querySelector('.game-info').style.display = 'none';
+        document.querySelector('.footer').style.display = 'none';
+    }
+
+    function startMemorizationMode() {
+        isReadingMode = false;
+        startGame();
+        document.querySelector('.container').classList.remove('reading-mode');
+        document.querySelector('.game-info').style.display = 'flex';
+        document.querySelector('.footer').style.display = 'block';
+    }
+
+    function startGame() {
+        score = 0;
+        hintsLeft = 6;
+        hintsUsed = 0;
+        lastHintTime = 0;
+        wordStates.clear();
+        words.forEach(word => wordStates.set(word, { attempts: 0, isCorrect: false, isHint: false }));
+        updateScore();
+        updateHintsLeft();
+        shuffleArray(words);
+        renderWords();
+        updateSideWords();
+        updateWordColors();
+        updateHintTimer();
+        gameStartTime = new Date();
+        startGameTimer();
+        console.log('Game started. Colors updated.');
+        document.querySelector('.container').classList.add('game-active');
+    }
+
+    function startGameTimer() {
+        gameTimer = setInterval(updateGameTimer, 1000);
+    }
+
+    function updateGameTimer() {
+        const currentTime = new Date();
+        const elapsedTime = new Date(currentTime - gameStartTime);
+        const minutes = elapsedTime.getUTCMinutes().toString().padStart(2, '0');
+        const seconds = elapsedTime.getUTCSeconds().toString().padStart(2, '0');
+        document.getElementById('gameTimer').textContent = `זמן משחק: ${minutes}:${seconds}`;
+    }
+
+    function updateSideWords() {
+        sideWords = [...words];
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function updateScore() {
+        document.getElementById('scoreValue').textContent = score;
+    }
+
+    function updateHintsLeft() {
+        document.getElementById('hintsLeftValue').textContent = hintsLeft;
+        document.getElementById('hintButton').disabled = hintsLeft === 0 || (Date.now() - lastHintTime < hintCooldown);
+    }
+
+    function updateHintTimer() {
+        const hintTimerElement = document.getElementById('hintTimer');
+        if (Date.now() - lastHintTime < hintCooldown) {
+            const remainingTime = Math.ceil((hintCooldown - (Date.now() - lastHintTime)) / 1000);
+            hintTimerElement.textContent = `זמן לרמז הבא: ${remainingTime} שניות`;
+            setTimeout(updateHintTimer, 1000);
+        } else {
+            hintTimerElement.textContent = '';
+            updateHintsLeft();
+        }
+    }
+
+    function renderWords() {
+        const sourceAreaRight = document.getElementById('sourceAreaRight');
+        const sourceAreaLeft = document.getElementById('sourceAreaLeft');
+        const sourceAreaBottom = document.getElementById('sourceAreaBottom');
+        const targetArea = document.getElementById('targetArea');
+        sourceAreaRight.innerHTML = '';
+        sourceAreaLeft.innerHTML = '';
+        sourceAreaBottom.innerHTML = '';
+        targetArea.innerHTML = '';
+
+        correctOrder.forEach((row, rowIndex) => {
+            const targetRow = document.createElement('div');
+            targetRow.className = 'target-row';
+            targetRow.dataset.rowIndex = rowIndex;
+            targetArea.appendChild(targetRow);
+
+            row.forEach((correctWord, columnIndex) => {
+                if (isReadingMode) {
+                    const wordElement = createWordElement(correctWord, columnIndex);
+                    wordElement.draggable = false;
+                    wordElement.classList.add('fixed');
+                    targetRow.appendChild(wordElement);
+                } else {
+                    const placeholder = createPlaceholder(correctWord, rowIndex, columnIndex);
+                    targetRow.appendChild(placeholder);
+                }
+            });
+        });
+
+        if (!isReadingMode) {
+            words.sort((a, b) => a.localeCompare(b, 'he'));
+
+            if (window.innerWidth <= 768) {
+                // For small screens, put all words in sourceAreaBottom
+                words.forEach((word, index) => {
+                    const wordElement = createWordElement(word, index);
+                    sourceAreaBottom.appendChild(wordElement);
+                });
+            } else {
+                // For larger screens, split words between left and right
+                const midpoint = Math.ceil(words.length / 2);
+                const rightWords = words.slice(0, midpoint);
+                const leftWords = words.slice(midpoint);
+
+                rightWords.forEach((word, index) => {
+                    const wordElement = createWordElement(word, index);
+                    sourceAreaRight.appendChild(wordElement);
+                });
+
+                leftWords.forEach((word, index) => {
+                    const wordElement = createWordElement(word, index + midpoint);
+                    sourceAreaLeft.appendChild(wordElement);
+                });
+            }
+
+            addDragEffects();
+        }
+    }
+
+    function createWordElement(word, index) {
+        const wordElement = document.createElement('div');
+        wordElement.className = 'word';
+        wordElement.textContent = word;
+        wordElement.draggable = !isReadingMode;
+        wordElement.dataset.word = word;
+        wordElement.dataset.index = index;
+        if (!isReadingMode) {
+            wordElement.addEventListener('dragstart', drag);
+        }
+        wordElement.style.backgroundColor = 'var(--accent-color)';
+        return wordElement;
+    }
+
+    function createPlaceholder(correctWord, rowIndex, columnIndex) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'placeholder';
+        placeholder.textContent = 'הנח כאן';
+        placeholder.dataset.correctWord = correctWord;
+        placeholder.dataset.rowIndex = rowIndex;
+        placeholder.dataset.columnIndex = columnIndex;
+        placeholder.addEventListener('dragover', allowDrop);
+        placeholder.addEventListener('drop', drop);
+        return placeholder;
+    }
+
+    function drag(event) {
+        if (!event.target.classList.contains('fixed')) {
+            event.dataTransfer.setData("text/plain", event.target.dataset.word);
+            event.dataTransfer.setData("sourceIndex", event.target.dataset.index);
+            event.dataTransfer.setData("sourceParent", event.target.parentNode.id);
+        } else {
+            event.preventDefault();
+        }
+    }
+
+    function allowDrop(event) {
+        event.preventDefault();
+    }
+
+    function drop(event) {
+        event.preventDefault();
+        const word = event.dataTransfer.getData("text/plain");
+        const sourceIndex = event.dataTransfer.getData("sourceIndex");
+        const sourceParent = event.dataTransfer.getData("sourceParent");
+
+        let targetElement = event.target.closest('.word:not(.fixed), .placeholder');
+        if (!targetElement) return;
+
+        const sourceElement = document.querySelector(`[data-word="${word}"][data-index="${sourceIndex}"]`);
+        if (!sourceElement || sourceElement.classList.contains('fixed')) return;
+
+        if (targetElement.classList.contains('placeholder') || targetElement.textContent === 'הנח כאן') {
+            targetElement.textContent = word;
+            targetElement.classList.remove('placeholder');
+            targetElement.classList.add('word', 'unchecked');
+            targetElement.dataset.word = word;
+            targetElement.dataset.index = sourceIndex;
+            targetElement.draggable = true;
+            targetElement.addEventListener('dragstart', drag);
+
+            if (sourceParent === 'sourceAreaLeft' || sourceParent === 'sourceAreaRight' || sourceParent === 'sourceAreaBottom') {
+                sourceElement.remove();
+                removeFromSideWords(word);
+            } else {
+                const oldPlaceholder = createPlaceholder(sourceElement.dataset.correctWord, sourceElement.parentElement.dataset.rowIndex, Array.from(sourceElement.parentElement.children).indexOf(sourceElement));
+                sourceElement.replaceWith(oldPlaceholder);
+            }
+        } else if (targetElement.classList.contains('word')) {
+            const targetWord = targetElement.textContent;
+            const targetIndex = targetElement.dataset.index;
+
+            [targetElement.textContent, sourceElement.textContent] = [sourceElement.textContent, targetElement.textContent];
+            [targetElement.dataset.word, sourceElement.dataset.word] = [sourceElement.dataset.word, targetElement.dataset.word];
+            [targetElement.dataset.index, sourceElement.dataset.index] = [sourceElement.dataset.index, targetElement.dataset.index];
+
+            targetElement.classList.add('unchecked');
+            targetElement.classList.remove('correct', 'incorrect', 'fixed', 'hint');
+            sourceElement.classList.add('unchecked');
+            sourceElement.classList.remove('correct', 'incorrect', 'fixed', 'hint');
+        }
+
+        addDragEffects();
+        updateWordColors();
+        console.log('Drop event completed. Colors updated.');
+    }
+
+    function addDragEffects() {
+        const words = document.querySelectorAll('.word');
+        words.forEach(word => {
+            word.addEventListener('dragstart', () => {
+                word.style.opacity = '0.4';
+            });
+            word.addEventListener('dragend', () => {
+                word.style.opacity = '1';
+            });
+        });
+
+        const placeholders = document.querySelectorAll('.placeholder');
+        placeholders.forEach(placeholder => {
+            placeholder.addEventListener('dragenter', () => {
+                placeholder.style.background = 'rgba(0, 0, 0, 0.1)';
+            });
+            placeholder.addEventListener('dragleave', () => {
+                placeholder.style.background = '';
+            });
+        });
+    }
+
+    function updateWordColors() {
+        const words = document.querySelectorAll('.word');
+        words.forEach(word => {
+            const parentId = word.parentElement.id;
+            if (parentId === 'sourceAreaLeft' || parentId === 'sourceAreaRight' || parentId === 'sourceAreaBottom') {
+                word.style.backgroundColor = 'var(--accent-color)';
+                word.classList.remove('correct', 'incorrect', 'unchecked', 'hint');
+            } else {
+                if (word.classList.contains('fixed')) {
+                    word.style.backgroundColor = '#2ecc71'; // green
+                } else if (word.classList.contains('hint')) {
+                    word.style.backgroundColor = '#3498db'; // blue
+                } else if (word.classList.contains('incorrect')) {
+                    word.style.backgroundColor = '#e74c3c'; // red
+                } else {
+                    word.style.backgroundColor = '#8e44ad'; // purple (unchecked)
+                }
+            }
+        });
+    }
+
+    function checkOrder() {
+        const targetArea = document.getElementById('targetArea');
+        let allCorrect = true;
+        let message = '';
+        let newScore = 0;
+        let correctWords = 0;
+        let incorrectWords = [];
+
+        const words = targetArea.querySelectorAll('.word');
+        words.forEach((wordElement) => {
+            const word = wordElement.textContent;
+            const correctWord = wordElement.dataset.correctWord;
+
+            if (word.trim() === correctWord.trim()) {
+                wordElement.classList.add('correct', 'fixed');
+                wordElement.classList.remove('incorrect', 'unchecked');
+                wordElement.draggable = false;
+                correctWords++;
+                if (!wordElement.classList.contains('scored') && !wordElement.classList.contains('hint')) {
+                    newScore += 10;
+                    wordElement.classList.add('scored');
+                }
+            } else {
+                allCorrect = false;
+                wordElement.classList.add('incorrect');
+                wordElement.classList.remove('correct', 'fixed', 'unchecked');
+                incorrectWords.push(wordElement);
+                if (!wordElement.classList.contains('penalized')) {
+                    score = Math.max(0, score - 5);
+                    wordElement.classList.add('penalized');
+                }
+            }
+        });
+
+        score += newScore;
+        updateScore();
+        updateWordColors();
+
+        if (isGameComplete() && allCorrect) {
+            message = '<div class="success">כל הכבוד! סידרת את כל המילים בסדר הנכון.</div>';
+            endGame();
+        } else if (allCorrect) {
+            message = '<div class="success">כל המילים שסידרת נכונות! המשך לסדר את שאר המילים.</div>';
+        } else {
+            message = '<div class="error">יש טעויות בסדר. המילים הנכונות מסומנות בירוק ומקובעות. נסה שוב!</div>';
+            setTimeout(() => {
+                resetIncorrectWords(incorrectWords);
+                updateWordColors();
+            }, 2000);
+        }
+
+        document.getElementById('message').innerHTML = message;
+        console.log('Check order completed. Colors updated.');
+    }
+
+    function resetIncorrectWords(incorrectWords) {
+        incorrectWords.forEach(wordElement => {
+            const word = wordElement.textContent;
+            const correctWord = wordElement.dataset.correctWord;
+
+            if (word !== correctWord) {
+                const placeholder = createPlaceholder(correctWord, wordElement.parentElement.dataset.rowIndex, Array.from(wordElement.parentElement.children).indexOf(wordElement));
+                wordElement.replaceWith(placeholder);
+
+                addToSideWords(word);
+
+                const sourceArea = window.innerWidth <= 768 ? document.getElementById('sourceAreaBottom') :
+                    (Math.random() < 0.5 ? document.getElementById('sourceAreaRight') : document.getElementById('sourceAreaLeft'));
+                const newWordElement = createWordElement(word, wordElement.dataset.index);
+
+                const insertIndex = Array.from(sourceArea.children).findIndex(child => child.textContent.localeCompare(word, 'he') > 0);
+
+                if (insertIndex === -1) {
+                    sourceArea.appendChild(newWordElement);
+                } else {
+                    sourceArea.insertBefore(newWordElement, sourceArea.children[insertIndex]);
+                }
+            }
+        });
+        updateWordColors();
+    }
+
+    function getHint() {
+        if (hintsLeft > 0 && !isGameComplete() && Date.now() - lastHintTime >= hintCooldown) {
+            const availablePositions = getAvailablePositions();
+            if (availablePositions.length === 0) {
+                alert('כל המילים כבר במקומן');
+                return;
+            }
+
+            const sideWords = getSideWords();
+            if (sideWords.length === 0) {
+                alert('אין מילים זמינות לרמז');
+                return;
+            }
+
+            hintsLeft--;
+            hintsUsed++;
+            score = Math.max(0, score - 10);
+            lastHintTime = Date.now();
+            updateScore();
+            updateHintsLeft();
+            updateHintTimer();
+
+            const hintPosition = availablePositions[Math.floor(Math.random() * availablePositions.length)];
+            const correctWord = hintPosition.correctWord;
+
+            if (sideWords.includes(correctWord)) {
+                placeWordInCorrectPosition(correctWord, hintPosition);
+            } else {
+                console.log("המילה הנכונה לא נמצאה בצדדים");
+                // בחר מילה אקראית מהצדדים במקום
+                const randomSideWord = sideWords[Math.floor(Math.random() * sideWords.length)];
+                placeWordInCorrectPosition(randomSideWord, hintPosition);
+            }
+
+            if (isGameComplete()) {
+                checkOrder();
+            }
+        } else if (isGameComplete()) {
+            alert('כל המילים כבר במקומן');
+        } else if (Date.now() - lastHintTime < hintCooldown) {
+            alert('עליך להמתין לפני בקשת רמז נוסף');
+        } else {
+            alert('אין לך יותר רמזים');
+        }
+    }
+
+    function getSideWords() {
+        const sourceAreaRight = document.getElementById('sourceAreaRight');
+        const sourceAreaLeft = document.getElementById('sourceAreaLeft');
+        const sourceAreaBottom = document.getElementById('sourceAreaBottom');
+
+        const words = [
+            ...Array.from(sourceAreaRight.children),
+            ...Array.from(sourceAreaLeft.children),
+            ...Array.from(sourceAreaBottom.children)
+        ].map(element => element.textContent);
+
+        return words;
+    }
+
+    function getAvailablePositions() {
+        const targetArea = document.getElementById('targetArea');
+        const positions = [];
+        const rows = targetArea.querySelectorAll('.target-row');
+        rows.forEach((row, rowIndex) => {
+            const words = row.children;
+            Array.from(words).forEach((word, columnIndex) => {
+                const correctWord = word.dataset.correctWord;
+                if (word.classList.contains('placeholder')) {
+                    positions.push({ row: rowIndex, column: columnIndex, correctWord: correctWord });
+                }
+            });
+        });
+        return positions;
+    }
+
+    function placeWordInCorrectPosition(word, position) {
+        const targetArea = document.getElementById('targetArea');
+        const targetRow = targetArea.querySelectorAll('.target-row')[position.row];
+        const targetPlace = targetRow.children[position.column];
+
+        // מצא את המילה במקור (אם היא קיימת) והסר אותה
+        const sourceElement = document.querySelector(`[data-word="${word}"]:not(.correct):not(.fixed)`);
+        if (sourceElement) {
+            sourceElement.remove();
+            removeFromSideWords(word);
+        } else {
+            console.log("המילה לא נמצאה במקור או שהיא כבר מקובעת במקום אחר");
+            return; // אם המילה לא נמצאה, אל תמשיך
+        }
+
+        // מקם את המילה החדשה
+        targetPlace.textContent = word;
+        targetPlace.classList.remove('placeholder');
+        targetPlace.classList.add('word', 'correct', 'hint', 'fixed');
+        targetPlace.draggable = false;
+        targetPlace.dataset.word = word;
+        targetPlace.dataset.correctWord = word;
+
+        updateWordColors();
+        console.log('המילה הוצבה במקום הנכון. הצבעים עודכנו.');
+    }
+
+    function isGameComplete() {
+        const targetArea = document.getElementById('targetArea');
+        const allPositionsFilled = Array.from(targetArea.querySelectorAll('.target-row')).every(row =>
+            Array.from(row.children).every(cell =>
+                cell.classList.contains('word') && cell.textContent === cell.dataset.correctWord
+            )
+        );
+        const noWordsInSides = document.getElementById('sourceAreaRight').children.length === 0
+                            && document.getElementById('sourceAreaLeft').children.length === 0
+                            && document.getElementById('sourceAreaBottom').children.length === 0;
+
+        return allPositionsFilled && noWordsInSides;
+    }
+
+    function removeFromSideWords(word) {
+        const index = sideWords.indexOf(word);
+        if (index !== -1) {
+            sideWords.splice(index, 1);
+        }
+    }
+
+    function addToSideWords(word) {
+        if (!sideWords.includes(word)) {
+            sideWords.push(word);
+        }
+    }
+
+    function minimizeHeader() {
+        const header = document.getElementById('header');
+        header.classList.add('minimized');
+    }
+
+    function maximizeHeader() {
+        const header = document.getElementById('header');
+        header.classList.remove('minimized');
+    }
+
+    function endGame() {
+        clearInterval(gameTimer);
+        const currentTime = new Date();
+        const elapsedTime = new Date(currentTime - gameStartTime);
+        const minutes = elapsedTime.getUTCMinutes().toString().padStart(2, '0');
+        const seconds = elapsedTime.getUTCSeconds().toString().padStart(2, '0');
+        const gameTimeString = `${minutes}:${seconds}`;
+
+        const successPercentage = Math.round((score / maxScore) * 100);
+        document.getElementById('finalScore').textContent = score;
+        document.getElementById('successPercentage').textContent = successPercentage;
+        document.getElementById('endGameMessage').textContent = endGameMessage;
+        document.getElementById('finalGameTime').textContent = gameTimeString;
+        document.getElementById('endGameModal').style.display = 'block';
+        maximizeHeader();
+        gameInProgress = false;
+        document.querySelector('.container').classList.remove('game-active');
+
+        if (typeof confetti !== 'undefined') {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+    }
+
+    function submitScore() {
+        const playerName = document.getElementById('playerName').value;
+        if (!playerName) {
+            alert('אנא הכנס את שמך');
+            return;
+        }
+
+        const successPercentage = Math.round((score / maxScore) * 100);
+        const formData = new URLSearchParams();
+        const gameLocation = `${currentMasechet} ${currentPerek} ${currentMishna}`;
+        const gameTime = document.getElementById('finalGameTime').textContent;
+
+        if (FORM_CODE) {
+            const fields = FORM_CODE.split(',');
+            fields.forEach(field => {
+                const [key, value] = field.split(':');
+                switch(value.trim()) {
+                    case 'gameLocation':
+                        formData.append(key.trim(), gameLocation);
+                        break;
+                    case 'name':
+                        formData.append(key.trim(), playerName);
+                        break;
+                    case 'score':
+                        formData.append(key.trim(), `${successPercentage}/${hintsUsed}`);
+                        break;
+                    case 'time':
+                        formData.append(key.trim(), gameTime);
+                        break;
+                    case 'date':
+                        formData.append(key.trim(), new Date().toLocaleString('he-IL'));
+                        break;
+                }
+            });
+        } else {
+            // Default if no form code
+            formData.append('entry.1413375521', gameLocation);
+            formData.append('entry.519480219', playerName);
+            formData.append('entry.997375840', `${successPercentage}/${hintsUsed}`);
+            formData.append('entry.339608900', gameTime);
+            formData.append('entry.1234567890', new Date().toLocaleString('he-IL'));
+        }
+
+        fetch(FORM_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: formData,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(() => {
+            alert('הציון נשלח בהצלחה!');
+            startNewGame();
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('אירעה שגיאה בשליחת הציון');
+        });
+    }
+
+    function startNewGame() {
+        document.getElementById('endGameModal').style.display = 'none';
+        document.getElementById('masechet').value = '';
+        document.getElementById('perek').value = '';
+        document.getElementById('mishna').value = '';
+        document.getElementById('gameTitle').textContent = '';
+        document.getElementById('targetArea').innerHTML = '';
+        document.getElementById('sourceAreaLeft').innerHTML = '';
+        document.getElementById('sourceAreaRight').innerHTML = '';
+        document.getElementById('sourceAreaBottom').innerHTML = '';
+        document.getElementById('message').innerHTML = '';
+        score = 0;
+        hintsUsed = 0;
+        lastHintTime = 0;
+        updateScore();
+        updatePrakim();
+        maximizeHeader();
+        gameInProgress = false;
+        wordStates.clear();
+        hintsLeft = 6;
+        updateHintsLeft();
+        updateHintTimer();
+        sideWords = [];
+        clearInterval(gameTimer);
+        document.getElementById('gameTimer').textContent = 'זמן משחק: 00:00';
+        document.getElementById('gameModeButtons').style.display = 'none';
+        isReadingMode = false;
+        document.querySelector('.container').classList.remove('reading-mode');
+        document.querySelector('.game-info').style.display = 'flex';
+        document.querySelector('.footer').style.display = 'block';
+    }
+
+    function toggleGameSelection() {
+        const header = document.getElementById('header');
+        header.classList.toggle('minimized');
+    }
+
+    function openContactModal() {
+        document.getElementById('contactModal').style.display = 'block';
+    }
+
+    function closeContactModal() {
+        document.getElementById('contactModal').style.display = 'none';
+    }
+
+    function submitContactForm(event) {
+        event.preventDefault();
+        const name = document.getElementById('contactName').value;
+        const email = document.getElementById('contactEmail').value;
+        const message = document.getElementById('contactMessage').value;
+
+        const formData = new URLSearchParams();
+        formData.append('entry.1839595978', name);
+        formData.append('entry.579646709', email + '\n\n' + message);
+
+        fetch('https://docs.google.com/forms/d/e/1FAIpQLSd4HgyyoZzz3bXutEf6y2wimkknDOeZXrcns9nX1iR5-Gd71g/formResponse', {
+            method: 'POST',
+            mode: 'no-cors',
+            body: formData,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(() => {
+            alert('ההודעה נשלחה בהצלחה!');
+            closeContactModal();
+            document.getElementById('contactForm').reset();
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('אירעה שגיאה בשליחת ההודעה');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadData();
+
+        document.getElementById('targetArea').addEventListener('dragover', allowDrop);
+        document.getElementById('targetArea').addEventListener('drop', drop);
+        document.getElementById('sourceAreaLeft').addEventListener('dragover', allowDrop);
+        document.getElementById('sourceAreaLeft').addEventListener('drop', drop);
+        document.getElementById('sourceAreaRight').addEventListener('dragover', allowDrop);
+        document.getElementById('sourceAreaRight').addEventListener('drop', drop);
+        document.getElementById('sourceAreaBottom').addEventListener('dragover', allowDrop);
+        document.getElementById('sourceAreaBottom').addEventListener('drop', drop);
+        document.getElementById('targetArea').addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.getElementById('sourceAreaLeft').addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.getElementById('sourceAreaRight').addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.getElementById('sourceAreaBottom').addEventListener('touchstart', handleTouchStart, { passive: false });
+
+        const confettiScript = document.createElement('script');
+        confettiScript.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js';
+        document.head.appendChild(confettiScript);
+
+        document.getElementById('contactForm').addEventListener('submit', submitContactForm);
+
+        window.addEventListener('resize', handleResize);
+    });
+
+    window.onclick = function(event) {
+        var modal = document.getElementById('endGameModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+        if (event.target == document.getElementById('contactModal')) {
+            closeContactModal();
+        }
+    }
+
+    function handleTouchStart(event) {
+        if (event.target.classList.contains('word') && !event.target.classList.contains('fixed')) {
+            event.preventDefault();
+            const touch = event.touches[0];
+            const draggedWord = event.target;
+
+            draggedWord.style.opacity = '0.4';
+
+            draggedWord.dataset.touchOffsetX = touch.clientX - draggedWord.getBoundingClientRect().left;
+            draggedWord.dataset.touchOffsetY = touch.clientY - draggedWord.getBoundingClientRect().top;
+
+            document.addEventListener('touchmove', handleTouchMove);
+            document.addEventListener('touchend', handleTouchEnd);
+        }
+    }
+
+    function handleTouchMove(event) {
+        event.preventDefault();
+        const touch = event.touches[0];
+        const draggedWord = document.querySelector('.word[style*="opacity: 0.4"]');
+
+        if (draggedWord) {
+            const offsetX = parseFloat(draggedWord.dataset.touchOffsetX);
+            const offsetY = parseFloat(draggedWord.dataset.touchOffsetY);
+
+            draggedWord.style.position = 'fixed';
+            draggedWord.style.left = (touch.clientX - offsetX) + 'px';
+            draggedWord.style.top = (touch.clientY - offsetY) + 'px';
+
+            document.querySelectorAll('.highlight-drop').forEach(el => {
+                el.classList.remove('highlight-drop');
+            });
+
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (elementBelow && (elementBelow.classList.contains('word') || elementBelow.classList.contains('placeholder'))) {
+                elementBelow.classList.add('highlight-drop');
+            }
+        }
+    }
+
+    function handleTouchEnd(event) {
+        const draggedWord = document.querySelector('.word[style*="opacity: 0.4"]');
+        if (draggedWord) {
+            draggedWord.style.opacity = '1';
+            draggedWord.style.position = '';
+            draggedWord.style.left = '';
+            draggedWord.style.top = '';
+
+            const targetElement = document.elementFromPoint(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+            if (targetElement && (targetElement.classList.contains('word') || targetElement.classList.contains('placeholder'))) {
+                const sourceParent = draggedWord.parentNode.id;
+                const word = draggedWord.dataset.word;
+                const sourceIndex = draggedWord.dataset.index;
+
+                const dropEvent = {
+                    preventDefault: () => {},
+                    target: targetElement,
+                    dataTransfer: {
+                        getData: (type) => {
+                            if (type === "text/plain") return word;
+                            if (type === "sourceIndex") return sourceIndex;
+                            if (type === "sourceParent") return sourceParent;
+                        }
+                    }
+                };
+
+                drop(dropEvent);
+            }
+        }
+
+        document.querySelectorAll('.highlight-drop').forEach(el => {
+            el.classList.remove('highlight-drop');
+        });
+
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
+    }
+
+    function handleResize() {
+        if (gameInProgress) {
+            renderWords();
+        }
+    }
+
+    </script>
+</body>
+</html>
