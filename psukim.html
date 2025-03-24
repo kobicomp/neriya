@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>משחק סידור מילים מרהיב</title>
+    <title>משחק סידור פסוקים מרהיב</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
@@ -458,18 +458,18 @@
         <div class="header" id="header">
             <button id="toggleSelectionButton" onclick="toggleGameSelection()">הצג/הסתר בחירת משחק</button>
             <button id="contactButton" onclick="openContactModal()">יצירת קשר</button>
-            <h1>משחק סידור מילים</h1>
+            <h1>משחק סידור פסוקים</h1>
             <div id="settingsIcon" onclick="openAdminPanel()">⚙️</div>
             <div class="game-selection">
                 <div class="input-group">
                     <select id="masechet" onchange="updatePrakim()">
-                        <option value="">בחר מסכת</option>
-                    </select>
-                    <select id="perek" onchange="updateMishnayot()" disabled>
                         <option value="">בחר פרק</option>
                     </select>
+                    <select id="perek" onchange="updateMishnayot()" disabled>
+                        <option value="">בחר פסוק</option>
+                    </select>
                     <select id="mishna" disabled>
-                        <option value="">בחר משנה</option>
+                        <option value="">בחר פסוק</option>
                     </select>
                     <button onclick="loadGame()">טען משחק</button>
                 </div>
@@ -554,7 +554,7 @@
     </div>
 
     <script>
-    let SHEET_URL = localStorage.getItem('sheetUrl') || 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMIK4rAliF1d3uqidPynJeN3mtsUbQWMMNX157X-ME_lVmpJTnjp8SPVC7WqD2e4-MWOfU3JhOshdW/pub?output=csv';
+    let SHEET_URL = localStorage.getItem('sheetUrl') || 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTEiIip3ZFgLcOmIXS5JPOYOSjs0maOtioL92dKcsRHmY0Ak0ZEen84UhIA1_McGMVKj4oQgupT82fK/pub?output=csv';
     let FORM_URL = localStorage.getItem('formUrl') || 'https://docs.google.com/forms/d/e/1FAIpQLSc0lbXF8zZi8ZMlIj7_GyhQcc3ZktSUe-QnFNn1s_VegImVFg/formResponse';
     let FORM_CODE = localStorage.getItem('formCode') || '';
     let DATA_SOURCE = localStorage.getItem('dataSource') || 'Google Sheets';
@@ -703,7 +703,7 @@
     function updateMasechtot() {
         const masechetSelect = document.getElementById('masechet');
         const masechtot = [...new Set(allData.slice(1).map(row => row[0]))];
-        masechetSelect.innerHTML = '<option value="">בחר מסכת</option>' +
+        masechetSelect.innerHTML = '<option value="">בחר פרק</option>' +
             masechtot.map(masechet => `<option value="${masechet}">${masechet}</option>`).join('');
     }
 
@@ -717,16 +717,16 @@
                 .filter(row => row[0] === currentMasechet)
                 .map(row => row[1]))];
 
-            perekSelect.innerHTML = '<option value="">בחר פרק</option>' +
+            perekSelect.innerHTML = '<option value="">בחר פסוק</option>' +
                 prakim.map(perek => `<option value="${perek}">${perek}</option>`).join('');
             perekSelect.disabled = false;
 
-            mishnaSelect.innerHTML = '<option value="">בחר משנה</option>';
+            mishnaSelect.innerHTML = '<option value="">בחר פסוק</option>';
             mishnaSelect.disabled = true;
         } else {
-            perekSelect.innerHTML = '<option value="">בחר פרק</option>';
+            perekSelect.innerHTML = '<option value="">בחר פסוק</option>';
             perekSelect.disabled = true;
-            mishnaSelect.innerHTML = '<option value="">בחר משנה</option>';
+            mishnaSelect.innerHTML = '<option value="">בחר פסוק</option>';
             mishnaSelect.disabled = true;
         }
     }
@@ -740,11 +740,11 @@
                 .filter(row => row[0] === currentMasechet && row[1] === currentPerek)
                 .map(row => row[2]))];
 
-            mishnaSelect.innerHTML = '<option value="">בחר משנה</option>' +
+            mishnaSelect.innerHTML = '<option value="">בחר פסוק</option>' +
                 mishnayot.map(mishna => `<option value="${mishna}">${mishna}</option>`).join('');
             mishnaSelect.disabled = false;
         } else {
-            mishnaSelect.innerHTML = '<option value="">בחר משנה</option>';
+            mishnaSelect.innerHTML = '<option value="">בחר פסוק</option>';
             mishnaSelect.disabled = true;
         }
     }
@@ -752,7 +752,7 @@
     function loadGame() {
         currentMishna = document.getElementById('mishna').value;
         if (!currentMasechet || !currentPerek || !currentMishna) {
-            alert('נא לבחור מסכת, פרק ומשנה');
+            alert('נא לבחור פרק ופסוק');
             return;
         }
 
@@ -763,7 +763,7 @@
         );
 
         if (gameData) {
-            gameTitle = gameData[3] || 'משחק סידור מילים';
+            gameTitle = gameData[3] || 'משחק סידור פסוקים';
             endGameMessage = gameData[4] || 'כל הכבוד! סיימת את המשחק.';
 
             correctOrder = gameData[5].split('\n').map(row => row.trim().split(/\s+/));
@@ -785,7 +785,7 @@
         document.querySelector('.container').classList.add('reading-mode');
         document.querySelector('.game-info').style.display = 'none';
         document.querySelector('.footer').style.display = 'none';
-    }
+        }
 
     function startMemorizationMode() {
         isReadingMode = false;
@@ -1546,6 +1546,9 @@
             renderWords();
         }
     }
+
+    let clickCount = 0;
+    let clickTimer;
 
     </script>
 </body>
