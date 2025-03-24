@@ -723,44 +723,44 @@
         }
     }
 
-    function loadGame() {
-        currentPerek = document.getElementById('perek').value;
-        if (!currentMasechet || !currentPerek) {
-            alert('נא לבחור פרק ופסוק');
+   function loadGame() {
+    currentPerek = document.getElementById('perek').value;
+    if (!currentMasechet || !currentPerek) {
+        alert('נא לבחור פרק ופסוק');
+        return;
+    }
+
+    const gameData = allData.find(row =>
+        row[0] === currentMasechet &&
+        row[1] === currentPerek
+    );
+
+    if (gameData) {
+        gameTitle = `${currentMasechet} ${currentPerek}`;
+        endGameMessage = 'כל הכבוד! סיימת את המשחק.';
+
+        // התוכן עכשיו בעמודה השלישית
+        const content = gameData[2];
+        
+        if (content) {
+            // מפצלים את התוכן למילים בודדות אבל שומרים על הסדר המקורי
+            const words_array = content.trim().split(/\s+/);
+            correctOrder = [words_array]; // מערך של מערך אחד עם כל המילים
+            words = [...words_array]; // שמירה על עותק של המילים בסדר המקורי
+            maxScore = words.length * 10;
+        } else {
+            alert('הפסוק לא מוגדר כראוי בקובץ הנתונים');
             return;
         }
 
-        const gameData = allData.find(row =>
-            row[0] === currentMasechet &&
-            row[1] === currentPerek
-        );
-
-        if (gameData) {
-            gameTitle = `${currentMasechet} ${currentPerek}`;
-            endGameMessage = 'כל הכבוד! סיימת את המשחק.';
-
-            // התוכן עכשיו בעמודה השלישית
-            const content = gameData[2];
-            
-            if (content) {
-                // מפצלים את התוכן למילים בודדות
-                const words_array = content.trim().split(/\s+/);
-                correctOrder = [words_array]; // מערך של מערך אחד עם כל המילים
-                words = words_array; // כל המילים ברצף
-                maxScore = words.length * 10;
-            } else {
-                alert('הפסוק לא מוגדר כראוי בקובץ הנתונים');
-                return;
-            }
-
-            document.getElementById('gameTitle').textContent = gameTitle;
-            document.getElementById('gameModeButtons').style.display = 'block';
-            minimizeHeader();
-            gameInProgress = true;
-        } else {
-            alert('לא נמצא משחק מתאים');
-        }
+        document.getElementById('gameTitle').textContent = gameTitle;
+        document.getElementById('gameModeButtons').style.display = 'block';
+        minimizeHeader();
+        gameInProgress = true;
+    } else {
+        alert('לא נמצא משחק מתאים');
     }
+}
 
     function startReadingMode() {
         isReadingMode = true;
