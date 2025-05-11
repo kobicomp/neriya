@@ -5,15 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>משחק מסלול טריוויה</title>
     <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #2563eb;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--background-gradient);
             margin: 0;
             padding: 20px;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        button {
+            cursor: pointer;
         }
 
         .game-container {
@@ -24,6 +43,18 @@
             max-width: 900px;
             width: 95%;
             position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-screen, .category-selection, .name-input, .game-screen, .summary-screen {
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            transform: translateY(20px);
         }
 
         .logo-container {
@@ -36,14 +67,117 @@
             height: auto;
         }
 
-        @media (min-width: 768px) {
-            .game-container {
-                padding: 30px;
-            }
-            
-            .logo-container img {
-                max-width: 200px;
-            }
+        .welcome-screen, .category-selection, .name-input {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .welcome-title {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn.large {
+            font-size: 20px;
+            padding: 15px 30px;
+        }
+
+        .name-input-container {
+            margin: 20px 0;
+        }
+
+        .name-input-container input {
+            padding: 12px 15px;
+            font-size: 18px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .name-input-container input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .avatar-selection {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .avatar-option {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 3px;
+        }
+
+        .avatar-option img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .avatar-option.selected {
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .category-btn {
+            background: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover, .category-btn.selected {
+            background: var(--primary-color);
+            color: white;
         }
 
         .game-board {
@@ -60,13 +194,34 @@
             display: block;
         }
 
+        .player-avatar {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 10;
+            top: 75%;
+            left: 15%;
+            overflow: hidden;
+        }
+
+        .player-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
         .checkpoint {
             position: absolute;
             width: 40px;
             height: 40px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.9);
-            border: 3px solid #3b82f6;
+            border: 3px solid var(--primary-color);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -77,26 +232,16 @@
             transition: all 0.3s ease;
         }
 
-        /* Responsive adjustments */
-        @media (min-width: 768px) {
-            .checkpoint {
-                width: 50px;
-                height: 50px;
-                font-size: 24px;
-            }
-        }
-
         .checkpoint.active {
-            background: #3b82f6;
+            background: var(--primary-color);
             color: white;
-            transform: scale(1.2);
-            border-color: #1d4ed8;
+            animation: pulse 1.5s infinite;
         }
 
         .checkpoint.completed {
-            background: #22c55e;
+            background: var(--success-color);
             color: white;
-            border-color: #15803d;
+            border-color: var(--success-color);
         }
 
         /* Checkpoint positions - approximate based on the path in the image */
@@ -120,6 +265,11 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .beit-midrash.completed {
+            animation: glow 2s infinite alternate;
         }
 
         .beit-midrash::before {
@@ -134,19 +284,49 @@
             color: #8b4513;
         }
 
-        @media (min-width: 768px) {
-            .beit-midrash {
-                width: 80px;
-                height: 80px;
-            }
-            
-            .beit-midrash::before {
-                font-size: 30px;
-            }
-            
-            .beit-midrash::after {
-                font-size: 12px;
-            }
+        .game-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-info img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color);
+        }
+
+        .score-display {
+            background: #f3f4f6;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .timer-container {
+            width: 100%;
+            background: #e5e7eb;
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .timer-bar {
+            height: 100%;
+            background: var(--warning-color);
+            width: 100%;
+            transition: width linear;
         }
 
         .question-container {
@@ -156,6 +336,12 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .question-number {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 5px;
         }
 
         .question {
@@ -171,38 +357,33 @@
             gap: 10px;
         }
 
-        @media (min-width: 640px) {
-            .answers {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-            }
-        }
-
         .answer-btn {
             padding: 15px 20px;
             font-size: 18px;
-            border: 2px solid #3b82f6;
+            border: 2px solid var(--primary-color);
             background: white;
-            color: #3b82f6;
+            color: var(--primary-color);
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .answer-btn:hover {
-            background: #3b82f6;
-            color: white;
+            background: #f0f9ff;
+            transform: translateY(-2px);
         }
 
         .answer-btn.correct {
-            background: #22c55e;
-            border-color: #22c55e;
+            background: var(--success-color);
+            border-color: var(--success-color);
             color: white;
         }
 
         .answer-btn.incorrect {
-            background: #ef4444;
-            border-color: #ef4444;
+            background: var(--error-color);
+            border-color: var(--error-color);
             color: white;
         }
 
@@ -210,8 +391,14 @@
             text-align: center;
             font-size: 20px;
             margin-top: 20px;
-            padding: 10px;
+            padding: 15px;
             border-radius: 10px;
+            transition: all 0.3s ease;
+            transform: scale(0);
+        }
+
+        .result-message.show {
+            transform: scale(1);
         }
 
         .result-message.success {
@@ -225,7 +412,6 @@
         }
 
         .certificate {
-            display: none;
             text-align: center;
             padding: 40px;
             background: linear-gradient(45deg, #ffd700, #ffea00);
@@ -233,39 +419,198 @@
             border: 5px solid #b8860b;
             margin-top: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .certificate::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="none" stroke="rgba(139, 69, 19, 0.1)" stroke-width="2" d="M25,2 L2,2 L2,25 M75,2 L98,2 L98,25 M25,98 L2,98 L2,75 M75,98 L98,98 L98,75"/></svg>');
+            background-repeat: repeat;
+            z-index: 0;
+            opacity: 0.5;
         }
 
         .certificate h2 {
             font-size: 36px;
             color: #8b4513;
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .certificate .player-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #5c3d1e;
+            margin: 15px 0;
+            position: relative;
+            z-index: 1;
         }
 
         .certificate-text {
-            font-size: 24px;
+            font-size: 22px;
             color: #654321;
             margin: 20px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .certificate-details {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .certificate-detail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .certificate-detail-label {
+            font-size: 14px;
+            color: #8b4513;
+        }
+
+        .certificate-detail-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #5c3d1e;
         }
 
         .certificate-date {
             font-size: 18px;
             color: #8b4513;
             margin-top: 30px;
+            position: relative;
+            z-index: 1;
         }
 
-        .restart-btn {
-            padding: 10px 20px;
-            font-size: 16px;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+        .certificate-stamp {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 100px;
+            height: 100px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="rgba(139, 69, 19, 0.5)" stroke-width="2"/><path d="M50 10 L54 22 L67 22 L56 30 L60 42 L50 35 L40 42 L44 30 L33 22 L46 22 Z" fill="rgba(139, 69, 19, 0.5)"/></svg>');
+            opacity: 0.7;
+            transform: rotate(-15deg);
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
             margin-top: 20px;
         }
 
-        .restart-btn:hover {
-            background: #2563eb;
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .summary-table th, .summary-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .summary-table th {
+            background: #f9fafb;
+            font-weight: bold;
+            color: #4b5563;
+        }
+
+        .correct-answer {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .wrong-answer {
+            color: var(--error-color);
+            text-decoration: line-through;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            top: -10px;
+            animation: fall linear forwards;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 5px 2px rgba(255, 215, 0, 0.5); }
+            to { box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.8); }
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive design */
+        @media (min-width: 640px) {
+            .answers {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .game-container {
+                padding: 30px;
+            }
+            
+            .logo-container img {
+                max-width: 200px;
+            }
+
+            .checkpoint {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+            
+            .beit-midrash {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .beit-midrash::before {
+                font-size: 30px;
+            }
+            
+            .beit-midrash::after {
+                font-size: 12px;
+            }
+
+            .player-avatar {
+                width: 50px;
+                height: 50px;
+            }
         }
     </style>
 </head>
@@ -275,159 +620,689 @@
             <img src="logo.png" alt="לוגו" />
         </div>
         
-        <div class="game-board">
-            <img src="map.jpg" alt="מסלול המשחק" />
-            
-            <!-- Checkpoints -->
-            <div class="checkpoint active" data-question="1">1</div>
-            <div class="checkpoint" data-question="2">2</div>
-            <div class="checkpoint" data-question="3">3</div>
-            <div class="checkpoint" data-question="4">4</div>
-            <div class="checkpoint" data-question="5">5</div>
-            
-            <!-- Beit Midrash -->
-            <div class="beit-midrash"></div>
+        <!-- Welcome Screen -->
+        <div class="welcome-screen">
+            <h1 class="welcome-title">ברוכים הבאים למשחק מסלול הטריוויה!</h1>
+            <p class="welcome-text">
+                מוכנים לאתגר? ענו נכון על 5 שאלות טריוויה והגיעו לבית המדרש!<br>
+                תשובות נכונות יקדמו אתכם במסלול, אך שגיאה תחזיר אתכם להתחלה.
+            </p>
+            <button class="btn large" id="start-btn">בואו נתחיל!</button>
         </div>
 
-        <div class="question-container">
-            <div class="question">מה בירת צרפת?</div>
-            <div class="answers">
-                <button class="answer-btn" data-correct="true">פריז</button>
-                <button class="answer-btn" data-correct="false">לונדון</button>
-                <button class="answer-btn" data-correct="false">ברלין</button>
-                <button class="answer-btn" data-correct="false">מדריד</button>
+        <!-- Name Input Screen -->
+        <div class="name-input hidden">
+            <h2 class="welcome-title">הכירו את עצמכם</h2>
+            <div class="name-input-container">
+                <label for="player-name">מה השם שלך?</label>
+                <input type="text" id="player-name" placeholder="הכנס את שמך כאן" />
+            </div>
+            
+            <h3>בחר אווטאר:</h3>
+            <div class="avatar-selection">
+                <div class="avatar-option selected" data-avatar="avatar1">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%233b82f6'/><circle cx='50' cy='40' r='15' fill='white'/><circle cx='40' cy='60' r='10' fill='white'/><circle cx='60' cy='60' r='10' fill='white'/></svg>" alt="אווטאר 1" />
+                </div>
+                <div class="avatar-option" data-avatar="avatar2">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2322c55e'/><rect x='35' y='35' width='30' height='30' fill='white'/><circle cx='50' cy='65' r='10' fill='white'/></svg>" alt="אווטאר 2" />
+                </div>
+                <div class="avatar-option" data-avatar="avatar3">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23f59e0b'/><polygon points='50,30 35,60 65,60' fill='white'/><rect x='40' y='60' width='20' height='15' fill='white'/></svg>" alt="אווטאר 3" />
+                </div>
+                <div class="avatar-option" data-avatar="avatar4">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23ef4444'/><circle cx='35' cy='40' r='10' fill='white'/><circle cx='65' cy='40' r='10' fill='white'/><path d='M30,60 Q50,80 70,60' fill='none' stroke='white' stroke-width='5'/></svg>" alt="אווטאר 4" />
+                </div>
+            </div>
+            
+            <button class="btn" id="continue-to-category">המשך</button>
+        </div>
+
+        <!-- Category Selection Screen -->
+        <div class="category-selection hidden">
+            <h2 class="welcome-title">בחר קטגוריה</h2>
+            <div class="categories">
+                <button class="category-btn selected" data-category="general">ידע כללי</button>
+                <button class="category-btn" data-category="science">מדע</button>
+                <button class="category-btn" data-category="history">היסטוריה</button>
+                <button class="category-btn" data-category="judaism">יהדות</button>
+            </div>
+            <button class="btn" id="start-game">התחל משחק</button>
+        </div>
+        
+        <!-- Game Screen -->
+        <div class="game-screen hidden">
+            <div class="game-board">
+                <img src="map.jpg" alt="מסלול המשחק" />
+                
+                <!-- Player Avatar -->
+                <div class="player-avatar">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%233b82f6'/><circle cx='50' cy='40' r='15' fill='white'/><circle cx='40' cy='60' r='10' fill='white'/><circle cx='60' cy='60' r='10' fill='white'/></svg>" alt="שחקן" />
+                </div>
+                
+                <!-- Checkpoints -->
+                <div class="checkpoint active" data-question="1">1</div>
+                <div class="checkpoint" data-question="2">2</div>
+                <div class="checkpoint" data-question="3">3</div>
+                <div class="checkpoint" data-question="4">4</div>
+                <div class="checkpoint" data-question="5">5</div>
+                
+                <!-- Beit Midrash -->
+                <div class="beit-midrash"></div>
+            </div>
+
+            <div class="game-status">
+                <div class="player-info">
+                    <img id="player-avatar-small" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%233b82f6'/><circle cx='50' cy='40' r='15' fill='white'/><circle cx='40' cy='60' r='10' fill='white'/><circle cx='60' cy='60' r='10' fill='white'/></svg>" alt="שחקן" />
+                    <span id="player-name-display">שחקן</span>
+                </div>
+                <div class="score-display">
+                    ניקוד: <span id="score">0</span>
+                </div>
+            </div>
+
+            <div class="timer-container">
+                <div class="timer-bar" id="timer-bar"></div>
+            </div>
+
+            <div class="question-container">
+                <div class="question-number">שאלה <span id="question-number">1</span> מתוך 5</div>
+                <div class="question">מה בירת צרפת?</div>
+                <div class="answers">
+                    <button class="answer-btn" data-index="0">פריז</button>
+                    <button class="answer-btn" data-index="1">לונדון</button>
+                    <button class="answer-btn" data-index="2">ברלין</button>
+                    <button class="answer-btn" data-index="3">מדריד</button>
+                </div>
+            </div>
+
+            <div class="result-message" id="result-message"></div>
+        </div>
+
+        <!-- Summary Screen -->
+        <div class="summary-screen hidden">
+            <h2 class="welcome-title">סיכום המשחק</h2>
+            <div class="player-info" style="justify-content: center; margin-bottom: 20px;">
+                <img id="summary-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%233b82f6'/><circle cx='50' cy='40' r='15' fill='white'/><circle cx='40' cy='60' r='10' fill='white'/><circle cx='60' cy='60' r='10' fill='white'/></svg>" alt="שחקן" style="width: 50px; height: 50px;" />
+                <span id="summary-name" style="font-size: 24px; margin-right: 10px;">שחקן</span>
+            </div>
+            
+            <div class="score-display" style="text-align: center; font-size: 24px; margin-bottom: 20px;">
+                הניקוד הסופי: <span id="final-score">0</span>
+            </div>
+            
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>שאלה</th>
+                        <th>תשובתך</th>
+                        <th>תשובה נכונה</th>
+                    </tr>
+                </thead>
+                <tbody id="summary-table-body">
+                    <!-- Filled dynamically -->
+                </tbody>
+            </table>
+            
+            <div class="btn-container">
+                <button class="btn" id="show-certificate">הצג תעודה</button>
+                <button class="btn" id="play-again">שחק שוב</button>
             </div>
         </div>
 
-        <div class="result-message" style="display: none;"></div>
-
-        <div class="certificate">
+        <!-- Certificate -->
+        <div class="certificate hidden" id="certificate">
+            <div class="certificate-stamp"></div>
             <h2>תעודת הצטיינות</h2>
+            <div class="player-name" id="certificate-name">ישראל ישראלי</div>
             <div class="certificate-text">
-                מוענקת בזאת תעודה זו על סיום מוצלח<br>
-                של משחק מסלול הטריוויה!
+                הצליח לסיים בהצלחה את מסלול הטריוויה<br>
+                וענה נכון על כל חמש השאלות!
             </div>
-            <div class="certificate-date"></div>
-            <button class="restart-btn" onclick="location.reload()">התחל מחדש</button>
+            <div class="certificate-details">
+                <div class="certificate-detail">
+                    <div class="certificate-detail-label">ניקוד</div>
+                    <div class="certificate-detail-value" id="certificate-score">1000</div>
+                </div>
+                <div class="certificate-detail">
+                    <div class="certificate-detail-label">קטגוריה</div>
+                    <div class="certificate-detail-value" id="certificate-category">ידע כללי</div>
+                </div>
+            </div>
+            <div class="certificate-date" id="certificate-date">הוענק בתאריך: 10/05/2025</div>
+            
+            <div class="btn-container">
+                <button class="btn" id="play-again-cert">שחק שוב</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const questions = [
-            {
-                question: "מה בירת צרפת?",
-                answers: ["פריז", "לונדון", "ברלין", "מדריד"],
-                correct: 0
-            },
-            {
-                question: "מי צייר את המונה ליזה?",
-                answers: ["לאונרדו דה וינצ'י", "פבלו פיקאסו", "וינסנט ואן גוך", "מיכלאנג'לו"],
-                correct: 0
-            },
-            {
-                question: "מהו כוכב הלכת הגדול ביותר במערכת השמש?",
-                answers: ["מאדים", "שבתאי", "צדק", "נוגה"],
-                correct: 2
-            },
-            {
-                question: "איזו מדינה היא הגדולה ביותר בעולם?",
-                answers: ["קנדה", "סין", "ארצות הברית", "רוסיה"],
-                correct: 3
-            },
-            {
-                question: "מי כתב את 'רומיאו ויוליה'?",
-                answers: ["צ'ארלס דיקנס", "ויליאם שייקספיר", "מארק טוויין", "ג'יין אוסטן"],
-                correct: 1
-            }
-        ];
-
-        let currentQuestion = 0;
-        let score = 0;
-
-        function showQuestion(index) {
-            const questionContainer = document.querySelector('.question-container');
-            const question = questions[index];
-            
-            questionContainer.innerHTML = `
-                <div class="question">${question.question}</div>
-                <div class="answers">
-                    ${question.answers.map((answer, i) => `
-                        <button class="answer-btn" data-index="${i}">${answer}</button>
-                    `).join('')}
-                </div>
-            `;
-            
-            const answerBtns = document.querySelectorAll('.answer-btn');
-            answerBtns.forEach(btn => {
-                btn.addEventListener('click', checkAnswer);
-            });
+        // המאגר שאלות לפי קטגוריות
+       // המאגר שאלות לפי קטגוריות
+const questionsDatabase = {
+    general: [
+        {
+            question: "מה בירת צרפת?",
+            answers: ["פריז", "לונדון", "ברלין", "מדריד"],
+            correct: 0
+        },
+        {
+            question: "מי צייר את המונה ליזה?",
+            answers: ["לאונרדו דה וינצ'י", "פבלו פיקאסו", "וינסנט ואן גוך", "מיכלאנג'לו"],
+            correct: 0
+        },
+        {
+            question: "מהו כוכב הלכת הגדול ביותר במערכת השמש?",
+            answers: ["מאדים", "שבתאי", "צדק", "נוגה"],
+            correct: 2
+        },
+        {
+            question: "איזו מדינה היא הגדולה ביותר בעולם?",
+            answers: ["קנדה", "סין", "ארצות הברית", "רוסיה"],
+            correct: 3
+        },
+        {
+            question: "מי כתב את 'רומיאו ויוליה'?",
+            answers: ["צ'ארלס דיקנס", "ויליאם שייקספיר", "מארק טוויין", "ג'יין אוסטן"],
+            correct: 1
+        },
+        {
+            question: "איזה יסוד כימי מסומן באות Na?",
+            answers: ["ניקל", "חנקן", "נתרן", "נאון"],
+            correct: 2
+        },
+        {
+            question: "באיזו שנה הסתיימה מלחמת העולם השנייה?",
+            answers: ["1943", "1945", "1947", "1950"],
+            correct: 1
         }
+    ],
+    science: [
+        {
+            question: "מה הנוסחה הכימית של מים?",
+            answers: ["CO2", "H2O", "O2", "NaCl"],
+            correct: 1
+        },
+        {
+            question: "איזה כוח מושך עצמים לכדור הארץ?",
+            answers: ["כוח המשיכה", "כוח החיכוך", "כוח אלקטרומגנטי", "כוח צנטריפוגלי"],
+            correct: 0
+        },
+        {
+            question: "איזה מהבאים הוא לא ירח של כוכב צדק?",
+            answers: ["גנימד", "אירופה", "טיטאן", "קליסטו"],
+            correct: 2
+        },
+        {
+            question: "כמה עצמות יש בגוף האדם?",
+            answers: ["106", "186", "206", "306"],
+            correct: 2
+        },
+        {
+            question: "מהי היחידה הבסיסית של החיים?",
+            answers: ["גן", "תא", "מולקולה", "אטום"],
+            correct: 1
+        }
+    ],
+    history: [
+        {
+            question: "מי היה הקיסר הראשון של רומא?",
+            answers: ["יוליוס קיסר", "אוגוסטוס", "נירון", "קליגולה"],
+            correct: 1
+        },
+        {
+            question: "באיזו שנה התרחשה המהפכה הצרפתית?",
+            answers: ["1689", "1789", "1889", "1989"],
+            correct: 1
+        },
+        {
+            question: "מי המציא את הטלפון?",
+            answers: ["תומאס אדיסון", "ניקולה טסלה", "אלכסנדר גרהם בל", "גוגלילמו מרקוני"],
+            correct: 2
+        },
+        {
+            question: "באיזו שנה הסתיימה מלחמת העצמאות של ישראל?",
+            answers: ["1947", "1948", "1949", "1950"],
+            correct: 2
+        },
+        {
+            question: "מי היה המלך הראשון של ישראל המאוחדת?",
+            answers: ["שאול", "דוד", "שלמה", "רחבעם"],
+            correct: 0
+        }
+    ],
+    judaism: [
+        {
+            question: "מי היה הכהן הגדול הראשון?",
+            answers: ["משה", "אהרן", "פנחס", "עלי"],
+            correct: 1
+        },
+        {
+            question: "כמה ספרים יש בתורה?",
+            answers: ["3", "5", "6", "12"],
+            correct: 1
+        },
+        {
+            question: "מה שמו של בנו הבכור של יעקב?",
+            answers: ["יוסף", "יהודה", "ראובן", "בנימין"],
+            correct: 2
+        },
+        {
+            question: "באיזה חג אוכלים מצות?",
+            answers: ["פורים", "פסח", "שבועות", "סוכות"],
+            correct: 1
+        },
+        {
+            question: "כמה ימים נמשך חג החנוכה?",
+            answers: ["7", "8", "9", "10"],
+            correct: 1
+        }
+    ]
+};
 
-        function checkAnswer(e) {
-            const selectedAnswer = parseInt(e.target.dataset.index);
-            const question = questions[currentQuestion];
-            const resultMessage = document.querySelector('.result-message');
-            const checkpoints = document.querySelectorAll('.checkpoint');
-            
-            if (selectedAnswer === question.correct) {
-                score++;
-                e.target.classList.add('correct');
-                resultMessage.textContent = 'נכון! ממשיכים קדימה!';
-                resultMessage.className = 'result-message success';
-                resultMessage.style.display = 'block';
-                
-                checkpoints[currentQuestion].classList.remove('active');
-                checkpoints[currentQuestion].classList.add('completed');
-                
-                currentQuestion++;
-                
-                if (currentQuestion < questions.length) {
-                    checkpoints[currentQuestion].classList.add('active');
-                    setTimeout(() => {
-                        resultMessage.style.display = 'none';
-                        showQuestion(currentQuestion);
-                    }, 1500);
-                } else {
-                    // Add completed class to beit midrash
-                    document.querySelector('.beit-midrash').classList.add('completed');
-                    setTimeout(showCertificate, 1500);
-                }
+// משתנים גלובליים
+let playerName = "שחקן";
+let playerAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%233b82f6'/><circle cx='50' cy='40' r='15' fill='white'/><circle cx='40' cy='60' r='10' fill='white'/><circle cx='60' cy='60' r='10' fill='white'/></svg>";
+let selectedCategory = "general";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let score = 0;
+let gameHistory = [];
+let timerInterval;
+let timeLeft = 20; // זמן לשאלה בשניות
+let answersDisabled = false;
+
+// פוזיציות התחנות על המסלול
+const checkpointPositions = [
+    { top: "75%", left: "15%" }, // תחנה 1
+    { top: "60%", left: "35%" }, // תחנה 2
+    { top: "45%", left: "55%" }, // תחנה 3
+    { top: "30%", left: "40%" }, // תחנה 4
+    { top: "15%", left: "60%" }, // תחנה 5
+    { top: "5%", left: "80%" }   // בית מדרש
+];
+
+// פונקציות עזר
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function getRandomQuestions(category, count) {
+    const allQuestions = questionsDatabase[category];
+    const shuffled = shuffleArray([...allQuestions]);
+    return shuffled.slice(0, count);
+}
+
+function updatePlayerPosition(questionIndex) {
+    const playerAvatar = document.querySelector('.player-avatar');
+    const position = checkpointPositions[questionIndex];
+    
+    playerAvatar.style.top = position.top;
+    playerAvatar.style.left = position.left;
+}
+
+function startTimer() {
+    timeLeft = 20;
+    clearInterval(timerInterval);
+    
+    const timerBar = document.getElementById('timer-bar');
+    timerBar.style.width = '100%';
+    
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        let width = (timeLeft / 20) * 100;
+        timerBar.style.width = width + '%';
+        
+        if (timeLeft < 5) {
+            timerBar.style.backgroundColor = '#ef4444';
+        } else if (timeLeft < 10) {
+            timerBar.style.backgroundColor = '#f59e0b';
+        }
+        
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            handleWrongAnswer();
+        }
+    }, 1000);
+}
+
+function createConfetti() {
+    const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
+    
+    for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const leftPosition = Math.random() * 100;
+        const size = Math.random() * 10 + 5;
+        const duration = Math.random() * 3 + 2;
+        const delay = Math.random() * 2;
+        
+        confetti.style.backgroundColor = color;
+        confetti.style.left = leftPosition + 'vw';
+        confetti.style.width = size + 'px';
+        confetti.style.height = size + 'px';
+        confetti.style.animationDuration = duration + 's';
+        confetti.style.animationDelay = delay + 's';
+        
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => {
+            confetti.remove();
+        }, (duration + delay) * 1000);
+    }
+}
+
+// מעבר בין מסכים
+function showScreen(screenClass) {
+    const screens = ['welcome-screen', 'name-input', 'category-selection', 'game-screen', 'summary-screen', 'certificate'];
+    
+    screens.forEach(screen => {
+        const element = document.querySelector('.' + screen);
+        if (element) {
+            if (screen === screenClass) {
+                element.classList.remove('hidden');
             } else {
-                e.target.classList.add('incorrect');
-                resultMessage.textContent = 'טעות! חוזרים להתחלה...';
-                resultMessage.className = 'result-message error';
-                resultMessage.style.display = 'block';
-                
-                setTimeout(() => {
-                    currentQuestion = 0;
-                    score = 0;
-                    checkpoints.forEach((checkpoint, index) => {
-                        checkpoint.classList.remove('active', 'completed');
-                        if (index === 0) checkpoint.classList.add('active');
-                    });
-                    document.querySelector('.beit-midrash').classList.remove('completed');
-                    resultMessage.style.display = 'none';
-                    showQuestion(0);
-                }, 2000);
+                element.classList.add('hidden');
             }
         }
+    });
+}
 
-        function showCertificate() {
-            const questionContainer = document.querySelector('.question-container');
-            const resultMessage = document.querySelector('.result-message');
-            const certificate = document.querySelector('.certificate');
-            const certificateDate = document.querySelector('.certificate-date');
-            
-            questionContainer.style.display = 'none';
-            resultMessage.style.display = 'none';
-            certificate.style.display = 'block';
-            
-            const today = new Date();
-            certificateDate.textContent = `הוענק בתאריך: ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+// טעינת שאלה
+function loadQuestion() {
+    if (currentQuestionIndex >= currentQuestions.length) {
+        // סיימנו את כל השאלות
+        endGame(true);
+        return;
+    }
+    
+    answersDisabled = false;
+    const question = currentQuestions[currentQuestionIndex];
+    const questionElement = document.querySelector('.question');
+    const answersContainer = document.querySelector('.answers');
+    const questionNumberElement = document.getElementById('question-number');
+    
+    questionNumberElement.textContent = currentQuestionIndex + 1;
+    questionElement.textContent = question.question;
+    
+    answersContainer.innerHTML = '';
+    question.answers.forEach((answer, index) => {
+        const button = document.createElement('button');
+        button.className = 'answer-btn';
+        button.dataset.index = index;
+        button.textContent = answer;
+        button.addEventListener('click', handleAnswer);
+        answersContainer.appendChild(button);
+    });
+    
+    // עדכון מיקום השחקן והתחנה הפעילה
+    document.querySelectorAll('.checkpoint').forEach((checkpoint, index) => {
+        checkpoint.classList.remove('active');
+        
+        if (index < currentQuestionIndex) {
+            checkpoint.classList.add('completed');
+        } else if (index === currentQuestionIndex) {
+            checkpoint.classList.add('active');
+        } else {
+            checkpoint.classList.remove('completed');
         }
+    });
+    
+    updatePlayerPosition(currentQuestionIndex);
+    startTimer();
+}
 
-        // Initialize game
-        showQuestion(0);
-    </script>
+// טיפול בתשובה
+function handleAnswer(e) {
+    if (answersDisabled) return;
+    answersDisabled = true;
+    
+    clearInterval(timerInterval);
+    
+    const selectedIndex = parseInt(e.target.dataset.index);
+    const questionData = currentQuestions[currentQuestionIndex];
+    const resultMessage = document.getElementById('result-message');
+    
+    // שמירת היסטוריית משחק
+    gameHistory.push({
+        question: questionData.question,
+        userAnswer: questionData.answers[selectedIndex],
+        correctAnswer: questionData.answers[questionData.correct],
+        isCorrect: selectedIndex === questionData.correct
+    });
+    
+    if (selectedIndex === questionData.correct) {
+        handleCorrectAnswer(e.target);
+    } else {
+        handleWrongAnswer(e.target);
+    }
+}
+
+function handleCorrectAnswer(selectedButton) {
+    selectedButton.classList.add('correct');
+    
+    const timeFactor = Math.max(timeLeft / 20, 0.3); // מקדם זמן - יותר מהיר = יותר נקודות
+    const questionPoints = Math.round(100 * timeFactor);
+    score += questionPoints;
+    
+    document.getElementById('score').textContent = score;
+    
+    const resultMessage = document.getElementById('result-message');
+    resultMessage.textContent = `נכון! +${questionPoints} נקודות!`;
+    resultMessage.className = 'result-message success show';
+    
+    // עדכון התחנה הנוכחית כהושלמה
+    const checkpoint = document.querySelector(`.checkpoint[data-question="${currentQuestionIndex + 1}"]`);
+    checkpoint.classList.remove('active');
+    checkpoint.classList.add('completed');
+    
+    currentQuestionIndex++;
+    
+    setTimeout(() => {
+        resultMessage.classList.remove('show');
+        setTimeout(() => {
+            loadQuestion();
+        }, 300);
+    }, 1500);
+}
+
+function handleWrongAnswer(selectedButton = null) {
+    if (selectedButton) {
+        selectedButton.classList.add('incorrect');
+        
+        // הדגשת התשובה הנכונה
+        const question = currentQuestions[currentQuestionIndex];
+        const allButtons = document.querySelectorAll('.answer-btn');
+        allButtons[question.correct].classList.add('correct');
+    }
+    
+    const resultMessage = document.getElementById('result-message');
+    resultMessage.textContent = "טעות! חוזרים להתחלה...";
+    resultMessage.className = 'result-message error show';
+    
+    setTimeout(() => {
+        // חזרה להתחלה
+        currentQuestionIndex = 0;
+        
+        // איפוס התחנות
+        document.querySelectorAll('.checkpoint').forEach((checkpoint, index) => {
+            checkpoint.classList.remove('active', 'completed');
+            if (index === 0) {
+                checkpoint.classList.add('active');
+            }
+        });
+        
+        resultMessage.classList.remove('show');
+        
+        setTimeout(() => {
+            updatePlayerPosition(0);
+            loadQuestion();
+        }, 500);
+    }, 2000);
+}
+
+function endGame(success) {
+    clearInterval(timerInterval);
+    
+    if (success) {
+        document.querySelector('.beit-midrash').classList.add('completed');
+        updatePlayerPosition(5); // העברה לבית המדרש
+        createConfetti();
+        
+        setTimeout(() => {
+            showSummaryScreen();
+        }, 2000);
+    }
+}
+
+function showSummaryScreen() {
+    showScreen('summary-screen');
+    
+    document.getElementById('summary-avatar').src = playerAvatar;
+    document.getElementById('summary-name').textContent = playerName;
+    document.getElementById('final-score').textContent = score;
+    
+    const tableBody = document.getElementById('summary-table-body');
+    tableBody.innerHTML = '';
+    
+    gameHistory.forEach((record, index) => {
+        const row = document.createElement('tr');
+        
+        const cellNum = document.createElement('td');
+        cellNum.textContent = index + 1;
+        
+        const cellQuestion = document.createElement('td');
+        cellQuestion.textContent = record.question;
+        
+        const cellUserAnswer = document.createElement('td');
+        cellUserAnswer.textContent = record.userAnswer;
+        if (record.isCorrect) {
+            cellUserAnswer.classList.add('correct-answer');
+        } else {
+            cellUserAnswer.classList.add('wrong-answer');
+        }
+        
+        const cellCorrect = document.createElement('td');
+        cellCorrect.textContent = record.correctAnswer;
+        cellCorrect.classList.add('correct-answer');
+        
+        row.appendChild(cellNum);
+        row.appendChild(cellQuestion);
+        row.appendChild(cellUserAnswer);
+        row.appendChild(cellCorrect);
+        
+        tableBody.appendChild(row);
+    });
+}
+
+function showCertificate() {
+    showScreen('certificate');
+    
+    const today = new Date();
+    const dateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+    
+    document.getElementById('certificate-name').textContent = playerName;
+    document.getElementById('certificate-score').textContent = score;
+    document.getElementById('certificate-category').textContent = getCategoryName(selectedCategory);
+    document.getElementById('certificate-date').textContent = `הוענק בתאריך: ${dateString}`;
+}
+
+function getCategoryName(categoryKey) {
+    const categories = {
+        'general': 'ידע כללי',
+        'science': 'מדע',
+        'history': 'היסטוריה',
+        'judaism': 'יהדות'
+    };
+    return categories[categoryKey] || categoryKey;
+}
+
+function resetGame() {
+    score = 0;
+    currentQuestionIndex = 0;
+    gameHistory = [];
+    document.getElementById('score').textContent = '0';
+    document.querySelector('.beit-midrash').classList.remove('completed');
+    
+    document.querySelectorAll('.checkpoint').forEach((checkpoint, index) => {
+        checkpoint.classList.remove('active', 'completed');
+        if (index === 0) {
+            checkpoint.classList.add('active');
+        }
+    });
+    
+    currentQuestions = getRandomQuestions(selectedCategory, 5);
+    updatePlayerPosition(0);
+    loadQuestion();
+    showScreen('game-screen');
+}
+
+// אתחול המשחק ואירועים
+document.addEventListener('DOMContentLoaded', () => {
+    // אירועי כפתורים
+    document.getElementById('start-btn').addEventListener('click', () => {
+        showScreen('name-input');
+    });
+    
+    document.getElementById('continue-to-category').addEventListener('click', () => {
+        const nameInput = document.getElementById('player-name');
+        if (nameInput.value.trim()) {
+            playerName = nameInput.value.trim();
+        }
+        
+        const selectedAvatarElement = document.querySelector('.avatar-option.selected img');
+        if (selectedAvatarElement) {
+            playerAvatar = selectedAvatarElement.src;
+        }
+        
+        document.getElementById('player-name-display').textContent = playerName;
+        document.getElementById('player-avatar-small').src = playerAvatar;
+        document.querySelector('.player-avatar img').src = playerAvatar;
+        
+        showScreen('category-selection');
+    });
+    
+    document.querySelectorAll('.avatar-option').forEach(option => {
+        option.addEventListener('click', () => {
+            document.querySelectorAll('.avatar-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            option.classList.add('selected');
+        });
+    });
+    
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.category-btn').forEach(b => {
+                b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+            selectedCategory = btn.dataset.category;
+        });
+    });
+    
+    document.getElementById('start-game').addEventListener('click', () => {
+        currentQuestions = getRandomQuestions(selectedCategory, 5);
+        resetGame();
+    });
+    
+    document.getElementById('show-certificate').addEventListener('click', showCertificate);
+    
+    document.getElementById('play-again').addEventListener('click', () => {
+        showScreen('category-selection');
+    });
+    
+    document.getElementById('play-again-cert').addEventListener('click', () => {
+        showScreen('category-selection');
+    });
+});
+         </script>
 </body>
 </html>
