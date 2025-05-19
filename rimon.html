@@ -46,7 +46,7 @@
             overflow: hidden;
         }
 
-        .welcome-screen, .name-input, .game-screen, .summary-screen {
+        .welcome-screen, .name-input, .video-screen, .game-screen, .summary-screen {
             transition: opacity 0.5s, transform 0.5s;
         }
 
@@ -67,7 +67,7 @@
             height: auto;
         }
 
-        .welcome-screen, .name-input {
+        .welcome-screen, .name-input, .video-screen {
             text-align: center;
             padding: 20px;
         }
@@ -154,6 +154,42 @@
         .avatar-option.selected {
             border-color: var(--primary-color);
             transform: scale(1.1);
+        }
+
+        /* סגנון למסך הוידאו החדש */
+        .video-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .video-container {
+            width: 100%;
+            max-width: 720px;
+            margin: 20px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        video {
+            width: 100%;
+            display: block;
+        }
+
+        .skip-video {
+            margin-top: 15px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .skip-video:hover {
+            background: var(--primary-color);
+            color: white;
         }
 
         .game-board {
@@ -638,7 +674,25 @@
                 </div>
             </div>
             
-            <button class="btn" id="continue-to-game">התחל משחק</button>
+            <button class="btn" id="continue-to-video">המשך</button>
+        </div>
+        
+        <!-- Video Screen - החדש! -->
+        <div class="video-screen hidden">
+            <h2 class="welcome-title">צפו בסרטון ההדרכה</h2>
+            <p class="welcome-text">לפני שמתחילים את המשחק, הנה סרטון קצר שיעזור לך להבין את סימני הטהרה:</p>
+            
+            <div class="video-container">
+                <video id="intro-video" controls>
+                    <source src="rimonm.mp4" type="video/mp4">
+                    הדפדפן שלך לא תומך בתגית וידאו.
+                </video>
+            </div>
+            
+            <div class="btn-container">
+                <button class="btn skip-video" id="skip-video">דלג על הסרטון</button>
+                <button class="btn" id="continue-to-game">התחל משחק</button>
+            </div>
         </div>
         
         <!-- Game Screen -->
@@ -745,7 +799,7 @@
             </div>
 
             
-            <div class="btn-container">
+          <div class="btn-container">
                 <button class="btn" id="play-again-cert">שחק שוב</button>
             </div>
         </div>
@@ -775,7 +829,7 @@
             {
                 category: "דגים – סימני טהרה",
                 question: "אם לדג יש קשקשים אבל לא סנפירים, מה דינו?",
-            answers: ["א. טהור", "ב. טמא", "ג. מותר באכילה רק בשבת", "ד. תלוי בגודל הדג"],
+                answers: ["א. טהור", "ב. טמא", "ג. מותר באכילה רק בשבת", "ד. תלוי בגודל הדג"],
                 correct: 1
             },
             {
@@ -795,6 +849,7 @@
         let timerInterval;
         let timeLeft = 20; // זמן לשאלה בשניות
         let answersDisabled = false;
+        let videoEnded = false; // משתנה חדש לבדיקה אם הסרטון הסתיים
 
         // פוזיציות התחנות על המסלול
         const checkpointPositions = [
@@ -871,7 +926,7 @@
 
         // מעבר בין מסכים
         function showScreen(screenClass) {
-            const screens = ['welcome-screen', 'name-input', 'game-screen', 'summary-screen', 'certificate'];
+            const screens = ['welcome-screen', 'name-input', 'video-screen', 'game-screen', 'summary-screen', 'certificate'];
             
             screens.forEach(screen => {
                 const element = document.querySelector('.' + screen);
@@ -1106,12 +1161,28 @@
 
         // אתחול המשחק ואירועים
         document.addEventListener('DOMContentLoaded', () => {
+            // אתחול אירועי סרטון
+            const videoElement = document.getElementById('intro-video');
+            const startGameButton = document.getElementById('continue-to-game');
+            
+            // הסתר את כפתור ה"התחל משחק" כברירת מחדל עד שהסרטון מסתיים
+            startGameButton.style.opacity = "0.5";
+            startGameButton.style.pointerEvents = "none";
+            
+            // מחזיר את כפתור "התחל משחק" כשהסרטון מסתיים
+            videoElement.addEventListener('ended', () => {
+                videoEnded = true;
+                startGameButton.style.opacity = "1";
+                startGameButton.style.pointerEvents = "auto";
+            });
+            
             // אירועי כפתורים
             document.getElementById('start-btn').addEventListener('click', () => {
                 showScreen('name-input');
             });
             
-            document.getElementById('continue-to-game').addEventListener('click', () => {
+            // מעבר ממסך הזנת שם למסך וידאו
+            document.getElementById('continue-to-video').addEventListener('click', () => {
                 const nameInput = document.getElementById('player-name');
                 if (nameInput.value.trim()) {
                     playerName = nameInput.value.trim();
@@ -1122,11 +1193,41 @@
                     playerAvatar = selectedAvatarElement.src;
                 }
                 
+                // עדכון מסך המשחק עם השם והאווטאר שנבחרו
                 document.getElementById('player-name-display').textContent = playerName;
                 document.getElementById('player-avatar-small').src = playerAvatar;
                 document.querySelector('.player-avatar img').src = playerAvatar;
                 
-                resetGame();
+                // מעבר למסך הוידאו
+                showScreen('video-screen');
+                
+                // התחל את הוידאו אוטומטית
+                videoElement.play().catch(e => {
+                    console.log("אוטופליי נחסם: ", e);
+                    // כפתור ההתחלה מופעל במקרה שאוטופליי נחסם
+                    startGameButton.style.opacity = "1";
+                    startGameButton.style.pointerEvents = "auto";
+                });
+            });
+            
+            // דילוג על הסרטון
+            document.getElementById('skip-video').addEventListener('click', () => {
+                videoElement.pause();
+                videoEnded = true;
+                startGameButton.style.opacity = "1";
+                startGameButton.style.pointerEvents = "auto";
+            });
+            
+            // מעבר ממסך וידאו למסך המשחק
+            document.getElementById('continue-to-game').addEventListener('click', () => {
+                // אם הסרטון הסתיים או שהמשתמש דילג עליו, מתחילים את המשחק
+                if (videoEnded) {
+                    resetGame();
+                } else {
+                    // אם לא, עוצרים את הסרטון ומתחילים את המשחק בכל מקרה
+                    videoElement.pause();
+                    resetGame();
+                }
             });
             
             document.querySelectorAll('.avatar-option').forEach(option => {
