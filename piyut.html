@@ -232,11 +232,11 @@
         }
 
         .row-label {
-            width: 30px;
+            width: 35px;
             height: 30px;
             background: #4f46e5;
             color: white;
-            border-radius: 50%;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -446,6 +446,14 @@
             border-radius: 6px;
             font-size: 0.85rem;
         }
+
+        .gender-indicator {
+            font-size: 0.7rem;
+            margin-right: 2px;
+        }
+
+        .male { color: #2563eb; }
+        .female { color: #db2777; }
     </style>
 </head>
 <body>
@@ -467,7 +475,7 @@
                     
                     <div class="search-group">
                         <label>חיפוש לפי מקום</label>
-                        <input type="text" id="searchSeat" placeholder="למשל: א-5">
+                        <input type="text" id="searchSeat" placeholder="למשל: 5-7">
                     </div>
                     
                     <div class="search-group">
@@ -476,6 +484,15 @@
                             <option value="">הכל</option>
                             <option value="available">פנוי</option>
                             <option value="occupied">תפוס</option>
+                        </select>
+                    </div>
+
+                    <div class="search-group">
+                        <label>מגדר</label>
+                        <select id="filterGender">
+                            <option value="">הכל</option>
+                            <option value="זכר">זכר</option>
+                            <option value="נקבה">נקבה</option>
                         </select>
                     </div>
                 </div>
@@ -495,6 +512,14 @@
                         <span class="stat-value available" id="availableSeats">0</span>
                     </div>
                     <div class="stat-item">
+                        <span class="stat-label">זכרים:</span>
+                        <span class="stat-value male" id="maleCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">נקבות:</span>
+                        <span class="stat-value female" id="femaleCount">0</span>
+                    </div>
+                    <div class="stat-item">
                         <span class="stat-label">תפוסה:</span>
                         <span class="stat-value" id="occupancyRate">0%</span>
                     </div>
@@ -509,10 +534,10 @@
 
                 <div class="info-box">
                     <strong>💡 איך זה עובד:</strong><br>
-                    • הדף טוען אוטומטית מהקובץ 1.xlsx<br>
-                    • השינויים נשמרים אוטומטית במחשב שלך<br>
-                    • בכל פתיחה: נתונים מהקובץ + השינויים שלך<br>
-                    • "חזור למקור" = מוחק שינויים מקומיים
+                    • הדף טוען אוטומטית מהקובץ 1.xlsx (גליון "a")<br>
+                    • עמודה D,G: שמות | עמודה E,H: מגדר<br>
+                    • עמודה F,I: "שורה X כיסא Y"<br>
+                    • השינויים נשמרים במחשב שלך
                 </div>
 
                 <div id="searchResults"></div>
@@ -532,6 +557,14 @@
                     <div class="legend-item">
                         <div class="legend-color" style="background: #dbeafe; border-color: #2563eb;"></div>
                         <span>נבחר</span>
+                    </div>
+                    <div class="legend-item">
+                        <span style="color: #2563eb;">♂</span>
+                        <span>זכר</span>
+                    </div>
+                    <div class="legend-item">
+                        <span style="color: #db2777;">♀</span>
+                        <span>נקבה</span>
                     </div>
                 </div>
 
@@ -558,8 +591,12 @@
                 <input type="text" id="personName" placeholder="הכנס שם מלא">
             </div>
             <div class="form-group">
-                <label>טלפון (אופציונלי)</label>
-                <input type="text" id="personPhone" placeholder="הכנס מספר טלפון">
+                <label>מגדר</label>
+                <select id="personGender">
+                    <option value="">בחר מגדר</option>
+                    <option value="זכר">זכר</option>
+                    <option value="נקבה">נקבה</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>הערות (אופציונלי)</label>
@@ -579,21 +616,21 @@
         let originalSeatsData = {}; // נתונים מקוריים מהאקסל
         let selectedSeatId = null;
 
-        // הגדרות האולם - על בסיס המפה שהראית
+        // הגדרות האולם - שורות במספרים
         const hallLayout = {
             rows: [
-                { label: 'א', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
-                { label: 'ב', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
-                { label: 'ג', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
-                { label: 'ד', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
-                { label: 'ה', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
-                { label: 'ו', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
-                { label: 'ז', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
-                { label: 'ח', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
-                { label: 'ט', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
-                { label: 'י', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
-                { label: 'יא', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
-                { label: 'יב', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] }
+                { label: '1', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
+                { label: '2', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
+                { label: '3', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
+                { label: '4', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
+                { label: '5', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
+                { label: '6', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
+                { label: '7', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
+                { label: '8', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
+                { label: '9', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
+                { label: '10', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
+                { label: '11', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] },
+                { label: '12', seats: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] }
             ]
         };
 
@@ -608,6 +645,22 @@
             document.getElementById('searchName').addEventListener('input', performSearch);
             document.getElementById('searchSeat').addEventListener('input', performSearch);
             document.getElementById('filterStatus').addEventListener('change', performSearch);
+            document.getElementById('filterGender').addEventListener('change', performSearch);
+        }
+
+        // פונקציה לפירוש הפורמט "שורה X כיסא Y"
+        function parseLocation(locationStr) {
+            if (!locationStr) return null;
+            
+            // רגקס לפירוש "שורה X כיסא Y"
+            const match = locationStr.match(/שורה\s*(\d+)\s*כיסא\s*(\d+)/);
+            if (match) {
+                return {
+                    row: parseInt(match[1]),
+                    seat: parseInt(match[2])
+                };
+            }
+            return null;
         }
 
         // שמירה אוטומטית ב-localStorage
@@ -708,7 +761,7 @@
                 // מקום תפוס - מצב עריכה
                 document.getElementById('modalTitle').textContent = `עריכת מקום ${seatId}`;
                 document.getElementById('personName').value = seat.person.name;
-                document.getElementById('personPhone').value = seat.person.phone || '';
+                document.getElementById('personGender').value = seat.person.gender || '';
                 document.getElementById('personNotes').value = seat.person.notes || '';
                 document.getElementById('removeBtn').style.display = 'inline-block';
                 document.getElementById('assignBtn').textContent = 'עדכן';
@@ -716,7 +769,7 @@
                 // מקום פנוי - מצב הקצאה חדשה
                 document.getElementById('modalTitle').textContent = `הקצאת מקום ${seatId}`;
                 document.getElementById('personName').value = '';
-                document.getElementById('personPhone').value = '';
+                document.getElementById('personGender').value = '';
                 document.getElementById('personNotes').value = '';
                 document.getElementById('removeBtn').style.display = 'none';
                 document.getElementById('assignBtn').textContent = 'הקצה';
@@ -739,20 +792,20 @@
         function assignSeat() {
             const seatId = document.getElementById('seatNumber').value;
             const name = document.getElementById('personName').value.trim();
+            const gender = document.getElementById('personGender').value;
             
             if (!name) {
                 alert('נא להכניס שם');
                 return;
             }
             
-            const phone = document.getElementById('personPhone').value.trim();
             const notes = document.getElementById('personNotes').value.trim();
             
             // עדכון נתוני המקום
             seatsData[seatId].occupied = true;
             seatsData[seatId].person = {
                 name: name,
-                phone: phone,
+                gender: gender,
                 notes: notes
             };
             
@@ -783,9 +836,19 @@
             
             if (seat.occupied) {
                 seatElement.className = 'seat occupied';
-                tooltip.textContent = `מקום ${seatId} - ${seat.person.name}`;
+                const genderIcon = seat.person.gender === 'זכר' ? '♂' : seat.person.gender === 'נקבה' ? '♀' : '';
+                const genderClass = seat.person.gender === 'זכר' ? 'male' : seat.person.gender === 'נקבה' ? 'female' : '';
+                
+                // הוספת אייקון מגדר לכסא
+                seatElement.innerHTML = `
+                    <span class="gender-indicator ${genderClass}">${genderIcon}</span>
+                    ${seat.number}
+                `;
+                
+                tooltip.textContent = `מקום ${seatId} - ${seat.person.name} (${seat.person.gender || 'לא צוין'})`;
             } else {
                 seatElement.className = 'seat available';
+                seatElement.innerHTML = seat.number;
                 tooltip.textContent = `מקום ${seatId} - פנוי`;
             }
         }
@@ -796,16 +859,24 @@
             const availableSeats = totalSeats - occupiedSeats;
             const occupancyRate = totalSeats > 0 ? Math.round((occupiedSeats / totalSeats) * 100) : 0;
             
+            const maleCount = Object.values(seatsData).filter(seat => 
+                seat.occupied && seat.person && seat.person.gender === 'זכר').length;
+            const femaleCount = Object.values(seatsData).filter(seat => 
+                seat.occupied && seat.person && seat.person.gender === 'נקבה').length;
+            
             document.getElementById('totalSeats').textContent = totalSeats;
             document.getElementById('occupiedSeats').textContent = occupiedSeats;
             document.getElementById('availableSeats').textContent = availableSeats;
             document.getElementById('occupancyRate').textContent = occupancyRate + '%';
+            document.getElementById('maleCount').textContent = maleCount;
+            document.getElementById('femaleCount').textContent = femaleCount;
         }
 
         function performSearch() {
             const searchName = document.getElementById('searchName').value.toLowerCase();
             const searchSeat = document.getElementById('searchSeat').value.toLowerCase();
             const filterStatus = document.getElementById('filterStatus').value;
+            const filterGender = document.getElementById('filterGender').value;
             
             const results = Object.values(seatsData).filter(seat => {
                 const matchName = !searchName || (seat.person && seat.person.name.toLowerCase().includes(searchName));
@@ -813,8 +884,9 @@
                 const matchStatus = !filterStatus || 
                     (filterStatus === 'occupied' && seat.occupied) ||
                     (filterStatus === 'available' && !seat.occupied);
+                const matchGender = !filterGender || (seat.person && seat.person.gender === filterGender);
                 
-                return matchName && matchSeat && matchStatus;
+                return matchName && matchSeat && matchStatus && matchGender;
             });
             
             displaySearchResults(results);
@@ -834,6 +906,7 @@
             results.forEach(seat => {
                 const status = seat.occupied ? 'תפוס' : 'פנוי';
                 const personInfo = seat.person ? ` - ${seat.person.name}` : '';
+                const genderInfo = seat.person && seat.person.gender ? ` (${seat.person.gender})` : '';
                 const statusClass = seat.occupied ? 'occupied' : 'available';
                 
                 html += `
@@ -841,7 +914,7 @@
                          onclick="selectSeat('${seat.id}')">
                         <strong>${seat.id}</strong> 
                         <span class="${statusClass}">(${status})</span>
-                        ${personInfo}
+                        ${personInfo}${genderInfo}
                     </div>
                 `;
             });
@@ -877,9 +950,14 @@
                 
                 const arrayBuffer = await response.arrayBuffer();
                 const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const data = XLSX.utils.sheet_to_json(firstSheet);
                 
+                // קריאה מהגליון "a"
+                const sheet = workbook.Sheets['a'];
+                if (!sheet) {
+                    throw new Error('לא נמצא גליון בשם "a"');
+                }
+                
+                const data = XLSX.utils.sheet_to_json(sheet);
                 console.log('נתונים מהקובץ:', data);
                 
                 // אתחול כל המקומות כפנויים
@@ -890,19 +968,46 @@
                 
                 // טען נתונים מהקובץ
                 data.forEach(row => {
-                    // תמיכה בכמה שמות עמודות אפשריים
-                    const seatId = row['מקום'] || row['seat'] || row['מקום ישיבה'] || row['Seat'] || '';
-                    const name = row['שם'] || row['name'] || row['שם מלא'] || row['Name'] || '';
-                    const phone = row['טלפון'] || row['phone'] || row['Phone'] || '';
-                    const notes = row['הערות'] || row['notes'] || row['Notes'] || '';
+                    // עמודות D,E,F - ראשון
+                    const name1 = row['__EMPTY_3'] || ''; // עמודה D
+                    const gender1 = row['__EMPTY_4'] || ''; // עמודה E  
+                    const location1 = row['__EMPTY_5'] || ''; // עמודה F
                     
-                    if (seatId && name && seatsData[seatId]) {
-                        seatsData[seatId].occupied = true;
-                        seatsData[seatId].person = {
-                            name: name,
-                            phone: phone,
-                            notes: notes
-                        };
+                    // עמודות G,H,I - שני
+                    const name2 = row['__EMPTY_6'] || ''; // עמודה G
+                    const gender2 = row['__EMPTY_7'] || ''; // עמודה H
+                    const location2 = row['__EMPTY_8'] || ''; // עמודה I
+                    
+                    // עיבוד האדם הראשון
+                    if (name1 && location1) {
+                        const parsed1 = parseLocation(location1);
+                        if (parsed1) {
+                            const seatId = `${parsed1.row}-${parsed1.seat}`;
+                            if (seatsData[seatId]) {
+                                seatsData[seatId].occupied = true;
+                                seatsData[seatId].person = {
+                                    name: name1,
+                                    gender: gender1,
+                                    notes: ''
+                                };
+                            }
+                        }
+                    }
+                    
+                    // עיבוד האדם השני
+                    if (name2 && location2) {
+                        const parsed2 = parseLocation(location2);
+                        if (parsed2) {
+                            const seatId = `${parsed2.row}-${parsed2.seat}`;
+                            if (seatsData[seatId]) {
+                                seatsData[seatId].occupied = true;
+                                seatsData[seatId].person = {
+                                    name: name2,
+                                    gender: gender2,
+                                    notes: ''
+                                };
+                            }
+                        }
                     }
                 });
                 
@@ -924,6 +1029,7 @@
                     'הנתונים נטענו בהצלחה מהקובץ!';
                     
                 console.log(message);
+                alert(message);
                 
             } catch (error) {
                 console.error('Error loading Excel:', error);
