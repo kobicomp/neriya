@@ -548,8 +548,9 @@
 
                 <div class="info-box">
                     <strong>💡 מבנה הקובץ:</strong><br>
-                    • D: שם ראשון | E: מגדר | F: מקום<br>
-                    • G: שם שני | H: מגדר | I: מקום<br>
+                    • B: שם משפחה<br>
+                    • D: שם פרטי 1 | E: מגדר | F: מקום<br>
+                    • G: שם פרטי 2 | H: מגדר | I: מקום<br>
                     • פורמט: "שורה X כיסא Y"
                 </div>
 
@@ -990,59 +991,72 @@
                     const row = rawData[i];
                     if (!row || row.length === 0) continue;
                     
-                    debugInfo.push(`שורה ${i+1}: ${JSON.stringify(row.slice(3, 9))}`);
+                    debugInfo.push(`שורה ${i+1}: ${JSON.stringify(row.slice(1, 9))}`);
+                    
+                    // עמודה B - שם משפחה (אינדקס 1)
+                    const familyName = row[1] ? String(row[1]).trim() : '';
                     
                     // אדם ראשון - עמודות D,E,F (אינדקס 3,4,5)
-                    const name1 = row[3];     // עמודה D - שם
-                    const gender1 = row[4];   // עמודה E - מגדר
-                    const location1 = row[5]; // עמודה F - מקום
+                    const firstName1 = row[3];     // עמודה D - שם פרטי
+                    const gender1 = row[4];        // עמודה E - מגדר
+                    const location1 = row[5];      // עמודה F - מקום
                     
                     // אדם שני - עמודות G,H,I (אינדקס 6,7,8)
-                    const name2 = row[6];     // עמודה G - שם
-                    const gender2 = row[7];   // עמודה H - מגדר
-                    const location2 = row[8]; // עמודה I - מקום
+                    const firstName2 = row[6];     // עמודה G - שם פרטי
+                    const gender2 = row[7];        // עמודה H - מגדר
+                    const location2 = row[8];      // עמודה I - מקום
                     
                     // עיבוד האדם הראשון
-                    if (name1 && location1) {
+                    if (firstName1 && location1) {
                         const parsed1 = parseLocation(location1);
                         if (parsed1) {
                             const seatId = `${parsed1.row}-${parsed1.seat}`;
                             if (seatsData[seatId]) {
+                                // שם מלא = שם פרטי + שם משפחה
+                                const fullName1 = familyName ? 
+                                    `${String(firstName1).trim()} ${familyName}` : 
+                                    String(firstName1).trim();
+                                
                                 seatsData[seatId].occupied = true;
                                 seatsData[seatId].person = {
-                                    name: String(name1).trim(),
+                                    name: fullName1,
                                     gender: String(gender1 || '').trim(),
                                     notes: 'מקובץ האקסל'
                                 };
                                 processedPeople++;
-                                debugInfo.push(`✓ אדם 1: ${name1} במקום ${seatId}`);
+                                debugInfo.push(`✓ אדם 1: ${fullName1} במקום ${seatId}`);
                             } else {
-                                debugInfo.push(`✗ מקום לא קיים: ${seatId} עבור ${name1}`);
+                                debugInfo.push(`✗ מקום לא קיים: ${seatId} עבור ${firstName1}`);
                             }
                         } else {
-                            debugInfo.push(`✗ לא ניתן לפענח מיקום: "${location1}" עבור ${name1}`);
+                            debugInfo.push(`✗ לא ניתן לפענח מיקום: "${location1}" עבור ${firstName1}`);
                         }
                     }
                     
                     // עיבוד האדם השני
-                    if (name2 && location2) {
+                    if (firstName2 && location2) {
                         const parsed2 = parseLocation(location2);
                         if (parsed2) {
                             const seatId = `${parsed2.row}-${parsed2.seat}`;
                             if (seatsData[seatId]) {
+                                // שם מלא = שם פרטי + שם משפחה
+                                const fullName2 = familyName ? 
+                                    `${String(firstName2).trim()} ${familyName}` : 
+                                    String(firstName2).trim();
+                                
                                 seatsData[seatId].occupied = true;
                                 seatsData[seatId].person = {
-                                    name: String(name2).trim(),
+                                    name: fullName2,
                                     gender: String(gender2 || '').trim(),
                                     notes: 'מקובץ האקסל'
                                 };
                                 processedPeople++;
-                                debugInfo.push(`✓ אדם 2: ${name2} במקום ${seatId}`);
+                                debugInfo.push(`✓ אדם 2: ${fullName2} במקום ${seatId}`);
                             } else {
-                                debugInfo.push(`✗ מקום לא קיים: ${seatId} עבור ${name2}`);
+                                debugInfo.push(`✗ מקום לא קיים: ${seatId} עבור ${firstName2}`);
                             }
                         } else {
-                            debugInfo.push(`✗ לא ניתן לפענח מיקום: "${location2}" עבור ${name2}`);
+                            debugInfo.push(`✗ לא ניתן לפענח מיקום: "${location2}" עבור ${firstName2}`);
                         }
                     }
                 }
