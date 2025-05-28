@@ -148,6 +148,7 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -437,6 +438,14 @@
                 padding: 20px;
             }
         }
+
+        .info-box {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e0f2fe;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
@@ -493,7 +502,17 @@
 
                 <div class="action-buttons">
                     <button class="btn btn-primary" onclick="loadFromExcel()">📁 טען מהקובץ</button>
-                    <button class="btn btn-secondary" onclick="clearAllSeats()">🔄 נקה הכל</button>
+                    <button class="btn btn-primary" onclick="saveToLocal()">💾 שמור שינויים</button>
+                    <button class="btn btn-secondary" onclick="resetToOriginal()">🔄 חזור למקור</button>
+                    <button class="btn btn-danger" onclick="clearAllSeats()">🗑️ נקה הכל</button>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 איך זה עובד:</strong><br>
+                    • הדף טוען אוטומטית מהקובץ 1.xlsx<br>
+                    • השינויים נשמרים אוטומטית במחשב שלך<br>
+                    • בכל פתיחה: נתונים מהקובץ + השינויים שלך<br>
+                    • "חזור למקור" = מוחק שינויים מקומיים
                 </div>
 
                 <div id="searchResults"></div>
@@ -557,6 +576,7 @@
     <script>
         // נתוני המקומות
         let seatsData = {};
+        let originalSeatsData = {}; // נתונים מקוריים מהאקסל
         let selectedSeatId = null;
 
         // הגדרות האולם - על בסיס המפה שהראית
@@ -580,7 +600,7 @@
         // אתחול המערכת
         window.addEventListener('load', function() {
             createSeatingLayout();
-            updateStats();
+            loadFromExcel(); // טעינה אוטומטית
             setupEventListeners();
         });
 
@@ -588,6 +608,37 @@
             document.getElementById('searchName').addEventListener('input', performSearch);
             document.getElementById('searchSeat').addEventListener('input', performSearch);
             document.getElementById('filterStatus').addEventListener('change', performSearch);
+        }
+
+        // שמירה אוטומטית ב-localStorage
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('hallSeatsData', JSON.stringify(seatsData));
+                console.log('נתונים נשמרו מקומית');
+            } catch (error) {
+                console.error('שגיאה בשמירה מקומית:', error);
+            }
+        }
+
+        // טעינה מ-localStorage
+        function loadFromLocalStorage() {
+            try {
+                const savedData = localStorage.getItem('hallSeatsData');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    // מיזוג עם הנתונים הקיימים
+                    Object.keys(parsedData).forEach(seatId => {
+                        if (seatsData[seatId]) {
+                            seatsData[seatId] = { ...seatsData[seatId], ...parsedData[seatId] };
+                        }
+                    });
+                    console.log('נתונים נטענו מהשמירה המקומית');
+                    return true;
+                }
+            } catch (error) {
+                console.error('שגיאה בטעינה מקומית:', error);
+            }
+            return false;
         }
 
         function createSeatingLayout() {
@@ -707,6 +758,7 @@
             
             updateSeatDisplay(seatId);
             updateStats();
+            saveToLocalStorage(); // שמירה אוטומטית
             closeModal();
         }
 
@@ -719,6 +771,7 @@
                 
                 updateSeatDisplay(selectedSeatId);
                 updateStats();
+                saveToLocalStorage(); // שמירה אוטומטית
                 closeModal();
             }
         }
@@ -813,21 +866,10 @@
             });
         }
 
-        function clearAllSeats() {
-            if (confirm('האם אתה בטוח שברצונך לנקות את כל המקומות?')) {
-                Object.keys(seatsData).forEach(seatId => {
-                    seatsData[seatId].occupied = false;
-                    seatsData[seatId].person = null;
-                    updateSeatDisplay(seatId);
-                });
-                
-                updateStats();
-                document.getElementById('searchResults').innerHTML = '';
-            }
-        }
-
         async function loadFromExcel() {
             try {
+                console.log('טוען נתונים מהקובץ...');
+                
                 const response = await fetch('1.xlsx');
                 if (!response.ok) {
                     throw new Error('לא ניתן לטעון את הקובץ');
@@ -838,7 +880,9 @@
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const data = XLSX.utils.sheet_to_json(firstSheet);
                 
-                // נקה מקומות קיימים
+                console.log('נתונים מהקובץ:', data);
+                
+                // אתחול כל המקומות כפנויים
                 Object.keys(seatsData).forEach(seatId => {
                     seatsData[seatId].occupied = false;
                     seatsData[seatId].person = null;
@@ -846,10 +890,11 @@
                 
                 // טען נתונים מהקובץ
                 data.forEach(row => {
-                    const seatId = row['מקום'] || row['seat'] || '';
-                    const name = row['שם'] || row['name'] || '';
-                    const phone = row['טלפון'] || row['phone'] || '';
-                    const notes = row['הערות'] || row['notes'] || '';
+                    // תמיכה בכמה שמות עמודות אפשריים
+                    const seatId = row['מקום'] || row['seat'] || row['מקום ישיבה'] || row['Seat'] || '';
+                    const name = row['שם'] || row['name'] || row['שם מלא'] || row['Name'] || '';
+                    const phone = row['טלפון'] || row['phone'] || row['Phone'] || '';
+                    const notes = row['הערות'] || row['notes'] || row['Notes'] || '';
                     
                     if (seatId && name && seatsData[seatId]) {
                         seatsData[seatId].occupied = true;
@@ -858,16 +903,74 @@
                             phone: phone,
                             notes: notes
                         };
-                        updateSeatDisplay(seatId);
                     }
                 });
                 
+                // שמור נתונים מקוריים
+                originalSeatsData = JSON.parse(JSON.stringify(seatsData));
+                
+                // טען שינויים מקומיים (אם יש)
+                const hasLocalChanges = loadFromLocalStorage();
+                
+                // עדכן תצוגה
+                Object.keys(seatsData).forEach(seatId => {
+                    updateSeatDisplay(seatId);
+                });
+                
                 updateStats();
-                alert('הנתונים נטענו בהצלחה מהקובץ!');
+                
+                const message = hasLocalChanges ? 
+                    'הנתונים נטענו מהקובץ + השינויים המקומיים שלך!' : 
+                    'הנתונים נטענו בהצלחה מהקובץ!';
+                    
+                console.log(message);
                 
             } catch (error) {
                 console.error('Error loading Excel:', error);
-                alert('שגיאה בטעינת הקובץ: ' + error.message);
+                alert('שגיאה בטעינת הקובץ: ' + error.message + '\nודא שהקובץ 1.xlsx נמצא באותה תיקייה');
+            }
+        }
+
+        function saveToLocal() {
+            saveToLocalStorage();
+            alert('השינויים נשמרו במחשב שלך!');
+        }
+
+        function resetToOriginal() {
+            if (confirm('האם אתה בטוח שברצונך לחזור לנתונים המקוריים מהקובץ? כל השינויים שלך יאבדו!')) {
+                // מחק נתונים מקומיים
+                localStorage.removeItem('hallSeatsData');
+                
+                // חזור לנתונים מקוריים
+                if (originalSeatsData && Object.keys(originalSeatsData).length > 0) {
+                    seatsData = JSON.parse(JSON.stringify(originalSeatsData));
+                    
+                    // עדכן תצוגה
+                    Object.keys(seatsData).forEach(seatId => {
+                        updateSeatDisplay(seatId);
+                    });
+                    
+                    updateStats();
+                    document.getElementById('searchResults').innerHTML = '';
+                    alert('חזרת לנתונים המקוריים מהקובץ!');
+                } else {
+                    alert('אין נתונים מקוריים. נא לטעון מהקובץ תחילה.');
+                }
+            }
+        }
+
+        function clearAllSeats() {
+            if (confirm('האם אתה בטוח שברצונך לנקות את כל המקומות? השינויים יישמרו אוטומטית.')) {
+                Object.keys(seatsData).forEach(seatId => {
+                    seatsData[seatId].occupied = false;
+                    seatsData[seatId].person = null;
+                    updateSeatDisplay(seatId);
+                });
+                
+                updateStats();
+                saveToLocalStorage(); // שמירה אוטומטית
+                document.getElementById('searchResults').innerHTML = '';
+                alert('כל המקומות נוקו!');
             }
         }
 
