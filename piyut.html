@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ניהול מקומות</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .file-upload {
+            margin-bottom: 20px;
+        }
+
+        .file-upload label,
+        .refresh-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #4f46e5;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 14px;
+        }
+
+        .file-upload label:hover,
+        .refresh-btn:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .search-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .search-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #374151;
+        }
+
+        .search-group input,
+        .search-group select {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-group input:focus,
+        .search-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .clear-btn {
+            grid-column: 1 / -1;
+            padding: 12px 24px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            justify-self: start;
+        }
+
+        .clear-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .stats {
+            padding: 20px 30px;
+            background: #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stats-item {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stats-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4f46e5;
+        }
+
+        .stats-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: #4f46e5;
+            color: white;
+            padding: 15px 12px;
+            text-align: right;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: right;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        tr:nth-child(even):hover {
+            background: #f1f5f9;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 30px;
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .no-data .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e5e7eb;
+            border-radius: 50%;
+            border-top-color: #4f46e5;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 20px;
+            margin: 20px 30px;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .search-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .stats-item {
+                margin-bottom: 10px;
+            }
+        }
+
+        .coordinates {
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #059669;
+        }
+
+        .hotel-info {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .yes-no {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .yes-no.yes {
+            color: #059669;
+        }
+
+        .yes-no.no {
+            color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ מערכת ניהול מקומות</h1>
+            <p>חיפוש וניהול מקומות ומלונות ברחבי העולם</p>
+        </div>
+
+        <div class="controls">
+            <div class="file-upload">
+                <button onclick="loadExcelFile()" class="refresh-btn">🔄 רענן נתונים מהקובץ</button>
+            </div>
+
+            <div class="search-container" id="searchContainer" style="display: none;">
+                <div class="search-group">
+                    <label>שם המקום</label>
+                    <input type="text" id="searchPlace" placeholder="חפש לפי שם המקום...">
+                </div>
+                <div class="search-group">
+                    <label>מדינה</label>
+                    <select id="searchCountry">
+                        <option value="">כל המדינות</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <label>סוג מקום</label>
+                    <select id="searchType">
+                        <option value="">כל הסוגים</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <label>יש מלון?</label>
+                    <select id="searchHasHotel">
+                        <option value="">הכל</option>
+                        <option value="כן">כן</option>
+                        <option value="לא">לא</option>
+                    </select>
+                </div>
+                <button class="clear-btn" onclick="clearFilters()">🔄 נקה מסננים</button>
+            </div>
+        </div>
+
+        <div class="stats" id="statsContainer" style="display: none;">
+            <div class="stats-item">
+                <div class="stats-number" id="totalPlaces">0</div>
+                <div class="stats-label">סה"כ מקומות</div>
+            </div>
+            <div class="stats-item">
+                <div class="stats-number" id="filteredPlaces">0</div>
+                <div class="stats-label">מקומות מוצגים</div>
+            </div>
+            <div class="stats-item">
+                <div class="stats-number" id="countriesCount">0</div>
+                <div class="stats-label">מדינות</div>
+            </div>
+            <div class="stats-item">
+                <div class="stats-number" id="hotelsCount">0</div>
+                <div class="stats-label">מקומות עם מלון</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loadingMessage" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <div>טוען נתונים...</div>
+            </div>
+            
+            <div id="noDataMessage" class="no-data">
+                <div class="icon">📁</div>
+                <h3>אין נתונים להצגה</h3>
+                <p>הקובץ 1.xlsx לא נמצא או ריק. ודא שהקובץ נמצא באותה תיקייה</p>
+            </div>
+
+            <div id="errorMessage" class="error" style="display: none;"></div>
+
+            <table id="placesTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>שם המקום</th>
+                        <th>מדינה</th>
+                        <th>סוג מקום</th>
+                        <th>קו רוחב</th>
+                        <th>קו אורך</th>
+                        <th>יש מלון?</th>
+                        <th>שם מלון (ללא עלון)</th>
+                        <th>שם מלון (מדור מלון)</th>
+                        <th>מקור מלון</th>
+                    </tr>
+                </thead>
+                <tbody id="placesTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let allPlaces = [];
+        let filteredPlaces = [];
+
+        // Load data automatically when page loads
+        window.addEventListener('load', loadExcelFile);
+        
+        // Event listeners for search filters
+        document.getElementById('searchPlace').addEventListener('input', filterPlaces);
+        document.getElementById('searchCountry').addEventListener('change', filterPlaces);
+        document.getElementById('searchType').addEventListener('change', filterPlaces);
+        document.getElementById('searchHasHotel').addEventListener('change', filterPlaces);
+
+        async function loadExcelFile() {
+            showLoading();
+            
+            try {
+                // Fetch the Excel file from the same directory
+                const response = await fetch('1.xlsx');
+                
+                if (!response.ok) {
+                    throw new Error(`לא ניתן לטעון את הקובץ: ${response.status} ${response.statusText}`);
+                }
+                
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                
+                // Read the first sheet
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const data = XLSX.utils.sheet_to_json(firstSheet);
+                
+                if (data.length === 0) {
+                    showError('הקובץ ריק או לא מכיל נתונים תקינים');
+                    return;
+                }
+
+                processData(data);
+                showSuccess();
+                
+            } catch (error) {
+                console.error('Error loading Excel file:', error);
+                showError('שגיאה בטעינת הקובץ: ' + error.message + '\nודא שהקובץ 1.xlsx נמצא באותה תיקייה');
+            }
+        }
+
+        function processData(data) {
+            // Map the data to our expected structure
+            allPlaces = data.map(row => ({
+                name: row['שם המקום'] || row['Place Name'] || '',
+                country: row['מדינה'] || row['Country'] || '',
+                type: row['סוג מקום'] || row['Place Type'] || '',
+                latitude: row['קו רוחב'] || row['Latitude'] || '',
+                longitude: row['קו אורך'] || row['Longitude'] || '',
+                hasHotel: row['יש מלון?'] || row['Has Hotel'] || '',
+                hotelName1: row['שם מלון (ללא עלון)'] || row['Hotel Name 1'] || '',
+                hotelName2: row['שם מלון (מדור מלון)'] || row['Hotel Name 2'] || '',
+                hotelSource: row['מקור מלון (אינטרן)'] || row['Hotel Source'] || ''
+            }));
+
+            filteredPlaces = [...allPlaces];
+            updateDropdowns();
+            updateStats();
+            displayPlaces();
+        }
+
+        function updateDropdowns() {
+            // Update country dropdown
+            const countries = [...new Set(allPlaces.map(p => p.country).filter(c => c))];
+            const countrySelect = document.getElementById('searchCountry');
+            countrySelect.innerHTML = '<option value="">כל המדינות</option>';
+            countries.sort().forEach(country => {
+                countrySelect.innerHTML += `<option value="${country}">${country}</option>`;
+            });
+
+            // Update type dropdown
+            const types = [...new Set(allPlaces.map(p => p.type).filter(t => t))];
+            const typeSelect = document.getElementById('searchType');
+            typeSelect.innerHTML = '<option value="">כל הסוגים</option>';
+            types.sort().forEach(type => {
+                typeSelect.innerHTML += `<option value="${type}">${type}</option>`;
+            });
+        }
+
+        function filterPlaces() {
+            const searchPlace = document.getElementById('searchPlace').value.toLowerCase();
+            const searchCountry = document.getElementById('searchCountry').value;
+            const searchType = document.getElementById('searchType').value;
+            const searchHasHotel = document.getElementById('searchHasHotel').value;
+
+            filteredPlaces = allPlaces.filter(place => {
+                return (
+                    (!searchPlace || place.name.toLowerCase().includes(searchPlace)) &&
+                    (!searchCountry || place.country === searchCountry) &&
+                    (!searchType || place.type === searchType) &&
+                    (!searchHasHotel || place.hasHotel === searchHasHotel)
+                );
+            });
+
+            updateStats();
+            displayPlaces();
+        }
+
+        function clearFilters() {
+            document.getElementById('searchPlace').value = '';
+            document.getElementById('searchCountry').value = '';
+            document.getElementById('searchType').value = '';
+            document.getElementById('searchHasHotel').value = '';
+            filteredPlaces = [...allPlaces];
+            updateStats();
+            displayPlaces();
+        }
+
+        function updateStats() {
+            document.getElementById('totalPlaces').textContent = allPlaces.length;
+            document.getElementById('filteredPlaces').textContent = filteredPlaces.length;
+            
+            const countries = new Set(allPlaces.map(p => p.country).filter(c => c));
+            document.getElementById('countriesCount').textContent = countries.size;
+            
+            const hotelsCount = allPlaces.filter(p => p.hasHotel === 'כן').length;
+            document.getElementById('hotelsCount').textContent = hotelsCount;
+        }
+
+        function displayPlaces() {
+            const tbody = document.getElementById('placesTableBody');
+            tbody.innerHTML = '';
+
+            filteredPlaces.forEach(place => {
+                const row = document.createElement('tr');
+                
+                // Format coordinates
+                const lat = place.latitude ? parseFloat(place.latitude).toFixed(6) : '';
+                const lon = place.longitude ? parseFloat(place.longitude).toFixed(6) : '';
+                
+                // Format hasHotel
+                const hasHotelClass = place.hasHotel === 'כן' ? 'yes' : 'no';
+                
+                row.innerHTML = `
+                    <td>${place.name}</td>
+                    <td>${place.country}</td>
+                    <td>${place.type}</td>
+                    <td class="coordinates">${lat}</td>
+                    <td class="coordinates">${lon}</td>
+                    <td class="yes-no ${hasHotelClass}">${place.hasHotel}</td>
+                    <td class="hotel-info" title="${place.hotelName1}">${place.hotelName1}</td>
+                    <td class="hotel-info" title="${place.hotelName2}">${place.hotelName2}</td>
+                    <td>${place.hotelSource}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function showLoading() {
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('noDataMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('placesTable').style.display = 'none';
+            document.getElementById('searchContainer').style.display = 'none';
+            document.getElementById('statsContainer').style.display = 'none';
+        }
+
+        function showSuccess() {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('noDataMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('placesTable').style.display = 'table';
+            document.getElementById('searchContainer').style.display = 'grid';
+            document.getElementById('statsContainer').style.display = 'flex';
+        }
+
+        function showError(message) {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('noDataMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('placesTable').style.display = 'none';
+            document.getElementById('searchContainer').style.display = 'none';
+            document.getElementById('statsContainer').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
